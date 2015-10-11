@@ -1,0 +1,17 @@
+{
+  "name": "@leisurelink/magicbus",
+  "version": "0.0.1",
+  "description": "A message bus framework using RabbitMQ.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive test/**/*tests.js",
+    "test-ex-integration": "mocha --recursive test/**/*.tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeisureLink/magicbus.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/LeisureLink/magicbus#readme"
+}
