@@ -243,4 +243,55 @@ individual piece of the message pipeline if needed.
 
 # Contributing
 
-Coming soon...
+## Running Tests
+
+Run all tests with the usual command:
+
+```bash
+$ npm test
+```
+
+This will run all tests, including integration tests that require a running RabbitMQ server initialized
+with test queues and exchanges. To exclude the integration tests (like on a build server without access
+to RabbitMQ), run:
+
+```bash
+$ npm run-script test-ex-integration
+```
+
+### Setting Up For Integration Tests
+
+You'll need access to a running RabbitMQ server. You can [download](http://www.rabbitmq.com/download.html)
+and install it locally for free.
+
+Login to the RabbitMQ management interface and create the exchange and queue the integration tests use.
+
+New Exchange Info:
+
+```
+Virtual Host: /
+Name:         magicbus-tests.publish 
+Type:         topic
+Durability:   Durable
+Auto Delete:  No
+Internal:     No
+```
+
+New Queue Info:
+
+```
+Virtual Host: /
+Name:         magicbus-tests.subscribe
+Durability:   Durable
+Auto Delete:  No
+```
+
+After creating the queue, bind it to the exchange:
+
+```
+From Exchange: magicbus-tests.publish
+Routing Key:   *
+```
+
+**NOTE: Running the integration tests will create the exchange and queue, but not the bindings.
+So you could save a couple manual steps.**
