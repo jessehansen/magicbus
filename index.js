@@ -3,6 +3,7 @@
 var assert = require('assert-plus');
 var util = require('util');
 var BasicEnvelope = require('./lib/basic-envelope.js');
+var JsonSerializer = require('./lib/json-serializer.js');
 
 module.exports = {
   Broker: require('./lib/broker.js'),
@@ -403,18 +404,5 @@ function ProducerMiddlewarePipeline() {
 function ConsumerMiddlewarePipeline() {
   this.execute = function(msg) {
     //Placeholder
-  };
-}
-
-function JsonSerializer() {
-  this.serialize = function(payload) {
-    var json = JSON.stringify(payload);
-    return new Buffer(json);
-  };
-
-  this.deserialize = function(content) {
-    //Content should be a Buffer
-
-    return JSON.parse(content.toString('utf8'));
   };
 }
