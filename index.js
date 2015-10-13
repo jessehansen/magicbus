@@ -2,6 +2,7 @@
 
 var assert = require('assert-plus');
 var util = require('util');
+var BasicEnvelope = require('./lib/basic-envelope.js');
 
 module.exports = {
   Broker: require('./lib/broker.js'),
@@ -402,26 +403,6 @@ function ProducerMiddlewarePipeline() {
 function ConsumerMiddlewarePipeline() {
   this.execute = function(msg) {
     //Placeholder
-  };
-}
-
-function BasicEnvelope() {
-  this.getMessage = function(data, kind) {
-    return {
-      properties: {
-        type: kind
-      },
-      payload: data
-    };
-  };
-
-  this.getData = function(msg) {
-    return msg.payload;
-  };
-
-  this.getMessageTypes = function(msg) {
-    //MassTransit envelope would return multiple
-    return [msg.properties.type];
   };
 }
 
