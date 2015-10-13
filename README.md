@@ -290,7 +290,7 @@ After creating the queue, bind it to the exchange:
 
 ```
 From Exchange: magicbus-tests.publish
-Routing Key:   *
+Routing Key:   #
 ```
 
 **NOTE: Running the integration tests will create the exchange and queue, but not the bindings.
