@@ -7,7 +7,7 @@ var JsonSerializer = require('./lib/json-serializer.js');
 
 module.exports = {
   Broker: require('./lib/broker.js'),
-  Publisher: Publisher,
+  Publisher: require('./lib/publisher.js'),
   Subscriber: Subscriber,
   Sender: Sender,
   Receiver: Receiver
@@ -95,43 +95,6 @@ Object.defineProperties(Producer.prototype, {
       };
     },
     enumerable: false
-  }
-});
-
-function Publisher(broker, options) {
-  Producer.call(this, broker, options);
-
-  var routeName = 'publish';
-
-  if (options && options.routeName) {
-    routeName = options.routeName;
-  }
-
-  this._defaultRouteName = routeName;
-}
-util.inherits(Publisher, Producer);
-
-Object.defineProperties(Publisher.prototype, {
-  publish: {
-    value: function(eventName, data, options) {
-      assert.string(eventName);
-      assert.optionalObject(data);
-      assert.optionalObject(options, 'options');
-      if (options) {
-        assert.optionalString(options.routingKeyPrefix, 'options.routingKeyPrefix');
-        assert.optionalString(options.routeName, 'options.routeName');
-      }
-
-      var msg = this._getMessage(data, eventName);
-      this._executeMiddleware(msg);
-
-      var routeName = this._getRouteName(options);
-      var routingKey = this._getRoutingKey(options, eventName);
-      var content = this._getSerializedContent(msg.payload);
-      var publishOptions = this._getPublishOptions(msg);
-      this._broker.publish(routeName, routingKey, content, publishOptions);
-    },
-    enumerable: true
   }
 });
 
