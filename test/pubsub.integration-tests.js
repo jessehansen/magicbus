@@ -2,6 +2,7 @@
 
 var Broker = require('../').Broker;
 var Publisher = require('../').Publisher;
+var Subscriber = require('../').Subscriber;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -16,10 +17,16 @@ describe('Pub/Sub integration', function() {
   };
   var broker;
   var publisher;
+  var subscriber;
 
   before(function() {
     broker = new Broker(appName, connectionInfo);
     publisher = new Publisher(broker);
+    subscriber = new Subscriber(broker);
+  });
+
+  after(function() {
+    broker.shutdown();
   });
 
   it('should be able to publish a message and consume that message', function(done) {
@@ -28,18 +35,15 @@ describe('Pub/Sub integration', function() {
       it: 'was awesome'
     };
 
-    var handler = function(msg) {
-      expect(msg.properties.type).to.eq(eventName);
-
-      var payload = JSON.parse(msg.content.toString('utf8'));
-      expect(payload).to.eql(data);
-
-      broker.ack('subscribe', msg);
+    var handler = function(handlerEventName, handlerData) {
+      expect(handlerEventName).to.eq(eventName);
+      expect(handlerData).to.eql(data);
 
       done();
     };
 
-    broker.consume('subscribe', handler).then(function() {
+    subscriber.on('something-done', handler);
+    subscriber.startSubscription().then(function() {
       publisher.publish(eventName, data);
     });
   });

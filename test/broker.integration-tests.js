@@ -19,6 +19,10 @@ describe('Broker really using RabbitMQ', function() {
     broker = new Broker(appName, connectionInfo);
   });
 
+  after(function() {
+    broker.shutdown();
+  });
+
   it('should be able to publish and consume messages', function(done) {
     var theMessage = 'Can I buy your magic bus?';
 
@@ -26,9 +30,9 @@ describe('Broker really using RabbitMQ', function() {
       var messageContent = new Buffer(msg.content).toString();
       expect(messageContent).to.eq(theMessage);
 
-      broker.ack('subscribe', msg);
-
-      done();
+      broker.ack('subscribe', msg).then(function() {
+        done();
+      });
     };
 
     broker.consume('subscribe', handler).then(function() {

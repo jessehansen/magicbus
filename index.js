@@ -8,7 +8,7 @@ var JsonSerializer = require('./lib/json-serializer.js');
 module.exports = {
   Broker: require('./lib/broker.js'),
   Publisher: require('./lib/publisher.js'),
-  Subscriber: Subscriber,
+  Subscriber: require('./lib/subscriber.js'),
   Sender: Sender,
   Receiver: Receiver
 };
@@ -153,108 +153,6 @@ Object.defineProperties(Consumer.prototype, {
   _getMessageTypes: {
     value: function(msg) {
       return this._envelope.getMessageTypes(msg);
-    },
-    enumerable: false
-  }
-});
-
-function Subscriber(broker, options) {
-  Consumer.call(this, broker);
-
-  assert.optionalObject(options, 'options');
-
-  if (options) {
-    assert.optionalString(options.routeName, 'options.routeName');
-  }
-
-  var routeName = 'subscribe';
-  if (options && options.routeName) {
-    routeName = options.routeName;
-  }
-
-  this._defaultRouteName = routeName;
-
-  this._handlers = {};
-}
-util.inherits(Subscriber, Consumer);
-
-Object.defineProperties(Subscriber.prototype, {
-  on: {
-    value: function(eventName, handler) {
-      this._handlers[eventName] = handler;
-    },
-    enumerable: true
-  },
-
-  startSubscription: {
-    value: function(options) {
-      assert.optionalObject(options, 'options');
-
-      if (options) {
-        assert.optionalString(options.routeName, 'options.routeName');
-      }
-
-      var routeName = this._getRouteName(options);
-
-      this._broker.consume(routeName, this._consumeCallback.bind(this));
-    },
-    enumerable: true
-  },
-
-  _consumeCallback: {
-    value: function(originalMessage) {
-      //Assume all the messages coming from the queue have the same
-      //serialization, all the middleware can process all the messages, and
-      //they all use the same envelope. Use different queues (different routeName)
-      //to setup subscribers for messages that need different handling.
-
-      var msg = {
-        properties: originalMessage.properties, //Should be a deep copy
-        payload: this._getDeserializedPayload(originalMessage)
-      };
-
-      this._executeMiddleware(msg);
-      var data = this._getData(msg);
-      var messageTypes = this._getMessageTypes(msg);
-      var handlerMatches = this._getHandlerMatches(messageTypes);
-
-      if (handlerMatches.length > 1) {
-        //Need to do some unhandled action here. This is an unrecoverable error so don't retry.
-        throw new Error('Cannot have multiple handlers for a message. If you need to do multiple things with a message, put it on multiple queues and consumer it once per queue.');
-      }
-
-      if (handlerMatches.length === 1) {
-        var match = handlerMatches[0];
-
-        //Need a way to support async handlers
-        match.handler(match.messageType, data, msg.properties.authContext);
-
-        //Gonna have the wrong route name here. Is it important to ack on the same channel that we consumed from?
-        this._broker.ack(this._getRouteName(), originalMessage);
-      } else {
-        //Need some unhandled action here. Wascally allows you to configure nack/reject/custom callback.
-      }
-    },
-    enumerable: false
-  },
-
-  _getHandlerMatches: {
-    value: function(messageTypes) {
-      //Simple exact match for now
-
-      var result = [];
-
-      for (var i = 0; i < messageTypes.length; i++) {
-        var messageType = messageTypes[i];
-        if (this._handlers[messageType]) {
-          result.push({
-            messageType: messageType,
-            handler: this._handlers[messageType]
-          });
-        }
-      }
-
-      return result;
     },
     enumerable: false
   }
