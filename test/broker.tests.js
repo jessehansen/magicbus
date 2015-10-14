@@ -34,6 +34,7 @@ describe('Broker', function() {
         })
       },
       ack: function(msg) {},
+      nack: function(msg, allUpTo, requeue) {},
       assertExchange: function(exchangeName, type, options) {
         return new Promise(function(resolve, reject) {
           resolve();
@@ -46,6 +47,11 @@ describe('Broker', function() {
             messageCount: 0,
             consumerCount: 0
           });
+        });
+      },
+      bindQueue: function(queueName, exchangeName, pattern) {
+        return new Promise(function(resolve, reject) {
+          resolve();
         });
       }
     };
@@ -164,6 +170,25 @@ describe('Broker', function() {
 
       return broker.ack(routeName, msg).then(function() {
         expect(mockChannel.ack).to.have.been.calledWith(msg);
+      });
+    });
+  });
+
+  describe('nack', function() {
+    beforeEach(function() {
+      setUpBrokerWithSuccessfulAmqpMocks();
+    });
+
+    it('should nack through a channel given a message', function() {
+      var routeName = 'subscribe';
+      var msg = {};
+
+      sinon.spy(mockChannel, 'nack');
+
+      broker.registerRoute(routeName, 'worker');
+
+      return broker.nack(routeName, msg, false, false).then(function() {
+        expect(mockChannel.nack).to.have.been.calledWith(msg, false, false);
       });
     });
   });
