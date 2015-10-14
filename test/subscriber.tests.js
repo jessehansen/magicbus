@@ -11,6 +11,7 @@ chai.use(sinonChai);
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
 var JsonSerializer = require('../lib/json-serializer.js');
+var Promise = require('bluebird');
 
 describe('Subscriber', function() {
   var mockBroker;
@@ -126,7 +127,7 @@ describe('Subscriber', function() {
       };
     });
 
-    it('should ack messages given the synchronous handler does not throw', function(done) {
+    it('should ack the message given a synchronous handler that does not throw', function(done) {
       var handler = function(handlerEventName, handlerData) {
         //Not throwing an exception here
       };
@@ -137,6 +138,7 @@ describe('Subscriber', function() {
       mockBroker.ack = function(routeName, message) {
         expect(routeName).to.eq(subscriber.route.name);
         expect(message).to.eq(fakeMessage);
+        
         done();
       };
 
@@ -145,7 +147,7 @@ describe('Subscriber', function() {
       subscriber.startSubscription();
     });
 
-    it('should nack messages given the synchronous handler throws', function(done) {
+    it('should nack the message given a synchronous handler that throws', function(done) {
       var handler = function(handlerEventName, handlerData) {
         throw new Error('Aw, snap!');
       };
@@ -154,6 +156,62 @@ describe('Subscriber', function() {
       //with the message we gave it. If it doesn't, the test will fail with a
       //timeout
       mockBroker.nack = function(routeName, message, allUpTo, requeue) {
+        expect(routeName).to.eq(subscriber.route.name);
+        expect(message).to.eq(fakeMessage);
+        expect(allUpTo).to.eq(false);
+        expect(requeue).to.eq(false);
+
+        done();
+      };
+
+      var subscriber = new Subscriber(mockBroker);
+      subscriber.on(eventName, handler);
+      subscriber.startSubscription();
+    });
+
+    it('should ack the message after the handler has completed given an asynchronous handler that resolves successfully', function(done) {
+      var handlerCompleted = false;
+      var handler = function(handlerEventName, handlerData) {
+        return new Promise(function(resolve, reject) {
+          process.nextTick(function(){
+            handlerCompleted = true;
+            resolve();
+          });
+        });
+      };
+
+      //This is our assertion. The subscriber's consume callback should call this
+      //with the message we gave it. If it doesn't, the test will fail with a
+      //timeout
+      mockBroker.ack = function(routeName, message) {
+        expect(handlerCompleted).to.be.eq(true);
+        expect(routeName).to.eq(subscriber.route.name);
+        expect(message).to.eq(fakeMessage);
+
+        done();
+      };
+
+      var subscriber = new Subscriber(mockBroker);
+      subscriber.on(eventName, handler);
+      subscriber.startSubscription();
+    });
+
+    it('should nack the message after the handler has completed given an asynchronous handler that rejects/resolves with an error', function(done) {
+      var handlerCompleted = false;
+      var handler = function(handlerEventName, handlerData) {
+        return new Promise(function(resolve, reject) {
+          process.nextTick(function(){
+            handlerCompleted = true;
+            reject(new Error('Aw, snap!'));
+          });
+        });
+      };
+
+      //This is our assertion. The subscriber's consume callback should call this
+      //with the message we gave it. If it doesn't, the test will fail with a
+      //timeout
+      mockBroker.nack = function(routeName, message, allUpTo, requeue) {
+        expect(handlerCompleted).to.be.eq(true);
         expect(routeName).to.eq(subscriber.route.name);
         expect(message).to.eq(fakeMessage);
         expect(allUpTo).to.eq(false);
@@ -226,8 +284,8 @@ describe('Subscriber', function() {
 
       var subscriber = new Subscriber(mockBroker);
       //Registering multiple handlers for the message
-      subscriber.on(eventName, function(){});
-      subscriber.on(eventName, function(){});
+      subscriber.on(eventName, function() {});
+      subscriber.on(eventName, function() {});
       subscriber.startSubscription();
     });
   });
