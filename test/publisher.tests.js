@@ -58,6 +58,14 @@ describe('Publisher', function() {
       expect(publisher.route.name).to.eq('my-route');
     });
 
+    it('should use the route pattern passed in the options', function() {
+      var publisher = new Publisher(mockBroker, {
+        routePattern: 'headers-publisher'
+      });
+
+      expect(publisher.route.pattern).to.eq('headers-publisher');
+    });
+
     it('should use the envelope passed in the options', function() {
       var envelope = {};
       var publisher = new Publisher(mockBroker, {

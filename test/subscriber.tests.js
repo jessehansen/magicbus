@@ -54,6 +54,14 @@ describe('Subscriber', function() {
       expect(subscriber.route.name).to.eq('my-route');
     });
 
+    it('should use the route pattern passed in the options', function() {
+      var subscriber = new Subscriber(mockBroker, {
+        routePattern: 'listener'
+      });
+
+      expect(subscriber.route.pattern).to.eq('listener');
+    });
+
     it('should use the envelope passed in the options', function() {
       var envelope = {};
       var subscriber = new Subscriber(mockBroker, {
