@@ -158,12 +158,76 @@ describe('Subscriber', function() {
         expect(message).to.eq(fakeMessage);
         expect(allUpTo).to.eq(false);
         expect(requeue).to.eq(false);
-        
+
         done();
       };
 
       var subscriber = new Subscriber(mockBroker);
       subscriber.on(eventName, handler);
+      subscriber.startSubscription();
+    });
+  });
+
+  describe('dealing with unhandled messages', function() {
+    var eventName;
+    var fakeMessage;
+
+    beforeEach(function() {
+      //The fake message needs to be real enough to thread the needle through the 
+      //envelope, serialization, and dispatch parts of the pipeline
+      eventName = 'my-event';
+      fakeMessage = {
+        properties: {
+          type: eventName
+        },
+        content: new Buffer(JSON.stringify('the payload'))
+      };
+
+      //subscriber.startSubscription() will call this to register the subsriber's consume
+      //callback with the broker. We'll asynchronously call the subscriber's consume
+      //callback with our fake message
+      mockBroker.consume = function(routeName, callback, options) {
+        process.nextTick(function() {
+          callback(fakeMessage);
+        });
+      };
+    });
+
+    it('should nack messages given no handler is registered for the message type', function(done) {
+      //This is our assertion. The subscriber's consume callback should call this
+      //with the message we gave it. If it doesn't, the test will fail with a
+      //timeout
+      mockBroker.nack = function(routeName, message, allUpTo, requeue) {
+        expect(routeName).to.eq(subscriber.route.name);
+        expect(message).to.eq(fakeMessage);
+        expect(allUpTo).to.eq(false);
+        expect(requeue).to.eq(false);
+
+        done();
+      };
+
+      var subscriber = new Subscriber(mockBroker);
+      //Not registering any handlers before starting the subscription
+      subscriber.startSubscription();
+    });
+
+    it('should nack messages given more than one handler is registered for the message type', function(done) {
+      //This is our assertion. The subscriber's consume callback should call this
+      //with the message we gave it. If it doesn't, the test will fail with a
+      //timeout
+      mockBroker.nack = function(routeName, message, allUpTo, requeue) {
+        expect(routeName).to.eq(subscriber.route.name);
+        expect(message).to.eq(fakeMessage);
+        expect(allUpTo).to.eq(false);
+        expect(requeue).to.eq(false);
+
+        done();
+      };
+
+      var subscriber = new Subscriber(mockBroker);
+      //Registering multiple handlers for the message
+      subscriber.on(eventName, function(){});
+      subscriber.on(eventName, function(){});
       subscriber.startSubscription();
     });
   });
