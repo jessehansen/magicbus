@@ -17,7 +17,9 @@ describe('Subscriber', function() {
 
   beforeEach(function() {
     mockBroker = {
-      registerRoute: function(name, pattern) {}
+      registerRoute: function(name, pattern) {},
+      ack: function(routeName, message) {},
+      nack: function(routeName, message) {}
     };
   });
 
@@ -96,6 +98,73 @@ describe('Subscriber', function() {
       };
 
       expect(fn).to.throw('AssertionError: broker (object) is required');
+    });
+  });
+
+  describe('acknowledging messages based on handler results', function() {
+    var eventName;
+    var fakeMessage;
+
+    beforeEach(function() {
+      //The fake message needs to be real enough to thread the needle through the 
+      //envelope, serialization, and dispatch parts of the pipeline
+      eventName = 'my-event';
+      fakeMessage = {
+        properties: {
+          type: eventName
+        },
+        content: new Buffer(JSON.stringify('the payload'))
+      };
+
+      //subscriber.startSubscription() will call this to register the subsriber's consume
+      //callback with the broker. We'll asynchronously call the subscriber's consume
+      //callback with our fake message
+      mockBroker.consume = function(routeName, callback, options) {
+        process.nextTick(function() {
+          callback(fakeMessage);
+        });
+      };
+    });
+
+    it('should ack messages given the synchronous handler does not throw', function(done) {
+      var handler = function(handlerEventName, handlerData) {
+        //Not throwing an exception here
+      };
+
+      //This is our assertion. The subscriber's consume callback should call this
+      //with the message we gave it. If it doesn't, the test will fail with a
+      //timeout
+      mockBroker.ack = function(routeName, message) {
+        expect(routeName).to.eq(subscriber.route.name);
+        expect(message).to.eq(fakeMessage);
+        done();
+      };
+
+      var subscriber = new Subscriber(mockBroker);
+      subscriber.on(eventName, handler);
+      subscriber.startSubscription();
+    });
+
+    it('should nack messages given the synchronous handler throws', function(done) {
+      var handler = function(handlerEventName, handlerData) {
+        throw new Error('Aw, snap!');
+      };
+
+      //This is our assertion. The subscriber's consume callback should call this
+      //with the message we gave it. If it doesn't, the test will fail with a
+      //timeout
+      mockBroker.nack = function(routeName, message, allUpTo, requeue) {
+        expect(routeName).to.eq(subscriber.route.name);
+        expect(message).to.eq(fakeMessage);
+        expect(allUpTo).to.eq(false);
+        expect(requeue).to.eq(false);
+        
+        done();
+      };
+
+      var subscriber = new Subscriber(mockBroker);
+      subscriber.on(eventName, handler);
+      subscriber.startSubscription();
     });
   });
 });
