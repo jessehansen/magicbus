@@ -35,6 +35,9 @@ describe('Broker really using RabbitMQ', function() {
       });
     };
 
+    broker.registerRoute('publish', 'topic-publisher');
+    broker.registerRoute('subscribe', 'worker');
+
     broker.consume('subscribe', handler).then(function() {
       broker.publish('publish', 'anything', new Buffer(theMessage));
     });

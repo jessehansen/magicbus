@@ -93,6 +93,21 @@ describe('Broker', function() {
     });
   });
 
+  describe('registerRoute', function() {
+    beforeEach(function() {
+      setUpBrokerWithSuccessfulAmqpMocks();
+    });
+
+    it('should keep track of the pattern of the route', function() {
+      var routeName = 'publish';
+      var routePattern = 'topic-publisher';
+
+      broker.registerRoute(routeName, routePattern);
+
+      expect(broker.getRoutePattern(routeName)).to.eq(routePattern);
+    });
+  });
+
   describe('publish', function() {
     beforeEach(function() {
       setUpBrokerWithSuccessfulAmqpMocks();
@@ -105,6 +120,8 @@ describe('Broker', function() {
       var options = {};
 
       sinon.spy(mockChannel, 'publish');
+
+      broker.registerRoute(routeName, 'topic-publisher');
 
       return broker.publish(routeName, routingKey, content, options).then(function() {
         expect(mockChannel.publish).to.have.been.calledWith('my-app.publish', routingKey, content, options);
@@ -124,6 +141,8 @@ describe('Broker', function() {
 
       sinon.spy(mockChannel, 'consume');
 
+      broker.registerRoute(routeName, 'worker');
+
       return broker.consume(routeName, callback, options).then(function() {
         expect(mockChannel.consume).to.have.been.calledWith('my-app.subscribe', callback, options);
       });
@@ -141,6 +160,8 @@ describe('Broker', function() {
 
       sinon.spy(mockChannel, 'ack');
 
+      broker.registerRoute(routeName, 'worker');
+
       return broker.ack(routeName, msg).then(function() {
         expect(mockChannel.ack).to.have.been.calledWith(msg);
       });
@@ -152,6 +173,8 @@ describe('Broker', function() {
       setUpBrokerWithSuccessfulAmqpMocks();
 
       sinon.spy(mockConnection, 'close');
+
+      broker.registerRoute('my-route', 'worker');
 
       return broker.consume('my-route', function() {}).then(function() {
         broker.shutdown();

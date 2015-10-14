@@ -5,6 +5,10 @@ var Publisher = require('../lib/publisher.js');
 var chai = require('chai');
 var expect = chai.expect;
 
+var sinon = require('sinon');
+var sinonChai = require('sinon-chai');
+chai.use(sinonChai);
+
 var BasicEnvelope = require('../lib/basic-envelope.js');
 var JsonSerializer = require('../lib/json-serializer.js');
 
@@ -12,7 +16,9 @@ describe('Publisher', function() {
   var mockBroker;
 
   beforeEach(function() {
-    mockBroker = {};
+    mockBroker = {
+      registerRoute: function(name, pattern) {}
+    };
   });
 
   describe('default construction', function() {
@@ -24,6 +30,10 @@ describe('Publisher', function() {
 
     it('should use publish as the route name', function() {
       expect(publisher.route.name).to.eq('publish');
+    });
+
+    it('should use topic-publisher as the route pattern', function() {
+      expect(publisher.route.pattern).to.eq('topic-publisher');
     });
 
     it('should use the basic envelope', function() {
@@ -72,6 +82,14 @@ describe('Publisher', function() {
       });
 
       expect(publisher._defaultRoutingKeyPrefix).to.eq('my-entity');
+    });
+  });
+
+  describe('constructor broker wireup', function() {
+    it('should register a route with the broker', function() {
+      sinon.spy(mockBroker, 'registerRoute');
+      new Publisher(mockBroker);
+      expect(mockBroker.registerRoute).to.have.been.calledWith('publish', 'topic-publisher');
     });
   });
 

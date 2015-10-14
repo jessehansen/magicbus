@@ -5,6 +5,10 @@ var Subscriber = require('../lib/subscriber.js');
 var chai = require('chai');
 var expect = chai.expect;
 
+var sinon = require('sinon');
+var sinonChai = require('sinon-chai');
+chai.use(sinonChai);
+
 var BasicEnvelope = require('../lib/basic-envelope.js');
 var JsonSerializer = require('../lib/json-serializer.js');
 
@@ -12,7 +16,9 @@ describe('Subscriber', function() {
   var mockBroker;
 
   beforeEach(function() {
-    mockBroker = {};
+    mockBroker = {
+      registerRoute: function(name, pattern) {}
+    };
   });
 
   describe('default construction', function() {
@@ -24,6 +30,10 @@ describe('Subscriber', function() {
 
     it('should use subscribe as the route name', function() {
       expect(subscriber.route.name).to.eq('subscribe');
+    });
+
+    it('should use worker as the route pattern', function() {
+      expect(subscriber.route.pattern).to.eq('worker');
     });
 
     it('should use the basic envelope', function() {
@@ -60,6 +70,14 @@ describe('Subscriber', function() {
       });
 
       expect(subscriber._serializer).to.eq(serializer);
+    });
+  });
+
+  describe('constructor broker wireup', function() {
+    it('should register a route with the broker', function() {
+      sinon.spy(mockBroker, 'registerRoute');
+      new Subscriber(mockBroker);
+      expect(mockBroker.registerRoute).to.have.been.calledWith('subscribe', 'worker');
     });
   });
 
