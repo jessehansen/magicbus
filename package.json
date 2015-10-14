@@ -1,6 +1,6 @@
 {
   "name": "@leisurelink/magicbus",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A message bus framework using RabbitMQ.",
   "main": "index.js",
   "scripts": {
