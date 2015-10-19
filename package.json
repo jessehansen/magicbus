@@ -1,6 +1,6 @@
 {
   "name": "@leisurelink/magicbus",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A message bus framework using RabbitMQ.",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
+    "amqp-uri": "^2.0.0",
     "amqplib": "^0.4.0",
     "assert-plus": "^0.1.5",
     "bluebird": "^2.10.2"
