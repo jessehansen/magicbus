@@ -6,7 +6,8 @@ var chai = require('chai');
 var expect = chai.expect;
 
 describe('Broker really using RabbitMQ', function() {
-  var appName = 'magicbus-tests';
+  var serviceDomainName = 'magicbus';
+  var appName = 'tests';
   var connectionInfo = {
     server: 'localhost',
     vhost: '/',
@@ -16,7 +17,7 @@ describe('Broker really using RabbitMQ', function() {
   var broker;
 
   beforeEach(function() {
-    broker = new Broker(appName, connectionInfo);
+    broker = new Broker(serviceDomainName, appName, connectionInfo);
   });
 
   afterEach(function() {

@@ -36,6 +36,7 @@ var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
 var Publisher = MagicBus.Publisher;
 
+var serviceDomainName = 'my-domain';
 var appName = 'my-publisher';
 
 var connectionInfo = {
@@ -45,7 +46,7 @@ var connectionInfo = {
   pass: 'guest'
 };
 
-var broker = new Broker(appName, connectionInfo);
+var broker = new Broker(serviceDomainName, appName, connectionInfo);
 
 var publisher = new Publisher(broker);
 
@@ -61,6 +62,7 @@ var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
 var Subscriber = MagicBus.Subscriber;
 
+var serviceDomainName = 'my-domain';
 var appName = 'my-subscriber';
 
 var connectionInfo = {
@@ -70,7 +72,7 @@ var connectionInfo = {
   pass: 'guest'
 };
 
-var broker = new Broker(appName, connectionInfo);
+var broker = new Broker(serviceDomainName, appName, connectionInfo);
 
 var subscriber = new Subscriber(broker);
 
@@ -270,7 +272,7 @@ New Exchange Info:
 
 ```
 Virtual Host: /
-Name:         magicbus-tests.publish 
+Name:         magicbus.tests.publish 
 Type:         topic
 Durability:   Durable
 Auto Delete:  No
@@ -281,7 +283,7 @@ New Queue Info:
 
 ```
 Virtual Host: /
-Name:         magicbus-tests.subscribe
+Name:         magicbus.tests.subscribe
 Durability:   Durable
 Auto Delete:  No
 ```
@@ -289,7 +291,7 @@ Auto Delete:  No
 After creating the queue, bind it to the exchange:
 
 ```
-From Exchange: magicbus-tests.publish
+From Exchange: magicbus.tests.publish
 Routing Key:   #
 ```
 

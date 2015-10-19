@@ -8,7 +8,8 @@ var chai = require('chai');
 var expect = chai.expect;
 
 describe('Send/Receive integration', function() {
-  var appName = 'magicbus-tests';
+  var serviceDomainName = 'magicbus';
+  var appName = 'tests';
   var connectionInfo = {
     server: 'localhost',
     vhost: '/',
@@ -20,7 +21,7 @@ describe('Send/Receive integration', function() {
   var receiver;
 
   before(function() {
-    broker = new Broker(appName, connectionInfo);
+    broker = new Broker(serviceDomainName, appName, connectionInfo);
     sender = new Sender(broker, {
       routeName: 'publish'
     });

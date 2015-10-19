@@ -10,6 +10,7 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 describe('Broker', function() {
+  var serviceDomainName = 'my-domain';
   var appName = 'my-app';
   var connectionInfo = {
     server: 'localhost',
@@ -31,7 +32,7 @@ describe('Broker', function() {
       consume: function(queueName, callback, options) {
         return new Promise(function(resolve, reject) {
           resolve('the-consumer-tag');
-        })
+        });
       },
       ack: function(msg) {},
       nack: function(msg, allUpTo, requeue) {},
@@ -77,14 +78,22 @@ describe('Broker', function() {
   function setUpBrokerWithSuccessfulAmqpMocks() {
     setUpSuccessfulAmqpMocks();
 
-    broker = new Broker(appName, connectionInfo);
+    broker = new Broker(serviceDomainName, appName, connectionInfo);
     broker._amqp = mockAmqp;
   }
 
   describe('constructor', function() {
-    it('should throw an assertion error given no app name', function() {
+    it('should throw an assertion error given no service domain name', function() {
       var fn = function() {
         new Broker();
+      };
+
+      expect(fn).to.throw('AssertionError: serviceDomainName (string) is required');
+    });
+
+    it('should throw an assertion error given no app name', function() {
+      var fn = function() {
+        new Broker('my-domain');
       };
 
       expect(fn).to.throw('AssertionError: appName (string) is required');
@@ -92,7 +101,7 @@ describe('Broker', function() {
 
     it('should throw an assertion error given no connection info', function() {
       var fn = function() {
-        new Broker('my-app');
+        new Broker('my-domain', 'my-app');
       };
 
       expect(fn).to.throw('AssertionError: connectionInfo (object) is required');
@@ -119,7 +128,7 @@ describe('Broker', function() {
       setUpBrokerWithSuccessfulAmqpMocks();
     });
 
-    it('should publish to an exchange with a name derived from the appName and routeName', function() {
+    it('should publish to an exchange with a name derived from the serviceDomainName, appName and routeName', function() {
       var routeName = 'publish';
       var routingKey = 'the.routing.key';
       var content = new Buffer('content');
@@ -130,7 +139,7 @@ describe('Broker', function() {
       broker.registerRoute(routeName, 'topic-publisher');
 
       return broker.publish(routeName, routingKey, content, options).then(function() {
-        expect(mockChannel.publish).to.have.been.calledWith('my-app.publish', routingKey, content, options);
+        expect(mockChannel.publish).to.have.been.calledWith('my-domain.my-app.publish', routingKey, content, options);
       });
     });
   });
@@ -140,7 +149,7 @@ describe('Broker', function() {
       setUpBrokerWithSuccessfulAmqpMocks();
     });
 
-    it('should consume from a queue with a name derived from the appName and routeName', function() {
+    it('should consume from a queue with a name derived from the serviceDomainName, appName and routeName', function() {
       var routeName = 'subscribe';
       var callback = function(msg) {};
       var options = {};
@@ -150,7 +159,7 @@ describe('Broker', function() {
       broker.registerRoute(routeName, 'worker');
 
       return broker.consume(routeName, callback, options).then(function() {
-        expect(mockChannel.consume).to.have.been.calledWith('my-app.subscribe', callback, options);
+        expect(mockChannel.consume).to.have.been.calledWith('my-domain.my-app.subscribe', callback, options);
       });
     });
   });
@@ -208,7 +217,7 @@ describe('Broker', function() {
     });
 
     it('should not error given it has not created a connection', function() {
-      var broker = new Broker(appName, connectionInfo);
+      var broker = new Broker(serviceDomainName, appName, connectionInfo);
       broker.shutdown();
     });
   });

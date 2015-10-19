@@ -8,7 +8,8 @@ var chai = require('chai');
 var expect = chai.expect;
 
 describe('Pub/Sub integration', function() {
-  var appName = 'magicbus-tests';
+  var serviceDomainName = 'magicbus';
+  var appName = 'tests';
   var connectionInfo = {
     server: 'localhost',
     vhost: '/',
@@ -20,7 +21,7 @@ describe('Pub/Sub integration', function() {
   var subscriber;
 
   before(function() {
-    broker = new Broker(appName, connectionInfo);
+    broker = new Broker(serviceDomainName, appName, connectionInfo);
     publisher = new Publisher(broker);
     subscriber = new Subscriber(broker);
   });
