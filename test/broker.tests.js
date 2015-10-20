@@ -159,17 +159,25 @@ describe('Broker', function() {
       setUpBrokerWithSuccessfulAmqpMocks();
     });
 
-    it('should consume from a queue with a name derived from the serviceDomainName, appName and routeName', function() {
+    it('should consume from a queue with the name returned from the route pattern', function() {
       var routeName = 'subscribe';
       var callback = function(msg) {};
       var options = {};
 
       sinon.spy(mockChannel, 'consume');
 
-      broker.registerRoute(routeName, 'worker');
+      var queueName = 'the-queue';
+      var mockRoutePattern = {
+        assertRoute: function() {
+          return Promise.resolve({
+            queueName: queueName
+          });
+        }
+      };
+      broker.registerRoute(routeName, mockRoutePattern);
 
       return broker.consume(routeName, callback, options).then(function() {
-        expect(mockChannel.consume).to.have.been.calledWith('my-domain.my-app.subscribe', callback, options);
+        expect(mockChannel.consume).to.have.been.calledWith(queueName, callback, options);
       });
     });
   });
@@ -185,7 +193,15 @@ describe('Broker', function() {
 
       sinon.spy(mockChannel, 'ack');
 
-      broker.registerRoute(routeName, 'worker');
+      var queueName = 'the-queue';
+      var mockRoutePattern = {
+        assertRoute: function() {
+          return Promise.resolve({
+            queueName: queueName
+          });
+        }
+      };
+      broker.registerRoute(routeName, mockRoutePattern);
 
       return broker.ack(routeName, msg).then(function() {
         expect(mockChannel.ack).to.have.been.calledWith(msg);
@@ -204,7 +220,15 @@ describe('Broker', function() {
 
       sinon.spy(mockChannel, 'nack');
 
-      broker.registerRoute(routeName, 'worker');
+      var queueName = 'the-queue';
+      var mockRoutePattern = {
+        assertRoute: function() {
+          return Promise.resolve({
+            queueName: queueName
+          });
+        }
+      };
+      broker.registerRoute(routeName, mockRoutePattern);
 
       return broker.nack(routeName, msg, false, false).then(function() {
         expect(mockChannel.nack).to.have.been.calledWith(msg, false, false);
@@ -218,7 +242,15 @@ describe('Broker', function() {
 
       sinon.spy(mockConnection, 'close');
 
-      broker.registerRoute('my-route', 'worker');
+      var queueName = 'the-queue';
+      var mockRoutePattern = {
+        assertRoute: function() {
+          return Promise.resolve({
+            queueName: queueName
+          });
+        }
+      };
+      broker.registerRoute('my-route', mockRoutePattern);
 
       return broker.consume('my-route', function() {}).then(function() {
         broker.shutdown();

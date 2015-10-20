@@ -13,6 +13,8 @@ var BasicEnvelope = require('../lib/basic-envelope.js');
 var JsonSerializer = require('../lib/json-serializer.js');
 var Promise = require('bluebird');
 
+var WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern.js');
+
 describe('Subscriber', function() {
   var mockBroker;
 
@@ -35,8 +37,8 @@ describe('Subscriber', function() {
       expect(subscriber.route.name).to.eq('subscribe');
     });
 
-    it('should use worker as the route pattern', function() {
-      expect(subscriber.route.pattern).to.eq('worker');
+    it('should use the worker route pattern', function() {
+      expect(subscriber.route.pattern instanceof WorkerRoutePattern).to.eq(true);
     });
 
     it('should use the basic envelope', function() {
@@ -58,11 +60,12 @@ describe('Subscriber', function() {
     });
 
     it('should use the route pattern passed in the options', function() {
+      var pattern = {};
       var subscriber = new Subscriber(mockBroker, {
-        routePattern: 'listener'
+        routePattern: pattern
       });
 
-      expect(subscriber.route.pattern).to.eq('listener');
+      expect(subscriber.route.pattern).to.eq(pattern);
     });
 
     it('should use the envelope passed in the options', function() {
@@ -87,8 +90,10 @@ describe('Subscriber', function() {
   describe('constructor broker wireup', function() {
     it('should register a route with the broker', function() {
       sinon.spy(mockBroker, 'registerRoute');
-      new Subscriber(mockBroker);
-      expect(mockBroker.registerRoute).to.have.been.calledWith('subscribe', 'worker');
+
+      var pattern = {};
+      new Subscriber(mockBroker, {routePattern: pattern});
+      expect(mockBroker.registerRoute).to.have.been.calledWith('subscribe', pattern);
     });
   });
 
