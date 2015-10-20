@@ -33,6 +33,16 @@ describe('BasicEnvelope', function() {
     });
   });
 
+  describe('getRoutingKey', function() {
+    it('should return the kind of the message', function() {
+      var routingKey = envelope.getRoutingKey({
+        my: 'data'
+      }, 'my-kind');
+
+      expect(routingKey).to.eq(routingKey);
+    });
+  });
+
   describe('getData', function() {
     it('should return the payload given a message with a payload', function() {
       var msg = {

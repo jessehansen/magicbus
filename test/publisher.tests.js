@@ -43,10 +43,6 @@ describe('Publisher', function() {
     it('should use the json serializer', function() {
       expect(publisher._serializer instanceof JsonSerializer).to.eq(true);
     });
-
-    it('should not use a routing key prefix', function() {
-      expect(publisher._defaultRoutingKeyPrefix).to.not.be.ok;
-    });
   });
 
   describe('construction options', function() {
@@ -82,14 +78,6 @@ describe('Publisher', function() {
       });
 
       expect(publisher._serializer).to.eq(serializer);
-    });
-
-    it('should use the routing key prefix passed in the options', function() {
-      var publisher = new Publisher(mockBroker, {
-        routingKeyPrefix: 'my-entity'
-      });
-
-      expect(publisher._defaultRoutingKeyPrefix).to.eq('my-entity');
     });
   });
 
