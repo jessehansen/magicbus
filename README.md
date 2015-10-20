@@ -150,7 +150,8 @@ either be:
 The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable"
 and will not be retried. Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference. Need to define our best guess at differentiating the two.  
 
-**Do we need sync and async versions of handlers with separate registration for each?** 
+Asynchronous handlers should return a promise. They should reject the promise using the same guidelines that
+applies for throwing errors from synchronous handlers.
 
 #### #startSubscription()
 
@@ -191,7 +192,8 @@ function handle(message, messageTypes, authContext) {
 }
 ```
 
-The ack behavior of a receiver handler is the same as for a subscriber handler. 
+The ack behavior of a receiver handler is the same as for a subscriber handler. Like subscriber handlers,
+asynchronous handlers should return promises.
 
 # Extension Points
 
