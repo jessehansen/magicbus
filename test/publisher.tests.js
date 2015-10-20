@@ -9,15 +9,22 @@ var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
+chai.use(require('chai-as-promised'));
+
 var BasicEnvelope = require('../lib/basic-envelope.js');
 var JsonSerializer = require('../lib/json-serializer.js');
+
+var Promise = require('bluebird');
 
 describe('Publisher', function() {
   var mockBroker;
 
   beforeEach(function() {
     mockBroker = {
-      registerRoute: function(name, pattern) {}
+      registerRoute: function(name, pattern) {},
+      publish: function(eventName, data) {
+        return Promise.resolve();
+      }
     };
   });
 
@@ -96,6 +103,44 @@ describe('Publisher', function() {
       };
 
       expect(fn).to.throw('AssertionError: broker (object) is required');
+    });
+  });
+
+  describe('publish', function() {
+    var publisher;
+
+    beforeEach(function() {
+      publisher = new Publisher(mockBroker);
+    });
+
+    it('should be rejected with an assertion error given no event name', function() {
+      var p = publisher.publish();
+
+      return expect(p).to.be.rejectedWith('eventName (string) is required');
+    });
+
+    it('should be fulfilled given the broker.publish call is fulfilled', function() {
+      var brokerPromise = Promise.resolve();
+
+      mockBroker.publish = function() {
+        return brokerPromise;
+      };
+
+      var p = publisher.publish('something-happened');
+
+      return expect(p).to.be.fulfilled;
+    });
+
+    it('should be rejected given the broker.publish call is rejected', function() {
+      var brokerPromise = Promise.reject(new Error('Aw, snap!'));
+
+      mockBroker.publish = function() {
+        return brokerPromise;
+      };
+
+      var p = publisher.publish('something-happened');
+
+      return expect(p).to.be.rejectedWith('Aw, snap!');
     });
   });
 });
