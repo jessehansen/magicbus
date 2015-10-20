@@ -11,6 +11,8 @@ chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
 
+var Promise = require('bluebird');
+
 describe('PublisherRoutePattern', function() {
   describe('default construction', function() {
     var routePattern;
@@ -40,7 +42,9 @@ describe('PublisherRoutePattern', function() {
 
     beforeEach(function() {
       mockChannel = {
-        assertExchange: function() {}
+        assertExchange: function() {
+          return Promise.resolve();
+        }
       };
 
       routePattern = new PublisherRoutePattern();
@@ -58,6 +62,16 @@ describe('PublisherRoutePattern', function() {
       var p = routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel);
 
       return expect(p).to.eventually.eql({exchangeName: 'my-domain.my-app.my-route'});
+    });
+
+    it('should reject if the exchange cannot be created', function() {
+      mockChannel.assertExchange = function() {
+        return Promise.reject(new Error('Shoot!'));
+      };
+
+      var p = routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel);
+
+      return expect(p).to.be.rejectedWith('Shoot!');
     });
   });
 });
