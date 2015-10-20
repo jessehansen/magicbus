@@ -121,6 +121,8 @@ Publish an event.
 * `eventName` is a required string
 * `data` is an optional parameter of any type
 
+This method is asynchronous and returns a promise.
+
 ### Subscriber
 
 #### #on(eventNames, handler)
@@ -155,6 +157,8 @@ and will not be retried. Operational errors will be retried. See [this article](
 Starts consuming from the queue. Don't call this until you've finished registering your handlers or you
 may end up with unhandled messages that you would have handled if your handler registration were complete.
 
+This method is asynchronous and returns a promise.
+
 ### Sender
 
 #### #send(message, messageType)
@@ -164,6 +168,8 @@ Send a command/message.
 * `message` is a require parameter of any type
 * `messageType` is an optional string 
 
+This method is asynchronous and returns a promise.
+
 ### Receiver
 
 #### #startReceiving(handler)
@@ -171,6 +177,8 @@ Send a command/message.
 Receive all messages from the queue through the same handler.
 
 * `handler` is a required function with the signature described below
+
+This method is asynchronous and returns a promise.
 
 #### Handler Signature
 
