@@ -5,5 +5,8 @@ module.exports = {
   Publisher: require('./lib/publisher.js'),
   Subscriber: require('./lib/subscriber.js'),
   Sender: require('./lib/sender.js'),
-  Receiver: require('./lib/receiver.js')
+  Receiver: require('./lib/receiver.js'),
+  RoutePatterns: {
+    Publisher: require('./lib/route-patterns/publisher-route-pattern.js')
+  }
 };

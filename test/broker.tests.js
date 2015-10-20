@@ -9,6 +9,8 @@ var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
+var Promise = require('bluebird');
+
 describe('Broker', function() {
   var serviceDomainName = 'my-domain';
   var appName = 'my-app';
@@ -128,7 +130,7 @@ describe('Broker', function() {
       setUpBrokerWithSuccessfulAmqpMocks();
     });
 
-    it('should publish to an exchange with a name derived from the serviceDomainName, appName and routeName', function() {
+    it('should publish to an exchange with the name returned from the route pattern', function() {
       var routeName = 'publish';
       var routingKey = 'the.routing.key';
       var content = new Buffer('content');
@@ -136,10 +138,18 @@ describe('Broker', function() {
 
       sinon.spy(mockChannel, 'publish');
 
-      broker.registerRoute(routeName, 'topic-publisher');
+      var exchangeName = 'the-exchange';
+      var mockRoutePattern = {
+        assertRoute: function() {
+          return Promise.resolve({
+            exchangeName: exchangeName
+          });
+        }
+      };
+      broker.registerRoute(routeName, mockRoutePattern);
 
       return broker.publish(routeName, routingKey, content, options).then(function() {
-        expect(mockChannel.publish).to.have.been.calledWith('my-domain.my-app.publish', routingKey, content, options);
+        expect(mockChannel.publish).to.have.been.calledWith(exchangeName, routingKey, content, options);
       });
     });
   });

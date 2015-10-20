@@ -13,6 +13,7 @@ chai.use(require('chai-as-promised'));
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
 var JsonSerializer = require('../lib/json-serializer.js');
+var PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern.js');
 
 var Promise = require('bluebird');
 
@@ -39,8 +40,9 @@ describe('Publisher', function() {
       expect(publisher.route.name).to.eq('publish');
     });
 
-    it('should use topic-publisher as the route pattern', function() {
-      expect(publisher.route.pattern).to.eq('topic-publisher');
+    it('should use the publisher route pattern with a topic exchange type', function() {
+      expect(publisher.route.pattern instanceof PublisherRoutePattern).to.eq(true);
+      expect(publisher.route.pattern.exchangeType).to.eq('topic');
     });
 
     it('should use the basic envelope', function() {
@@ -62,11 +64,13 @@ describe('Publisher', function() {
     });
 
     it('should use the route pattern passed in the options', function() {
+      var pattern = {};
+
       var publisher = new Publisher(mockBroker, {
-        routePattern: 'headers-publisher'
+        routePattern: pattern
       });
 
-      expect(publisher.route.pattern).to.eq('headers-publisher');
+      expect(publisher.route.pattern).to.eq(pattern);
     });
 
     it('should use the envelope passed in the options', function() {
@@ -91,8 +95,12 @@ describe('Publisher', function() {
   describe('constructor broker wireup', function() {
     it('should register a route with the broker', function() {
       sinon.spy(mockBroker, 'registerRoute');
-      new Publisher(mockBroker);
-      expect(mockBroker.registerRoute).to.have.been.calledWith('publish', 'topic-publisher');
+
+      var pattern = {};
+      new Publisher(mockBroker, {
+        routePattern: pattern
+      });
+      expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
     });
   });
 

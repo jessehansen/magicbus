@@ -5,6 +5,8 @@ var Broker = require('../').Broker;
 var chai = require('chai');
 var expect = chai.expect;
 
+var PublisherRoutePattern = require('../').RoutePatterns.Publisher;
+
 describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
@@ -36,7 +38,7 @@ describe('Broker really using RabbitMQ', function() {
       });
     };
 
-    broker.registerRoute('publish', 'topic-publisher');
+    broker.registerRoute('publish', new PublisherRoutePattern());
     broker.registerRoute('subscribe', 'worker');
 
     broker.consume('subscribe', handler).then(function() {
@@ -53,7 +55,7 @@ describe('Broker really using RabbitMQ', function() {
       });
     };
 
-    broker.registerRoute('publish', 'topic-publisher');
+    broker.registerRoute('publish', new PublisherRoutePattern());
     broker.registerRoute('subscribe', 'worker');
 
     broker.consume('subscribe', handler).then(function() {
