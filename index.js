@@ -8,6 +8,7 @@ module.exports = {
   Receiver: require('./lib/receiver.js'),
   RoutePatterns: {
     Publisher: require('./lib/route-patterns/publisher-route-pattern.js'),
-    Worker: require('./lib/route-patterns/worker-route-pattern.js')
+    Worker: require('./lib/route-patterns/worker-route-pattern.js'),
+    Listener: require('./lib/route-patterns/listener-route-pattern.js')
   }
 };
