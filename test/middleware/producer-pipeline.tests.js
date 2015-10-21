@@ -18,7 +18,7 @@ function secondMiddleware(message, actions){
   actions.next();
 }
 function errorMiddleware(message, actions) {
-  actions.error();
+  actions.error(new Error('oh crap'));
 }
 
 describe('ProducerPipeline', function() {
@@ -58,7 +58,11 @@ describe('ProducerPipeline', function() {
         done();
       });
     });
-    it('should not call successive functions in succession when middleware errors', function(done){
+    it('should reject promise when error occurs', function(done){
+      producerPipeline.use(errorMiddleware);
+      expect(producerPipeline.execute(message)).to.eventually.be.rejectedWith('oh crap').and.notify(done);
+    });
+    it('should not call successive functions when middleware errors', function(done){
       producerPipeline.use(errorMiddleware);
       producerPipeline.use(simpleMiddleware);
       producerPipeline.use(secondMiddleware);
