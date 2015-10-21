@@ -4,7 +4,7 @@
   "description": "A message bus framework using RabbitMQ.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive test/**/*tests.js",
+    "test": "mocha --recursive test/**/*tests.js test/*.tests.js",
     "test-ex-integration": "mocha --recursive test/**/*.tests.js"
   },
   "repository": {

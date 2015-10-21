@@ -19,11 +19,18 @@ var Promise = require('bluebird');
 
 describe('Publisher', function() {
   var mockBroker;
+  var mockPipeline;
 
   beforeEach(function() {
     mockBroker = {
-      registerRoute: function(name, pattern) {},
-      publish: function(eventName, data) {
+      registerRoute: function(/* name, pattern */) {},
+      publish: function(/* eventName, data */) {
+        return Promise.resolve();
+      }
+    };
+
+    mockPipeline = {
+      execute: function(/* message */){
         return Promise.resolve();
       }
     };
@@ -118,28 +125,33 @@ describe('Publisher', function() {
     var publisher;
 
     beforeEach(function() {
-      publisher = new Publisher(mockBroker);
+      publisher = new Publisher(mockBroker, {
+        pipeline: mockPipeline
+      });
     });
 
     it('should be rejected with an assertion error given no event name', function() {
-      var p = publisher.publish();
+      var fn = function(){
+        publisher.publish();
+      };
 
-      return expect(p).to.be.rejectedWith('eventName (string) is required');
+      expect(fn).to.throw('eventName (string) is required');
     });
 
-    it('should be fulfilled given the broker.publish call is fulfilled', function() {
-      var brokerPromise = Promise.resolve();
-
+    it('should be fulfilled given the pipeline.execute and broker.publish calls are fulfilled', function(done) {
+      mockPipeline.execute = function() {
+        return Promise.resolve();
+      };
       mockBroker.publish = function() {
-        return brokerPromise;
+        return Promise.resolve();
       };
 
       var p = publisher.publish('something-happened');
 
-      return expect(p).to.be.fulfilled;
+      return expect(p).to.be.fulfilled.and.notify(done);
     });
 
-    it('should be rejected given the broker.publish call is rejected', function() {
+    it('should be rejected given the broker.publish call is rejected', function(done) {
       var brokerPromise = Promise.reject(new Error('Aw, snap!'));
 
       mockBroker.publish = function() {
@@ -148,7 +160,17 @@ describe('Publisher', function() {
 
       var p = publisher.publish('something-happened');
 
-      return expect(p).to.be.rejectedWith('Aw, snap!');
+      return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
+    });
+
+    it('should be rejected given the pipeline.execute call is rejected', function(done) {
+      mockPipeline.execute = function() {
+        return Promise.reject(new Error('Aw, snap!'));
+      };
+
+      var p = publisher.publish('something-happened');
+
+      return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
     });
   });
 });
