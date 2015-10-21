@@ -1,6 +1,6 @@
 {
   "name": "@leisurelink/magicbus",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A message bus framework using RabbitMQ.",
   "main": "index.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "amqplib": "^0.4.0",
     "assert-plus": "^0.1.5",
     "bluebird": "^2.10.2",
+    "lodash": "^3.10.1",
     "shortid": "^2.2.4"
   }
 }

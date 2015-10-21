@@ -23,7 +23,7 @@ describe('Publisher', function() {
   beforeEach(function() {
     mockBroker = {
       registerRoute: function(name, pattern) {},
-      publish: function(eventName, data) {
+      publish: function(routeName, routingKey, content, options) {
         return Promise.resolve();
       }
     };
@@ -149,6 +149,50 @@ describe('Publisher', function() {
       var p = publisher.publish('something-happened');
 
       return expect(p).to.be.rejectedWith('Aw, snap!');
+    });
+
+    it('should use default publish options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      return publisher.publish('something-happened').then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({persistent: true}));
+      });
+    });
+
+    it('should copy properties from the properties property of the message to the publish options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      return publisher.publish('something-happened').then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({type: 'something-happened'}));
+      });
+    });
+
+    it('should copy properties from the publishOptions property of the options to the publish options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      var options = {
+        publishOptions: {
+          correlationId: '123'
+        }
+      };
+
+      return publisher.publish('something-happened', null, options).then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({correlationId: '123'}));
+      });
+    });
+
+    it('should overwrite publish options set from anywhere else with values from the publishOptions property of the options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      var options = {
+        publishOptions: {
+          persistent: false
+        }
+      };
+
+      return publisher.publish('something-happened', null, options).then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({persistent: false}));
+      });
     });
   });
 });
