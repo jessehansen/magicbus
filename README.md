@@ -15,7 +15,7 @@ interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
 * Content serialization/deserialization
 * Delayed retry support for consumers
 * Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue
-* Connection management (single connection, re-establishing a lost connection)  
+* Connection management (single connection, re-establishing a lost connection)
 
 # Installation
 
@@ -93,6 +93,16 @@ subscriber.
 
 # Framework Components
 
+## Class Diagram
+
+- Broker
+- Producer
+  + Publisher
+  + Sender
+- Consumer
+  + Subscriber
+  + Receiver
+
 ## Broker
 
 * Maintains a single connection to a single RabbitMQ server/vhost
@@ -148,7 +158,7 @@ either be:
 * re-queued and retried later
 
 The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable"
-and will not be retried. Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference. Need to define our best guess at differentiating the two.  
+and will not be retried. Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference. Need to define our best guess at differentiating the two.
 
 Asynchronous handlers should return a promise. They should reject the promise using the same guidelines that
 applies for throwing errors from synchronous handlers.
@@ -167,7 +177,7 @@ This method is asynchronous and returns a promise.
 Send a command/message.
 
 * `message` is a require parameter of any type
-* `messageType` is an optional string 
+* `messageType` is an optional string
 
 This method is asynchronous and returns a promise.
 
@@ -208,7 +218,7 @@ from wherever it put them when it produced the message.
 
 The initial message must have a payload property which will be serialized into a Buffer to pass as the
 `content` parameter to the [amqplib publish method](http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish). The `properties` property of the initial message will be used as the `options`
-parameter of the publish method so documentation of those options applies. 
+parameter of the publish method so documentation of those options applies.
 
 The default envelope creates messages with the following shape:
 
@@ -282,7 +292,7 @@ New Exchange Info:
 
 ```
 Virtual Host: /
-Name:         magicbus.tests.publish 
+Name:         magicbus.tests.publish
 Type:         topic
 Durability:   Durable
 Auto Delete:  No
