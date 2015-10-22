@@ -13,7 +13,6 @@ chai.use(sinonChai);
 chai.use(require('chai-as-promised'));
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
-var JsonSerializer = require('../lib/json-serializer.js');
 var PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern.js');
 
 var Promise = require('bluebird');
@@ -25,7 +24,7 @@ describe('Publisher', function() {
   beforeEach(function() {
     mockBroker = {
       registerRoute: function(/* name, pattern */) {},
-      publish: function(/* eventName, data */) {
+      publish: function(/* routeName, routingKey, content, options */) {
         return Promise.resolve();
       }
     };
@@ -49,10 +48,6 @@ describe('Publisher', function() {
 
     it('should use the basic envelope', function() {
       expect(publisher._envelope instanceof BasicEnvelope).to.eq(true);
-    });
-
-    it('should use the json serializer', function() {
-      expect(publisher._serializer instanceof JsonSerializer).to.eq(true);
     });
   });
 
@@ -82,15 +77,6 @@ describe('Publisher', function() {
       });
 
       expect(publisher._envelope).to.eq(envelope);
-    });
-
-    it('should use the serializer passed in the options', function() {
-      var serializer = {};
-      var publisher = new Publisher(mockBroker, {
-        serializer: serializer
-      });
-
-      expect(publisher._serializer).to.eq(serializer);
     });
   });
 
@@ -179,6 +165,50 @@ describe('Publisher', function() {
           assert.fail('Expected success, but promise failed');
           done();
         });
+    });
+
+    it('should set persistent to true by default', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      return publisher.publish('something-happened').then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({persistent: true}));
+      });
+    });
+
+    it('should copy properties from the properties property of the message to the publish options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      return publisher.publish('something-happened').then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({type: 'something-happened'}));
+      });
+    });
+
+    it('should copy properties from the publishOptions property of the options to the publish options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      var options = {
+        publishOptions: {
+          correlationId: '123'
+        }
+      };
+
+      return publisher.publish('something-happened', null, options).then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({correlationId: '123'}));
+      });
+    });
+
+    it('should overwrite publish options set from anywhere else with values from the publishOptions property of the options', function() {
+      sinon.spy(mockBroker, 'publish');
+
+      var options = {
+        publishOptions: {
+          persistent: false
+        }
+      };
+
+      return publisher.publish('something-happened', null, options).then(function(){
+        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({persistent: false}));
+      });
     });
   });
 });

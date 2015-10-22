@@ -225,11 +225,20 @@ The default envelope creates messages with the following shape:
 ```javascript
 {
   properties: {
+    contentType: 'application/prs.magicbus+json',
     type: '<the type>'
   },
   payload: <the data>
 }
 ```
+
+### Choosing a Content Type
+
+The content type was chosen based on information from [this standards doc](http://www.w3.org/Protocols/rfc1341/4_Content-Type.html)
+and [this Wikipedia article](https://en.wikipedia.org/wiki/Media_type). Specifically, our content type is
+in the "Personal or Vanity Tree" because at this time, MagicBus is a "product[] that [is] not distributed
+commercially". When building an envelope to interoperate with another system, you probably want your envelope
+to use the other system's content type.
 
 ## Content Serializers
 

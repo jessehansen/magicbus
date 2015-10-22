@@ -12,6 +12,12 @@ describe('JsonSerializer', function() {
     serializer = new JsonSerializer();
   });
 
+  describe('contentTypeSuffix', function() {
+    it('should return a hardcoded value in all cases', function() {
+      expect(serializer.contentTypeSuffix).to.eq('+json');
+    });
+  });
+
   describe('serialize', function() {
     it('should return a buffer containing the stringified payload', function() {
       var payload = {

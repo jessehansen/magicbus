@@ -11,7 +11,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
-var JsonSerializer = require('../lib/json-serializer.js');
 var Promise = require('bluebird');
 
 var WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern.js');
@@ -45,10 +44,6 @@ describe('Subscriber', function() {
     it('should use the basic envelope', function() {
       expect(subscriber._envelope instanceof BasicEnvelope).to.eq(true);
     });
-
-    it('should use the json serializer', function() {
-      expect(subscriber._serializer instanceof JsonSerializer).to.eq(true);
-    });
   });
 
   describe('construction options', function() {
@@ -76,15 +71,6 @@ describe('Subscriber', function() {
       });
 
       expect(subscriber._envelope).to.eq(envelope);
-    });
-
-    it('should use the serializer passed in the options', function() {
-      var serializer = {};
-      var subscriber = new Subscriber(mockBroker, {
-        serializer: serializer
-      });
-
-      expect(subscriber._serializer).to.eq(serializer);
     });
   });
 
