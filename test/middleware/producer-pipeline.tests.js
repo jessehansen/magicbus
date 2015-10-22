@@ -32,11 +32,11 @@ describe('ProducerPipeline', function() {
 
   describe('#execute', function(){
     it('should eventually fulfill promise', function(done){
-      expect(producerPipeline.execute(message)).to.eventually.be.fulfilled.and.notify(done);
+      expect(producerPipeline.prepare()(message)).to.eventually.be.fulfilled.and.notify(done);
     });
     it('should call middleware function once when it is given one', function(done){
       producerPipeline.use(simpleMiddleware);
-      producerPipeline.execute(message).then(function(){
+      producerPipeline.prepare()(message).then(function(){
         expect(message.properties.headers.length).to.equal(1);
         expect(message.properties.headers[0]).to.equal('first: true');
         done();
@@ -48,7 +48,7 @@ describe('ProducerPipeline', function() {
     it('should call middleware functions in succession when given multiple', function(done){
       producerPipeline.use(simpleMiddleware);
       producerPipeline.use(secondMiddleware);
-      producerPipeline.execute(message).then(function(){
+      producerPipeline.prepare()(message).then(function(){
         expect(message.properties.headers.length).to.equal(2);
         expect(message.properties.headers[0]).to.equal('first: true');
         expect(message.properties.headers[1]).to.equal('second: true');
@@ -60,17 +60,32 @@ describe('ProducerPipeline', function() {
     });
     it('should reject promise when error occurs', function(done){
       producerPipeline.use(errorMiddleware);
-      expect(producerPipeline.execute(message)).to.eventually.be.rejectedWith('oh crap').and.notify(done);
+      expect(producerPipeline.prepare()(message)).to.eventually.be.rejectedWith('oh crap').and.notify(done);
     });
     it('should not call successive functions when middleware errors', function(done){
       producerPipeline.use(errorMiddleware);
       producerPipeline.use(simpleMiddleware);
       producerPipeline.use(secondMiddleware);
-      producerPipeline.execute(message).then(function(){
+      producerPipeline.prepare()(message).then(function(){
         assert.fail('expected promise to fail, but it succeeded');
         done();
       }, function(){
         expect(message.properties.headers.length).to.equal(0);
+        done();
+      });
+    });
+    it('should not impact past messages', function(done){
+      var msg1 = {properties: {headers:[]}};
+      var msg2 = {properties: {headers:[]}};
+      producerPipeline.use(simpleMiddleware);
+      producerPipeline.prepare()(msg1).then(function(){
+        producerPipeline.prepare()(msg2);
+      }).then(function(){
+        expect(msg1.properties.headers.length).to.equal(1);
+        expect(msg2.properties.headers.length).to.equal(1);
+        done();
+      }, function(){
+        assert.fail('expected promise to succeed, but it failed');
         done();
       });
     });
