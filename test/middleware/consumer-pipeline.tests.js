@@ -92,6 +92,25 @@ describe('ConsumerPipeline', function() {
           done();
         });
       });
+      it('should emit event when middleware calls ' + fn, function(done){
+        consumerPipeline = new ConsumerPipeline();
+        consumerPipeline.use(function(msg, actions){
+          actions[fn]({});
+        });
+
+        var emitted = false;
+        consumerPipeline.on(fn, function(){
+          emitted = true;
+        });
+
+        consumerPipeline.execute(message).then(function(){
+          expect(emitted).to.be.ok;
+          done();
+        }, function(){
+          assert.fail('expected promise to succeed, but it failed');
+          done();
+        });
+      });
     }
   });
 });
