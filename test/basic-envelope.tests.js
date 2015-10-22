@@ -5,6 +5,8 @@ var BasicEnvelope = require('../lib/basic-envelope.js');
 var chai = require('chai');
 var expect = chai.expect;
 
+var JsonSerializer = require('../lib/json-serializer.js');
+
 describe('BasicEnvelope', function() {
   var envelope;
 
@@ -12,7 +14,38 @@ describe('BasicEnvelope', function() {
     envelope = new BasicEnvelope();
   });
 
+  describe('default construction', function() {
+    it('should use the json serializer', function() {
+      expect(envelope._serializer instanceof JsonSerializer).to.eq(true);
+    });
+  });
+
+  describe('construction options', function() {
+    it('should use the serializer passed in the options', function() {
+      var serializer = {};
+      envelope = new BasicEnvelope({
+        serializer: serializer
+      });
+
+      expect(envelope._serializer).to.eq(serializer);
+    });
+  });
+
+  describe('contentType', function() {
+    it('should return a hardcoded value in all cases', function() {
+      expect(envelope.contentType).to.eq('application/prs.magicbus');
+    });
+  });
+
   describe('getMessage', function() {
+    it('should set the content type', function() {
+      var msg = envelope.getMessage({
+        my: 'data'
+      }, 'my-kind');
+
+      expect(msg.properties.contentType).to.eq('application/prs.magicbus+json');
+    });
+
     it('should put the kind of the message in the type property of the amqp properties', function() {
       var msg = envelope.getMessage({
         my: 'data'

@@ -12,7 +12,6 @@ chai.use(sinonChai);
 chai.use(require('chai-as-promised'));
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
-var JsonSerializer = require('../lib/json-serializer.js');
 var PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern.js');
 
 var Promise = require('bluebird');
@@ -48,10 +47,6 @@ describe('Publisher', function() {
     it('should use the basic envelope', function() {
       expect(publisher._envelope instanceof BasicEnvelope).to.eq(true);
     });
-
-    it('should use the json serializer', function() {
-      expect(publisher._serializer instanceof JsonSerializer).to.eq(true);
-    });
   });
 
   describe('construction options', function() {
@@ -80,15 +75,6 @@ describe('Publisher', function() {
       });
 
       expect(publisher._envelope).to.eq(envelope);
-    });
-
-    it('should use the serializer passed in the options', function() {
-      var serializer = {};
-      var publisher = new Publisher(mockBroker, {
-        serializer: serializer
-      });
-
-      expect(publisher._serializer).to.eq(serializer);
     });
   });
 
@@ -151,7 +137,7 @@ describe('Publisher', function() {
       return expect(p).to.be.rejectedWith('Aw, snap!');
     });
 
-    it('should use default publish options', function() {
+    it('should set persistent to true by default', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
