@@ -4,6 +4,7 @@ var Sender = require('../lib/sender.js');
 
 var chai = require('chai');
 var expect = chai.expect;
+var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -19,18 +20,11 @@ var Promise = require('bluebird');
 
 describe('Sender', function() {
   var mockBroker;
-  var mockPipeline;
 
   beforeEach(function() {
     mockBroker = {
       registerRoute: function(/* name, pattern */) {},
       publish: function(/* eventName, data */) {
-        return Promise.resolve();
-      }
-    };
-
-    mockPipeline = {
-      execute: function(/* message */){
         return Promise.resolve();
       }
     };
@@ -126,9 +120,7 @@ describe('Sender', function() {
     var msg;
 
     beforeEach(function() {
-      sender = new Sender(mockBroker, {
-        pipeline: mockPipeline
-      });
+      sender = new Sender(mockBroker);
       msg = {'some':'data'};
     });
 
@@ -140,10 +132,7 @@ describe('Sender', function() {
       expect(fn).to.throw('message (object) is required');
     });
 
-    it('should be fulfilled given the pipeline.execute and broker.publish calls are fulfilled', function(done) {
-      mockPipeline.execute = function() {
-        return Promise.resolve();
-      };
+    it('should be fulfilled given the broker.publish call is fulfilled', function(done) {
       mockBroker.publish = function() {
         return Promise.resolve();
       };
@@ -165,14 +154,32 @@ describe('Sender', function() {
       return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
     });
 
-    it('should be rejected given the pipeline.execute call is rejected', function(done) {
-      mockPipeline.execute = function() {
-        return Promise.reject(new Error('Aw, snap!'));
-      };
+    it('should be rejected when middleware rejects the message', function(done) {
+      sender.use(function(message, actions) {
+        actions.error(new Error('Aw, snap!'));
+      });
 
       var p = sender.send(msg);
 
-      return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
+      return expect(p).to.eventually.be.rejectedWith('Aw, snap!').and.notify(done);
+    });
+
+    it('should call middleware with the message', function(done) {
+      var middlewareCalled = false;
+      sender.use(function(message, actions){
+        middlewareCalled = true;
+        actions.next();
+      });
+
+      var p = sender.send(msg);
+
+      p.then(function() {
+          expect(middlewareCalled).to.equal(true);
+          done();
+        }, function(){
+          assert.fail('Expected success, but promise failed');
+          done();
+        });
     });
   });
 });

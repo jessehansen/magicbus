@@ -4,6 +4,7 @@ var Publisher = require('../lib/publisher.js');
 
 var chai = require('chai');
 var expect = chai.expect;
+var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -25,12 +26,6 @@ describe('Publisher', function() {
     mockBroker = {
       registerRoute: function(/* name, pattern */) {},
       publish: function(/* eventName, data */) {
-        return Promise.resolve();
-      }
-    };
-
-    mockPipeline = {
-      execute: function(/* message */){
         return Promise.resolve();
       }
     };
@@ -125,9 +120,7 @@ describe('Publisher', function() {
     var publisher;
 
     beforeEach(function() {
-      publisher = new Publisher(mockBroker, {
-        pipeline: mockPipeline
-      });
+      publisher = new Publisher(mockBroker);
     });
 
     it('should be rejected with an assertion error given no event name', function() {
@@ -138,10 +131,7 @@ describe('Publisher', function() {
       expect(fn).to.throw('eventName (string) is required');
     });
 
-    it('should be fulfilled given the pipeline.execute and broker.publish calls are fulfilled', function(done) {
-      mockPipeline.execute = function() {
-        return Promise.resolve();
-      };
+    it('should be fulfilled given the broker.publish calls are fulfilled', function(done) {
       mockBroker.publish = function() {
         return Promise.resolve();
       };
@@ -163,14 +153,32 @@ describe('Publisher', function() {
       return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
     });
 
-    it('should be rejected given the pipeline.execute call is rejected', function(done) {
-      mockPipeline.execute = function() {
-        return Promise.reject(new Error('Aw, snap!'));
-      };
+    it('should be rejected given the middleware rejects the message', function(done) {
+      publisher.use(function(message, actions){
+        actions.error(new Error('Aw, snap!'));
+      });
 
       var p = publisher.publish('something-happened');
 
       return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
+    });
+
+    it('should call middleware with the message', function(done) {
+      var middlewareCalled = false;
+      publisher.use(function(message, actions){
+        middlewareCalled = true;
+        actions.next();
+      });
+
+      var p = publisher.publish('something-happened');
+
+      p.then(function() {
+          expect(middlewareCalled).to.equal(true);
+          done();
+        }, function(){
+          assert.fail('Expected success, but promise failed');
+          done();
+        });
     });
   });
 });
