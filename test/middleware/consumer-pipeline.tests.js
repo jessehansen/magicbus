@@ -74,7 +74,7 @@ describe('ConsumerPipeline', function() {
         done();
       });
     });
-    var funcs = ['ack', 'nack', 'reject', 'reply'];
+    var funcs = ['ack', 'nack', 'reject'];
     for (var i = 0; i < funcs.length; i++){
       var fn = funcs[i];
       it('should not call successive functions when middleware calls ' + fn, function(done){
