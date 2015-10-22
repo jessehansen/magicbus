@@ -85,10 +85,10 @@ describe('ConsumerPipeline', function() {
         consumerPipeline.use(simpleMiddleware);
 
         consumerPipeline.prepare()(message).then(function(){
-          expect(message.properties.headers.length).to.equal(0);
+          assert.fail('expected promise to fail, but it succeeded');
           done();
         }, function(){
-          assert.fail('expected promise to succeed, but it failed');
+          expect(message.properties.headers.length).to.equal(0);
           done();
         });
       });
@@ -105,10 +105,10 @@ describe('ConsumerPipeline', function() {
             emitted++;
           });
         })(message).then(function(){
-          expect(emitted).to.equal(1);
+          assert.fail('expected promise to fail, but it succeeded');
           done();
         }, function(){
-          assert.fail('expected promise to succeed, but it failed');
+          expect(emitted).to.equal(1);
           done();
         });
       });
