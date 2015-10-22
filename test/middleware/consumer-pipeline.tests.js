@@ -36,7 +36,7 @@ describe('ConsumerPipeline', function() {
     });
     it('should call middleware function once when it is given one', function(done){
       consumerPipeline.use(simpleMiddleware);
-      consumerPipeline.execute(message).then(() => {
+      consumerPipeline.execute(message).then(function() {
         expect(message.properties.headers.length).to.equal(1);
         expect(message.properties.headers[0]).to.equal('first: true');
         done();
