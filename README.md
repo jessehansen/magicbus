@@ -246,17 +246,36 @@ In the consumer pipeline, middleware runs after the content is deserialized and 
 is sent to any handlers registered by the application. Middleware functions should have the following signature:
 
 ```javascript
-function(message, actions) {
+function MyCoolMiddleware(message, actions) {
+  //do something cool
 }
+// ...
+publisher.use(MyCoolMiddleware);
+// ...
+subscriber.use(MyOtherCoolMiddleware);
+
 ```
 
 The message parameter will always be a "complete" message, either created by an envelope, or provided to the
 amqplib consume callback. The actions available are different for producer and consumer middleware.
 
-**TODO: Define producer and consumer middleware actions**
-
 There is no default middleware. The [messaging-examples](https://github.com/LeisureLink/messaging-examples)
 repo demonstrates some of the middleware available from other repos.
+
+### Producer Middleware
+
+The actions available to producer middleware (both publisher and sender) are:
+* `actions.next()` - proceed to the next step.
+* `actions.error(err)` - abort publishing with the associated error.
+
+### Consumer Middleware
+
+The actions available to consumer middleware (both subscriber and receiver) ar:
+* `actions.next()` - proceed to the next step.
+* `actions.error(err)` - abort consumption of this message with the associated error.
+* `actions.ack()` - acknowledge the message (removing it from the queue) and stop processing.
+* `actions.nack()` - abort processing of this message, but leave it in the queue.
+* `actions.reject()` - abort processing of this message and remove it from the queue. Results in a NACK.
 
 ## Customizing the Message Pipeline
 
