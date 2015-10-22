@@ -12,7 +12,7 @@ describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
   var connectionInfo = {
-    server: 'localhost',
+    host: 'localhost',
     vhost: '/',
     user: 'guest',
     pass: 'guest'

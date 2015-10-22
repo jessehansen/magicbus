@@ -19,7 +19,6 @@ var Promise = require('bluebird');
 
 describe('Publisher', function() {
   var mockBroker;
-  var mockPipeline;
 
   beforeEach(function() {
     mockBroker = {

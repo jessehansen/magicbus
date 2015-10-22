@@ -49,10 +49,6 @@ describe('Sender', function() {
     it('should use the basic envelope', function() {
       expect(sender._envelope instanceof BasicEnvelope).to.eq(true);
     });
-
-    it('should use the json serializer', function() {
-      expect(sender._serializer instanceof JsonSerializer).to.eq(true);
-    });
   });
 
   describe('construction options', function() {
@@ -81,15 +77,6 @@ describe('Sender', function() {
       });
 
       expect(sender._envelope).to.eq(envelope);
-    });
-
-    it('should use the serializer passed in the options', function() {
-      var serializer = {};
-      var sender = new Sender(mockBroker, {
-        serializer: serializer
-      });
-
-      expect(sender._serializer).to.eq(serializer);
     });
   });
 
