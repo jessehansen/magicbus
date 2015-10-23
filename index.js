@@ -2,9 +2,9 @@
 
 module.exports = {
   Broker: require('./lib/broker.js'),
-  Publisher: require('./lib/publisher.js'),
+  Publisher: require('./lib/producer.js'),
   Subscriber: require('./lib/subscriber.js'),
-  Sender: require('./lib/sender.js'),
+  Sender: require('./lib/producer.js'),
   Receiver: require('./lib/receiver.js'),
   AbstractEnvelope: require('./lib/abstract-envelope.js'),
   BasicEnvelope: require('./lib/basic-envelope.js'),

@@ -1,6 +1,6 @@
 'use strict';
 
-var Publisher = require('../lib/publisher.js');
+var Publisher = require('../').Publisher;
 
 var chai = require('chai');
 var expect = chai.expect;

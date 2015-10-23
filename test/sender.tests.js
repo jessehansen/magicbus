@@ -1,6 +1,6 @@
 'use strict';
 
-var Sender = require('../lib/sender.js');
+var Sender = require('../').Sender;
 
 var chai = require('chai');
 var expect = chai.expect;
