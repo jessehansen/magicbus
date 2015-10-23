@@ -76,7 +76,7 @@ var broker = new Broker(serviceDomainName, appName, connectionInfo);
 
 var subscriber = new Subscriber(broker);
 
-subscriber.on('publisher-executed'), function(eventName, data, authContext) {
+subscriber.on('publisher-executed'), function(eventName, data, rawMessage) {
   console.log('The publisher was executed!');
   console.log(data);
 });
@@ -145,8 +145,7 @@ Register a handler for an event.
 #### Handler Signature
 
 ```javascript
-function handleFooCreated(eventName, data, authContext) {
-  //Make demands agains authContext if you need to
+function handleFooCreated(eventName, data, rawMessage) {
   //Do work
 }
 ```
@@ -196,8 +195,7 @@ This method is asynchronous and returns a promise.
 The order of arguments of a receiver handler is different from the order of arguments of a subscriber handler.
 
 ```javascript
-function handle(message, messageTypes, authContext) {
-  //Make demands against authContext if you need to
+function handle(message, messageTypes, rawMessage) {
   //Do work
 }
 ```
