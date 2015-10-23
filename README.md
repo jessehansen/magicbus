@@ -15,7 +15,7 @@ interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
 * Content serialization/deserialization
 * Delayed retry support for consumers
 * Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue
-* Connection management (single connection, re-establishing a lost connection)  
+* Connection management (single connection, re-establishing a lost connection)
 
 # Installation
 
@@ -76,7 +76,7 @@ var broker = new Broker(serviceDomainName, appName, connectionInfo);
 
 var subscriber = new Subscriber(broker);
 
-subscriber.on('publisher-executed'), function(eventName, data, authContext) {
+subscriber.on('publisher-executed'), function(eventName, data, rawMessage) {
   console.log('The publisher was executed!');
   console.log(data);
 });
@@ -92,6 +92,16 @@ You'll need to manually bind the subscriber's queue to the producer's exchange f
 subscriber.
 
 # Framework Components
+
+## Class Diagram
+
+- Broker
+- Producer
+  + Publisher
+  + Sender
+- Consumer
+  + Subscriber
+  + Receiver
 
 ## Broker
 
@@ -135,8 +145,7 @@ Register a handler for an event.
 #### Handler Signature
 
 ```javascript
-function handleFooCreated(eventName, data, authContext) {
-  //Make demands agains authContext if you need to
+function handleFooCreated(eventName, data, rawMessage) {
   //Do work
 }
 ```
@@ -148,7 +157,7 @@ either be:
 * re-queued and retried later
 
 The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable"
-and will not be retried. Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference. Need to define our best guess at differentiating the two.  
+and will not be retried. Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference. Need to define our best guess at differentiating the two.
 
 Asynchronous handlers should return a promise. They should reject the promise using the same guidelines that
 applies for throwing errors from synchronous handlers.
@@ -167,7 +176,7 @@ This method is asynchronous and returns a promise.
 Send a command/message.
 
 * `message` is a require parameter of any type
-* `messageType` is an optional string 
+* `messageType` is an optional string
 
 This method is asynchronous and returns a promise.
 
@@ -186,8 +195,7 @@ This method is asynchronous and returns a promise.
 The order of arguments of a receiver handler is different from the order of arguments of a subscriber handler.
 
 ```javascript
-function handle(message, messageTypes, authContext) {
-  //Make demands against authContext if you need to
+function handle(message, messageTypes, rawMessage) {
   //Do work
 }
 ```
@@ -208,7 +216,7 @@ from wherever it put them when it produced the message.
 
 The initial message must have a payload property which will be serialized into a Buffer to pass as the
 `content` parameter to the [amqplib publish method](http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish). The `properties` property of the initial message will be used as the `options`
-parameter of the publish method so documentation of those options applies. 
+parameter of the publish method so documentation of those options applies.
 
 The default envelope creates messages with the following shape:
 
@@ -245,17 +253,36 @@ In the consumer pipeline, middleware runs after the content is deserialized and 
 is sent to any handlers registered by the application. Middleware functions should have the following signature:
 
 ```javascript
-function(message, actions) {
+function MyCoolMiddleware(message, actions) {
+  //do something cool
 }
+// ...
+publisher.use(MyCoolMiddleware);
+// ...
+subscriber.use(MyOtherCoolMiddleware);
+
 ```
 
 The message parameter will always be a "complete" message, either created by an envelope, or provided to the
 amqplib consume callback. The actions available are different for producer and consumer middleware.
 
-**TODO: Define producer and consumer middleware actions**
-
 There is no default middleware. The [messaging-examples](https://github.com/LeisureLink/messaging-examples)
 repo demonstrates some of the middleware available from other repos.
+
+### Producer Middleware
+
+The actions available to producer middleware (both publisher and sender) are:
+* `actions.next()` - proceed to the next step.
+* `actions.error(err)` - abort publishing with the associated error.
+
+### Consumer Middleware
+
+The actions available to consumer middleware (both subscriber and receiver) ar:
+* `actions.next()` - proceed to the next step.
+* `actions.error(err)` - abort consumption of this message with the associated error.
+* `actions.ack()` - acknowledge the message (removing it from the queue) and stop processing.
+* `actions.nack()` - abort processing of this message, but leave it in the queue.
+* `actions.reject()` - abort processing of this message and remove it from the queue. Results in a NACK.
 
 ## Customizing the Message Pipeline
 
@@ -291,7 +318,7 @@ New Exchange Info:
 
 ```
 Virtual Host: /
-Name:         magicbus.tests.publish 
+Name:         magicbus.tests.publish
 Type:         topic
 Durability:   Durable
 Auto Delete:  No

@@ -21,8 +21,8 @@ describe('Publisher', function() {
 
   beforeEach(function() {
     mockBroker = {
-      registerRoute: function(name, pattern) {},
-      publish: function(routeName, routingKey, content, options) {
+      registerRoute: function(/* name, pattern */) {},
+      publish: function(/* routeName, routingKey, content, options */) {
         return Promise.resolve();
       }
     };
@@ -108,16 +108,16 @@ describe('Publisher', function() {
     });
 
     it('should be rejected with an assertion error given no event name', function() {
-      var p = publisher.publish();
+      var fn = function(){
+        publisher.publish();
+      };
 
-      return expect(p).to.be.rejectedWith('eventName (string) is required');
+      expect(fn).to.throw('eventName (string) is required');
     });
 
-    it('should be fulfilled given the broker.publish call is fulfilled', function() {
-      var brokerPromise = Promise.resolve();
-
+    it('should be fulfilled given the broker.publish calls are fulfilled', function() {
       mockBroker.publish = function() {
-        return brokerPromise;
+        return Promise.resolve();
       };
 
       var p = publisher.publish('something-happened');
@@ -135,6 +135,30 @@ describe('Publisher', function() {
       var p = publisher.publish('something-happened');
 
       return expect(p).to.be.rejectedWith('Aw, snap!');
+    });
+
+    it('should be rejected given the middleware rejects the message', function() {
+      publisher.use(function(message, actions){
+        actions.error(new Error('Aw, snap!'));
+      });
+
+      var p = publisher.publish('something-happened');
+
+      return expect(p).to.be.rejectedWith('Aw, snap!');
+    });
+
+    it('should call middleware with the message', function() {
+      var middlewareCalled = false;
+      publisher.use(function(message, actions){
+        middlewareCalled = true;
+        actions.next();
+      });
+
+      var p = publisher.publish('something-happened');
+
+      return p.then(function() {
+          expect(middlewareCalled).to.equal(true);
+        });
     });
 
     it('should set persistent to true by default', function() {
