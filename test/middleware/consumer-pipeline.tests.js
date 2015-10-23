@@ -31,68 +31,56 @@ describe('ConsumerPipeline', function() {
   });
 
   describe('#execute', function(){
-    it('should eventually fulfill promise', function(done){
-      expect(consumerPipeline.prepare()(message)).to.eventually.be.fulfilled.and.notify(done);
+    it('should eventually fulfill promise', function(){
+      return expect(consumerPipeline.prepare()(message)).to.eventually.be.fulfilled;
     });
-    it('should call middleware function once when it is given one', function(done){
+    it('should call middleware function once when it is given one', function(){
       consumerPipeline.use(simpleMiddleware);
-      consumerPipeline.prepare()(message).then(function() {
+      return consumerPipeline.prepare()(message).then(function() {
         expect(message.properties.headers.length).to.equal(1);
         expect(message.properties.headers[0]).to.equal('first: true');
-        done();
-      }, function(){
-        assert.fail('expected promise to succeed, but it failed');
-        done();
       });
     });
-    it('should call middleware functions in succession when given multiple', function(done){
+    it('should call middleware functions in succession when given multiple', function(){
       consumerPipeline.use(simpleMiddleware);
       consumerPipeline.use(secondMiddleware);
-      consumerPipeline.prepare()(message).then(function(){
+      return consumerPipeline.prepare()(message).then(function(){
         expect(message.properties.headers.length).to.equal(2);
         expect(message.properties.headers[0]).to.equal('first: true');
         expect(message.properties.headers[1]).to.equal('second: true');
-        done();
-      }, function(){
-        assert.fail('expected promise to succeed, but it failed');
-        done();
       });
     });
-    it('should reject promise when error occurs', function(done){
+    it('should reject promise when error occurs', function(){
       consumerPipeline.use(errorMiddleware);
-      expect(consumerPipeline.prepare()(message)).to.eventually.be.rejectedWith('oh crap').and.notify(done);
+      return expect(consumerPipeline.prepare()(message)).to.eventually.be.rejectedWith('oh crap');
     });
-    it('should not call successive functions when middleware errors', function(done){
+    it('should not call successive functions when middleware errors', function(){
       consumerPipeline.use(errorMiddleware);
       consumerPipeline.use(simpleMiddleware);
       consumerPipeline.use(secondMiddleware);
-      consumerPipeline.prepare()(message).then(function(){
+      return consumerPipeline.prepare()(message).then(function(){
         assert.fail('expected promise to fail, but it succeeded');
-        done();
-      }, function(){
+      }).catch(function(){
         expect(message.properties.headers.length).to.equal(0);
-        done();
       });
     });
     var funcs = ['ack', 'nack', 'reject'];
     for (var i = 0; i < funcs.length; i++){
       var fn = funcs[i];
-      it('should not call successive functions when middleware calls ' + fn, function(done){
+      it('should not call successive functions when middleware calls ' + fn, function(){
         consumerPipeline = new ConsumerPipeline();
         consumerPipeline.use(function(msg, actions){
           actions[fn]({});
         });
         consumerPipeline.use(simpleMiddleware);
 
-        consumerPipeline.prepare()(message).then(function(){
+        return consumerPipeline.prepare()(message).then(function(){
           assert.fail('expected promise to fail, but it succeeded');
-          done();
-        }, function(){
+        }).catch(function(){
           expect(message.properties.headers.length).to.equal(0);
-          done();
         });
       });
-      it('should emit event when middleware calls ' + fn, function(done){
+      it('should emit event when middleware calls ' + fn, function(){
         consumerPipeline = new ConsumerPipeline();
         consumerPipeline.use(function(msg, actions){
           actions[fn]({});
@@ -100,16 +88,14 @@ describe('ConsumerPipeline', function() {
 
         var emitted = 0;
 
-        consumerPipeline.prepare(function(eventSink){
+        return consumerPipeline.prepare(function(eventSink){
           eventSink.on(fn, function(){
             emitted++;
           });
         })(message).then(function(){
           assert.fail('expected promise to fail, but it succeeded');
-          done();
-        }, function(){
+        }).catch(function(){
           expect(emitted).to.equal(1);
-          done();
         });
       });
     }
