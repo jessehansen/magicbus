@@ -4,7 +4,6 @@ var Publisher = require('../lib/publisher.js');
 
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -116,17 +115,17 @@ describe('Publisher', function() {
       expect(fn).to.throw('eventName (string) is required');
     });
 
-    it('should be fulfilled given the broker.publish calls are fulfilled', function(done) {
+    it('should be fulfilled given the broker.publish calls are fulfilled', function() {
       mockBroker.publish = function() {
         return Promise.resolve();
       };
 
       var p = publisher.publish('something-happened');
 
-      return expect(p).to.be.fulfilled.and.notify(done);
+      return expect(p).to.be.fulfilled;
     });
 
-    it('should be rejected given the broker.publish call is rejected', function(done) {
+    it('should be rejected given the broker.publish call is rejected', function() {
       var brokerPromise = Promise.reject(new Error('Aw, snap!'));
 
       mockBroker.publish = function() {
@@ -135,20 +134,20 @@ describe('Publisher', function() {
 
       var p = publisher.publish('something-happened');
 
-      return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
+      return expect(p).to.be.rejectedWith('Aw, snap!');
     });
 
-    it('should be rejected given the middleware rejects the message', function(done) {
+    it('should be rejected given the middleware rejects the message', function() {
       publisher.use(function(message, actions){
         actions.error(new Error('Aw, snap!'));
       });
 
       var p = publisher.publish('something-happened');
 
-      return expect(p).to.be.rejectedWith('Aw, snap!').and.notify(done);
+      return expect(p).to.be.rejectedWith('Aw, snap!');
     });
 
-    it('should call middleware with the message', function(done) {
+    it('should call middleware with the message', function() {
       var middlewareCalled = false;
       publisher.use(function(message, actions){
         middlewareCalled = true;
@@ -157,12 +156,8 @@ describe('Publisher', function() {
 
       var p = publisher.publish('something-happened');
 
-      p.then(function() {
+      return p.then(function() {
           expect(middlewareCalled).to.equal(true);
-          done();
-        }, function(){
-          assert.fail('Expected success, but promise failed');
-          done();
         });
     });
 
