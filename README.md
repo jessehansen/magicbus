@@ -136,17 +136,16 @@ This method is asynchronous and returns a promise.
 
 ### Consumer
 
-#### #on(eventNames, handler)
+#### #startReceiving(handler)
 
-Register a handler for an event.
+Register a handler for messages returned from a queue.
 
-* `eventNames` is a required single string or regex, or an array of strings or regex
 * `handler` is a required function with the signature described below
 
 #### Handler Signature
 
 ```javascript
-function handleFooCreated(eventName, data, rawMessage) {
+function handleMessage(message, messageTypes, rawMessage) {
   //Do work
 }
 ```
@@ -160,31 +159,32 @@ The type of error determines how the message is treated. Programmer errors will 
 
 Asynchronous handlers should return a promise. They should reject the promise using the same guidelines that applies for throwing errors from synchronous handlers.
 
+### Subscriber
+
+#### #on(eventNames, handler)
+
+Register a handler for an event.
+
+* `eventNames` is a required single string or regex, or an array of strings or regex. To handle all messages, use `'*'`.
+* `handler` is a required function with the signature described below
+
+#### Handler Signature
+
+**NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a consumer handler.
+
+```javascript
+function handleFooCreated(eventName, data, rawMessage) {
+  //Do work
+}
+```
+
+Ack behavior is the same as a consumer handler. Event handlers should either return nothing, or return a Promise.
+
 #### #startSubscription()
 
 Starts consuming from the queue. Don't call this until you've finished registering your handlers or you may end up with unhandled messages that you would have handled if your handler registration were complete.
 
 This method is asynchronous and returns a promise.
-
-#### #startReceiving(handler)
-
-Receive all messages from the queue through the same handler.
-
-* `handler` is a required function with the signature described below
-
-This method is asynchronous and returns a promise.
-
-#### Handler Signature
-
-The order of arguments of a receiver handler is different from the order of arguments of a subscriber handler.
-
-```javascript
-function handle(message, messageTypes, rawMessage) {
-  //Do work
-}
-```
-
-The ack behavior of a receiver handler is the same as for a subscriber handler. Like subscriber handlers, asynchronous handlers should return promises.
 
 # Extension Points
 
