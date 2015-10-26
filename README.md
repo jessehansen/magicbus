@@ -114,13 +114,28 @@ the sender/receiver pair, there are small semantic differences.
 
 ### Producer
 
+There are two additional synonyms for producer: Publisher and Sender.
+
+#### Producer(broker, options)
+
+Creates a new instance of producer with the specified options.
+
+* `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
+* `options` is an optional collection of publishing options
+  - `options.envelope` is an instance of the `AbstractEnvelope` class, configured for your desired message envelope behavior. Defaults to a new `BasicEnvelope`
+  - `options.pipeline` can be:
+    + an array of middleware functions
+    + an instance of the `Pipeline` class, configured for your desired middleware handling
+  - `options.routeName` is the name of the route for this producer (should be unique)
+  - `options.routePattern` is an instance of the `RoutePattern` class, configured for your desired routing behavior
+
 #### #publish(eventName, data, options)
 
 Publish an event.
 
 * `eventName` is a required string
 * `data` is an optional parameter of any type
-* `options` is an optional collection of publishing options
+* `options` is an optional collection of publishing options, overriding the options from the constructor
 
 This method is asynchronous and returns a promise.
 
