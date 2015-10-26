@@ -1,6 +1,7 @@
 'use strict';
 
 var Broker = require('../lib').Broker;
+var Binder = require('../lib').Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -14,6 +15,20 @@ describe('Broker really using RabbitMQ', function() {
   var appName = 'tests';
   var connectionInfo = environment.rabbit;
   var broker;
+
+  before(function(){
+    return new Binder(connectionInfo).bind({
+      serviceDomainName: serviceDomainName,
+      appName: appName,
+      name: 'publish',
+      pattern: new PublisherRoutePattern()
+    }, {
+      serviceDomainName: serviceDomainName,
+      appName: appName,
+      name: 'subscribe',
+      pattern: new WorkerRoutePattern()
+    }, {pattern: '#'});
+  });
 
   beforeEach(function() {
     broker = new Broker(serviceDomainName, appName, connectionInfo);
