@@ -12,7 +12,7 @@ chai.use(sinonChai);
 var eventName = 'myCoolEventName';
 var reallyBadEventName = '/\\^$*+?.()|[]{}';
 
-describe.only('EventDispatcher', function() {
+describe('EventDispatcher', function() {
   var doNothing = function() {};
   var eventDispatcher;
   var handlerSpy;
