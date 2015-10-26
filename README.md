@@ -112,11 +112,11 @@ the sender/receiver pair, there are small semantic differences.
 * Should they create different local topology? Does it matter if the framework doesn't handle cross-app binding?
 * Currently the receiver doesn't implement message dispatch by type. Should it? If you want to handle dispatch yourself, you could register a single wildcard handler.
 
-### Producer
+### Sender
 
-There are two additional synonyms for producer: Publisher and Sender.
+Sender and Publisher classes are synonyms
 
-#### Producer(broker, options)
+#### Sender(broker, options)
 
 Creates a new instance of producer with the specified options.
 
