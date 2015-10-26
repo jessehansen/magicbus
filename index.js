@@ -9,7 +9,7 @@ module.exports = {
   Subscriber: require('./lib/subscriber.js'),
 
   Sender: Sender,
-  Receiver: require('./lib/receiver.js'),
+  Receiver: require('./lib/consumer.js'),
 
   AbstractEnvelope: require('./lib/abstract-envelope.js'),
   BasicEnvelope: require('./lib/basic-envelope.js'),
