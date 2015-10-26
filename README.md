@@ -2,9 +2,7 @@
 
 Helps messages [get on the bus that takes me to you](https://www.youtube.com/watch?v=bl9bvuAV-Ao).
 
-A message bus framework implementing configurable pipelines to prepare messages to be
-published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for
-interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
+A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
 
 ## What Does This Add to amqplib?
 
@@ -25,34 +23,39 @@ $ npm install @leisurelink/magicbus
 
 # Usage
 
-Usage is a broad topic due to the number of potential scenarios. A bare-bones pub-sub scenario is described below.
-For more examples, including best practices for usage in LeisureLink's "Blue" system, see the
-[messaging-examples](https://github.com/LeisureLink/messaging-examples) repo.
+Usage is a broad topic due to the number of potential scenarios. A bare-bones pub-sub scenario is described below. For more examples, including best practices for usage in LeisureLink's "Blue" system, see the [messaging-examples](https://github.com/LeisureLink/messaging-examples) repo.
 
 ## Publishing App
 
 ```javascript
 var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
-var Publisher = MagicBus.Publisher;
+var Sender = MagicBus.Sender;
 
-var serviceDomainName = 'my-domain';
-var appName = 'my-publisher';
+var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
 
-var connectionInfo = {
-  server: 'localhost',
-  vhost: '/',
-  user: 'guest',
-  pass: 'guest'
-};
+var sender = new Sender(broker);
 
-var broker = new Broker(serviceDomainName, appName, connectionInfo);
-
-var publisher = new Publisher(broker);
-
-publisher.publish('publisher-executed', {
+sender.publish('publisher-executed', {
   some: 'data'
 });
+```
+
+## Worker App
+
+```javascript
+var MagicBus = require('@leisurelink/magicbus');
+var Broker = MagicBus.Broker;
+var Receiver = MagicBus.Receiver;
+
+var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
+
+var receiver = new Receiver(broker);
+
+receiver.startReceiving(function(message, types){
+    console.log('Received message with types ' + types)
+    console.log(message);
+  })
 ```
 
 ## Subscribing App
@@ -62,17 +65,7 @@ var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
 var Subscriber = MagicBus.Subscriber;
 
-var serviceDomainName = 'my-domain';
-var appName = 'my-subscriber';
-
-var connectionInfo = {
-  server: 'localhost',
-  vhost: '/',
-  user: 'guest',
-  pass: 'guest'
-};
-
-var broker = new Broker(serviceDomainName, appName, connectionInfo);
+var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
 
 var subscriber = new Subscriber(broker);
 
@@ -86,10 +79,8 @@ subscriber.startSubscription();
 
 ## Cross-app Bindings
 
-Since the publisher and subscriber above are two separate apps, and it's assumed that one app has no permission
-on any of the exchanges/queues in the other app's security domain, the framework does not setup any bindings.
-You'll need to manually bind the subscriber's queue to the producer's exchange for messages to reach the
-subscriber.
+Since the publisher and subscriber above are two separate apps, and it's assumed that one app has no permission on any of the exchanges/queues in the other app's security domain, the framework does not setup any bindings.
+You'll need to manually bind the subscriber's queue to the producer's exchange for messages to reach the subscriber.
 
 # Framework Components
 
@@ -100,17 +91,11 @@ subscriber.
 * Creates local (as opposed to cross-app) exchanges/queues for producers/consumers
 * Provides delayed retry support for consumers
 
-**Is 'Broker' the right term for this component?**
+**TODO: Is 'Broker' the right term for this component?**
 
 ## Messaging Parties
 
-Each party is either a producer or consumer of messages. While publisher/subscriber pair is very similar to
-the sender/receiver pair, there are small semantic differences.
-
-**Need to put some more thought into these and whether they are worthwhile. Some considerations:**
-
-* Should they create different local topology? Does it matter if the framework doesn't handle cross-app binding?
-* Currently the receiver doesn't implement message dispatch by type. Should it? If you want to handle dispatch yourself, you could register a single wildcard handler.
+Each party is either a producer or consumer of messages. While publisher/subscriber pair is very similar to the sender/receiver pair, there are small semantic differences.
 
 ### Sender
 
@@ -118,7 +103,7 @@ Sender and Publisher classes are synonyms
 
 #### Sender(broker, options)
 
-Creates a new instance of producer with the specified options.
+Creates a new instance of `Sender` with the specified options.
 
 * `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
 * `options` is an optional collection of publishing options
@@ -149,7 +134,20 @@ Send a command/message.
 
 This method is asynchronous and returns a promise.
 
-### Consumer
+### Receiver
+
+#### Receiver(broker, options)
+
+Creates a new instance of `Receiver` with the specified options.
+
+* `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
+* `options` is an optional collection of publishing options
+  - `options.envelope` is an instance of the `AbstractEnvelope` class, configured for your desired message envelope behavior. Defaults to a new `BasicEnvelope`
+  - `options.pipeline` can be:
+    + an array of middleware functions
+    + or, an instance of the `Pipeline` class, configured for your desired middleware handling
+  - `options.routeName` is the name of the route for this producer (should be unique)
+  - `options.routePattern` is an instance of the `RoutePattern` class, configured for your desired routing behavior
 
 #### #startReceiving(handler)
 
@@ -176,16 +174,23 @@ Asynchronous handlers should return a promise. They should reject the promise us
 
 ### Subscriber
 
+#### Subscriber(receiver, eventDispatcher)
+
+Creates a new instance of `Subscriber` with the specified options.
+
+* `receiver` is an instance of the `Receiver` class
+* `eventDispatcher` is and instance of the `EventDispatcher` class
+
 #### #on(eventNames, handler)
 
 Register a handler for an event.
 
-* `eventNames` is a required single string or regex, or an array of strings or regex. To handle all messages, use `'*'`.
+* `eventNames` is a required single string or regex, or an array of strings or regex. To handle all messages, use `/.*/`.
 * `handler` is a required function with the signature described below
 
 #### Handler Signature
 
-**NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a consumer handler.
+**NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a receiver handler.
 
 ```javascript
 function handleFooCreated(eventName, data, rawMessage) {
@@ -193,7 +198,9 @@ function handleFooCreated(eventName, data, rawMessage) {
 }
 ```
 
-Ack behavior is the same as a consumer handler. Event handlers should either return nothing, or return a Promise.
+Message acknowledgement is the same as with a Receiver handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, they are called in series, in the order they were registered. If any handler fails, no further handlers will be executed.
+
+**TODO: Is this the best way to handle errors with multiple handlers?**
 
 #### #startSubscription()
 
@@ -230,8 +237,7 @@ The content type was chosen based on information from [this standards doc](http:
 
 ## Content Serializers
 
-In the producer messaging pipeline, a content serializer is responsible for converting the `payload` property of the message into a Buffer. In the consumer messaging pipeline it is responsible for the reverse: converting
-the `content` property of the message received by the [amqplib consume callback](http://www.squaremobius.net/amqp.node/channel_api.html#channel_consume) into an appropriate data structure.
+In the producer messaging pipeline, a content serializer is responsible for converting the `payload` property of the message into a Buffer. In the consumer messaging pipeline it is responsible for the reverse: converting the `content` property of the message received by the [amqplib consume callback](http://www.squaremobius.net/amqp.node/channel_api.html#channel_consume) into an appropriate data structure.
 
 The default content serializer uses JSON.
 
@@ -245,10 +251,11 @@ function MyCoolMiddleware(message, actions) {
   //do something cool
 }
 // ...
-producer.use(MyCoolMiddleware);
+sender.use(MyCoolMiddleware);
 // ...
-consumer.use(MyOtherCoolMiddleware);
-
+receiver.use(MyOtherCoolMiddleware);
+// ...
+subscriber.use(YetAnotherMiddleware);
 ```
 
 The message parameter will always be a "complete" message, either created by an envelope, or provided to the amqplib consume callback. The actions available are different for producer and consumer middleware.
@@ -268,7 +275,7 @@ The actions available to consumer middleware (both subscriber and receiver) ar:
 * `actions.error(err)` - abort consumption of this message with the associated error.
 * `actions.ack()` - acknowledge the message (removing it from the queue) and stop processing.
 * `actions.nack()` - abort processing of this message, but leave it in the queue.
-* `actions.reject()` - abort processing of this message and remove it from the queue. Results in a NACK.
+* `actions.reject()` - abort processing of this message and remove it from the queue. Results in a NACK. Depending on route pattern and queue setup, may result in a requeue to a failure queue.
 
 ## Customizing the Message Pipeline
 
@@ -284,17 +291,23 @@ Run all tests with the usual command:
 $ npm test
 ```
 
-This will run all tests, including integration tests that require a running RabbitMQ server initialized with test queues and exchanges. To exclude the integration tests (like on a build server without access to RabbitMQ), run:
+This will run all unit tests. To run the integration tests, run:
 
 ```bash
-$ npm run-script test-ex-integration
+$ RABBITMQ_HOST=localhost npm run-script integration-tests
 ```
 
 ### Setting Up For Integration Tests
 
-You'll need access to a running RabbitMQ server. You can [download](http://www.rabbitmq.com/download.html) and install it locally for free.
+You'll need access to a running RabbitMQ server. The easiest way to get rabbit running is with this `docker` command:
+```bash
+$ docker create --name rabbitmq -p 5672:5672 -p 15672:15672 \
+  rabbitmq:management
+```
 
-Login to the RabbitMQ management interface and create the exchange and queue the integration tests use.
+You can also [download](http://www.rabbitmq.com/download.html) and install it locally for free.
+
+Login to the RabbitMQ management interface at http://<host-ip>:15672/ and create the exchange and queue the integration tests use.
 
 New Exchange Info:
 
@@ -323,8 +336,7 @@ From Exchange: magicbus.tests.publish
 Routing Key:   #
 ```
 
-**NOTE: Running the integration tests will create the exchange and queue, but not the bindings.
-So you could save a couple manual steps.**
+**NOTE: Running the integration tests will create the exchange and queue, but not the bindings. So you could save a couple manual steps.**
 
 ### Todo
 
