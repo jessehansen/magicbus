@@ -10,13 +10,10 @@
     "test:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:unit:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:coverage": "istanbul cover node_modules/.bin/_mocha -- -R spec --recursive test",
-
     "lint": "esw --quiet",
     "lint:watch": "esw --quiet --watch",
-
-    "docs": "node_modules/.bin/esdoc -c esdoc.json",
+    "docs": "node_modules/.bin/jsdoc -c ./jsdoc.conf.json",
     "docs:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json'  -- npm run docs",
-
     "ci": "npm run test:cover && npm run test:cover"
   },
   "repository": {
@@ -25,17 +22,17 @@
   },
   "author": "LeisureLink Tech <techteam@leisurelink.com>",
   "license": "MIT",
-  "bugs":{
+  "bugs": {
     "url": "https://github.com/LeisureLink/magicbus/issues"
   },
   "homepage": "https://github.com/LeisureLink/magicbus#readme",
   "devDependencies": {
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
-    "esdoc": "^0.4.1",
     "eslint": "^1.7.3",
     "eslint-watch": "^2.1.2",
     "istanbul": "^0.4.0",
+    "jsdoc": "^3.3.3",
     "mocha": "^2.3.3",
     "onchange": "^2.0.0",
     "sinon": "^1.17.1",

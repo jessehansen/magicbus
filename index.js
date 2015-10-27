@@ -3,10 +3,27 @@
 var Sender = require('./lib/sender.js');
 var Receiver = require('./lib/receiver.js');
 
+/**
+ * MagicBus
+ *
+ * @public
+ *
+ * @property {Broker}
+ * @property {Publisher} synonym for Sender
+ * @property {Subscriber}
+ * @property {Sender}
+ * @property {Receiver}
+ * @property {AbstractEnvelope}
+ * @property {BasicEnvelope}
+ * @property {JsonSerializer}
+ * @property {RoutePatterns.Publisher}
+ * @property {RoutePatterns.Worker}
+ * @property {RoutePatterns.Listener}
+ */
 module.exports = {
   Broker: require('./lib/broker.js'),
 
-  Publisher: Sender, // Deprecated, Publisher and Sender are now synonyms
+  Publisher: Sender,
   Subscriber: require('./lib/subscriber-shim.js'),
 
   Sender: Sender,
