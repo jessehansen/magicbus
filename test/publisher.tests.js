@@ -1,6 +1,6 @@
 'use strict';
 
-var Publisher = require('../lib/publisher.js');
+var Publisher = require('../').Publisher;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -12,7 +12,6 @@ chai.use(sinonChai);
 chai.use(require('chai-as-promised'));
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
-var PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern.js');
 
 var Promise = require('bluebird');
 
@@ -35,15 +34,6 @@ describe('Publisher', function() {
       publisher = new Publisher(mockBroker);
     });
 
-    it('should use publish as the route name', function() {
-      expect(publisher.route.name).to.eq('publish');
-    });
-
-    it('should use the publisher route pattern with a topic exchange type', function() {
-      expect(publisher.route.pattern instanceof PublisherRoutePattern).to.eq(true);
-      expect(publisher.route.pattern.exchangeType).to.eq('topic');
-    });
-
     it('should use the basic envelope', function() {
       expect(publisher._envelope instanceof BasicEnvelope).to.eq(true);
     });
@@ -55,7 +45,7 @@ describe('Publisher', function() {
         routeName: 'my-route'
       });
 
-      expect(publisher.route.name).to.eq('my-route');
+      expect(publisher._routeName).to.eq('my-route');
     });
 
     it('should use the route pattern passed in the options', function() {
@@ -65,7 +55,7 @@ describe('Publisher', function() {
         routePattern: pattern
       });
 
-      expect(publisher.route.pattern).to.eq(pattern);
+      expect(publisher._routePattern).to.eq(pattern);
     });
 
     it('should use the envelope passed in the options', function() {
@@ -75,18 +65,6 @@ describe('Publisher', function() {
       });
 
       expect(publisher._envelope).to.eq(envelope);
-    });
-  });
-
-  describe('constructor broker wireup', function() {
-    it('should register a route with the broker', function() {
-      sinon.spy(mockBroker, 'registerRoute');
-
-      var pattern = {};
-      new Publisher(mockBroker, {
-        routePattern: pattern
-      });
-      expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
     });
   });
 
@@ -105,6 +83,18 @@ describe('Publisher', function() {
 
     beforeEach(function() {
       publisher = new Publisher(mockBroker);
+    });
+
+    it('should register a route with the broker', function() {
+      sinon.spy(mockBroker, 'registerRoute');
+
+      var pattern = {};
+      return new Publisher(mockBroker, {
+        routePattern: pattern
+      }).publish('test-event')
+      .then(function(){
+        expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
+      });
     });
 
     it('should be rejected with an assertion error given no event name', function() {
@@ -165,7 +155,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({persistent: true}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({persistent: true}));
       });
     });
 
@@ -173,7 +163,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({type: 'something-happened'}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({type: 'something-happened'}));
       });
     });
 
@@ -187,7 +177,7 @@ describe('Publisher', function() {
       };
 
       return publisher.publish('something-happened', null, options).then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({correlationId: '123'}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({correlationId: '123'}));
       });
     });
 
@@ -201,7 +191,7 @@ describe('Publisher', function() {
       };
 
       return publisher.publish('something-happened', null, options).then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith(publisher.route.name, 'something-happened', null, sinon.match({persistent: false}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({persistent: false}));
       });
     });
   });

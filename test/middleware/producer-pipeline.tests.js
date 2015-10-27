@@ -30,6 +30,24 @@ describe('ProducerPipeline', function() {
     message = {properties: {headers:[]}, payload:'data'};
   });
 
+  describe('#clone', function(){
+    it('should return equivalent (but separate) pipeline', function(){
+      producerPipeline.use(simpleMiddleware);
+      var clone = producerPipeline.clone();
+      clone.use(secondMiddleware);
+      expect(producerPipeline._pipe.length).to.equal(1);
+      expect(clone._pipe.length).to.equal(2);
+      expect(clone._pipe[0]).to.equal(simpleMiddleware);
+      expect(clone._pipe[1]).to.equal(secondMiddleware);
+    });
+  });
+
+  describe('#use', function(){
+    it('should return pipeline for chaining', function(){
+      expect(producerPipeline.use(simpleMiddleware)).to.equal(producerPipeline);
+    });
+  });
+
   describe('#execute', function(){
     it('should eventually fulfill promise', function(){
       return expect(producerPipeline.prepare()(message)).to.eventually.be.fulfilled;

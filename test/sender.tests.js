@@ -1,6 +1,6 @@
 'use strict';
 
-var Sender = require('../lib/sender.js');
+var Sender = require('../').Sender;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -12,7 +12,6 @@ chai.use(sinonChai);
 chai.use(require('chai-as-promised'));
 
 var BasicEnvelope = require('../lib/basic-envelope.js');
-var PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern.js');
 
 var Promise = require('bluebird');
 
@@ -35,15 +34,6 @@ describe('Sender', function() {
       sender = new Sender(mockBroker);
     });
 
-    it('should use send as the route name', function() {
-      expect(sender.route.name).to.eq('send');
-    });
-
-    it('should use the sender route pattern with a topic exchange type', function() {
-      expect(sender.route.pattern instanceof PublisherRoutePattern).to.eq(true);
-      expect(sender.route.pattern.exchangeType).to.eq('topic');
-    });
-
     it('should use the basic envelope', function() {
       expect(sender._envelope instanceof BasicEnvelope).to.eq(true);
     });
@@ -55,7 +45,7 @@ describe('Sender', function() {
         routeName: 'my-route'
       });
 
-      expect(sender.route.name).to.eq('my-route');
+      expect(sender._routeName).to.eq('my-route');
     });
 
     it('should use the route pattern passed in the options', function() {
@@ -65,7 +55,7 @@ describe('Sender', function() {
         routePattern: pattern
       });
 
-      expect(sender.route.pattern).to.eq(pattern);
+      expect(sender._routePattern).to.eq(pattern);
     });
 
     it('should use the envelope passed in the options', function() {
@@ -75,18 +65,6 @@ describe('Sender', function() {
       });
 
       expect(sender._envelope).to.eq(envelope);
-    });
-  });
-
-  describe('constructor broker wireup', function() {
-    it('should register a route with the broker', function() {
-      sinon.spy(mockBroker, 'registerRoute');
-
-      var pattern = {};
-      new Sender(mockBroker, {
-        routePattern: pattern
-      });
-      expect(mockBroker.registerRoute).to.have.been.calledWith('send', pattern);
     });
   });
 
@@ -107,6 +85,17 @@ describe('Sender', function() {
     beforeEach(function() {
       sender = new Sender(mockBroker);
       msg = {'some':'data'};
+    });
+
+    it('should register a route with the broker', function() {
+      sinon.spy(mockBroker, 'registerRoute');
+
+      var pattern = {};
+      return new Sender(mockBroker, {
+        routePattern: pattern
+      }).send({hi:'world'}).then(function(){
+        expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
+      });
     });
 
     it('should be rejected with an assertion error given no message', function() {

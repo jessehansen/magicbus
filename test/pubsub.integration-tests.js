@@ -3,6 +3,7 @@
 var Broker = require('../').Broker;
 var Publisher = require('../').Publisher;
 var Subscriber = require('../').Subscriber;
+var environment = require('./_test-env');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -10,12 +11,7 @@ var expect = chai.expect;
 describe('Pub/Sub integration', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = {
-    host: 'localhost',
-    vhost: '/',
-    user: 'guest',
-    pass: 'guest'
-  };
+  var connectionInfo = environment.rabbit;
   var broker;
   var publisher;
   var subscriber;

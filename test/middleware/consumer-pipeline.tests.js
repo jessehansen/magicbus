@@ -31,39 +31,6 @@ describe('ConsumerPipeline', function() {
   });
 
   describe('#execute', function(){
-    it('should eventually fulfill promise', function(){
-      return expect(consumerPipeline.prepare()(message)).to.eventually.be.fulfilled;
-    });
-    it('should call middleware function once when it is given one', function(){
-      consumerPipeline.use(simpleMiddleware);
-      return consumerPipeline.prepare()(message).then(function() {
-        expect(message.properties.headers.length).to.equal(1);
-        expect(message.properties.headers[0]).to.equal('first: true');
-      });
-    });
-    it('should call middleware functions in succession when given multiple', function(){
-      consumerPipeline.use(simpleMiddleware);
-      consumerPipeline.use(secondMiddleware);
-      return consumerPipeline.prepare()(message).then(function(){
-        expect(message.properties.headers.length).to.equal(2);
-        expect(message.properties.headers[0]).to.equal('first: true');
-        expect(message.properties.headers[1]).to.equal('second: true');
-      });
-    });
-    it('should reject promise when error occurs', function(){
-      consumerPipeline.use(errorMiddleware);
-      return expect(consumerPipeline.prepare()(message)).to.eventually.be.rejectedWith('oh crap');
-    });
-    it('should not call successive functions when middleware errors', function(){
-      consumerPipeline.use(errorMiddleware);
-      consumerPipeline.use(simpleMiddleware);
-      consumerPipeline.use(secondMiddleware);
-      return consumerPipeline.prepare()(message).then(function(){
-        assert.fail('expected promise to fail, but it succeeded');
-      }).catch(function(){
-        expect(message.properties.headers.length).to.equal(0);
-      });
-    });
     var funcs = ['ack', 'nack', 'reject'];
     for (var i = 0; i < funcs.length; i++){
       var fn = funcs[i];

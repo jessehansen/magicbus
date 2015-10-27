@@ -1,6 +1,7 @@
 'use strict';
 
 var Broker = require('../').Broker;
+var environment = require('./_test-env');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -11,12 +12,7 @@ var WorkerRoutePattern = require('../').RoutePatterns.Worker;
 describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = {
-    host: 'localhost',
-    vhost: '/',
-    user: 'guest',
-    pass: 'guest'
-  };
+  var connectionInfo = environment.rabbit;
   var broker;
 
   beforeEach(function() {
