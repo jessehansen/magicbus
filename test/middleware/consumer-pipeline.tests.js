@@ -13,13 +13,6 @@ function simpleMiddleware(message, actions){
   message.properties.headers.push('first: true');
   actions.next();
 }
-function secondMiddleware(message, actions){
-  message.properties.headers.push('second: true');
-  actions.next();
-}
-function errorMiddleware(message, actions) {
-  actions.error(new Error('oh crap'));
-}
 
 describe('ConsumerPipeline', function() {
   var consumerPipeline;

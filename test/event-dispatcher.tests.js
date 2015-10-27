@@ -130,12 +130,12 @@ describe('EventDispatcher', function() {
         eventDispatcher.on(eventName, handlerSpy);
 
         return eventDispatcher.dispatch(eventName).then(function() {
-            assert.fail();
-          })
-          .catch(function(err) {
-            expect(err).to.be.ok;
-            expect(handlerSpy).to.have.not.been.called;
-          });
+          assert.fail();
+        })
+        .catch(function(err) {
+          expect(err).to.be.ok;
+          expect(handlerSpy).to.have.not.been.called;
+        });
       });
       it('should not call successive handlers after a failing async handler', function() {
         eventDispatcher.on(eventName, doNothing);
@@ -145,12 +145,12 @@ describe('EventDispatcher', function() {
         eventDispatcher.on(eventName, handlerSpy);
 
         return eventDispatcher.dispatch(eventName).then(function() {
-            assert.fail();
-          })
-          .catch(function(err) {
-            expect(err).to.be.ok;
-            expect(handlerSpy).to.have.not.been.called;
-          });
+          assert.fail();
+        })
+        .catch(function(err) {
+          expect(err).to.be.ok;
+          expect(handlerSpy).to.have.not.been.called;
+        });
       });
     });
   });

@@ -148,8 +148,8 @@ describe('Sender', function() {
       var p = sender.send(msg);
 
       return p.then(function() {
-          expect(middlewareCalled).to.equal(true);
-        });
+        expect(middlewareCalled).to.equal(true);
+      });
     });
   });
 });

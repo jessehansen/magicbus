@@ -10,18 +10,24 @@
     "test:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:unit:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:cover": "istanbul cover node_modules/.bin/mocha -- -u exports -R spec --recursive test",
+
     "lint": "esw --quiet",
     "lint:watch": "esw --quiet --watch",
+
     "docs": "node_modules/.bin/esdoc -c esdoc.json",
     "docs:watch": "onchange 'src/**/*' '*.json' 'test/**/*'  -- npm run docs",
+
     "ci": "npm run test:cover && npm run test:cover"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LeisureLink/magicbus.git"
   },
-  "author": "",
-  "license": "UNLICENSED",
+  "author": "LeisureLink Tech <techteam@leisurelink.com>",
+  "license": "MIT",
+  "bugs":{
+    "url": "https://github.com/LeisureLink/magicbus/issues"
+  },
   "homepage": "https://github.com/LeisureLink/magicbus#readme",
   "devDependencies": {
     "chai": "^3.3.0",

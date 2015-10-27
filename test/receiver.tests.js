@@ -4,7 +4,6 @@ var Receiver = require('../lib/receiver.js');
 
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
