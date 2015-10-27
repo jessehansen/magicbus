@@ -1,7 +1,7 @@
 {
   "title": "Integration Hub Client",
   "source": "./lib",
-  "destination": "./docs/esdoc",
+  "destination": "./docs",
   "autoPrivate": true,
   "coverage": true,
   "test": {

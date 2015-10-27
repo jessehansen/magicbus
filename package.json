@@ -9,7 +9,7 @@
     "test:unit": "mocha --recursive test/**/*.tests.js test/*.tests.js",
     "test:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:unit:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
-    "test:cover": "istanbul cover node_modules/.bin/mocha -- -u exports -R spec --recursive test",
+    "test:coverage": "istanbul cover node_modules/.bin/_mocha -- -R spec --recursive test",
 
     "lint": "esw --quiet",
     "lint:watch": "esw --quiet --watch",
