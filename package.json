@@ -4,9 +4,17 @@
   "description": "A message bus framework using RabbitMQ.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive test/**/*tests.js test/*.tests.js",
-    "integration-tests": "mocha --recursive test/**/*.integration-tests.js test/*.integration-tests.js",
-    "test-ex-integration": "mocha --recursive test/**/*.tests.js"
+    "test": "mocha test",
+    "test:integration": "mocha --recursive test/**/*.integration-tests.js test/*.integration-tests.js",
+    "test:unit": "mocha --recursive test/**/*.tests.js",
+    "test:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
+    "test:unit:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
+    "test:cover": "istanbul cover node_modules/.bin/mocha -- -u exports -R spec --recursive test",
+    "lint": "esw --quiet",
+    "lint:watch": "esw --quiet --watch",
+    "docs": "node_modules/.bin/esdoc -c esdoc.json",
+    "docs:watch": "onchange 'src/**/*' '*.json' 'test/**/*'  -- npm run docs",
+    "ci": "npm run test:cover && npm run test:cover"
   },
   "repository": {
     "type": "git",
@@ -18,7 +26,12 @@
   "devDependencies": {
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
+    "esdoc": "^0.4.1",
+    "eslint": "^1.7.3",
+    "eslint-watch": "^2.1.2",
+    "istanbul": "^0.4.0",
     "mocha": "^2.3.3",
+    "onchange": "^2.0.0",
     "sinon": "^1.17.1",
     "sinon-chai": "^2.8.0"
   },

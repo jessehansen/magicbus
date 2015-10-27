@@ -1,0 +1,11 @@
+{
+  "title": "Integration Hub Client",
+  "source": "./lib",
+  "destination": "./docs/esdoc",
+  "autoPrivate": true,
+  "coverage": true,
+  "test": {
+    "type": "mocha",
+    "source": "./test"
+  }
+}
