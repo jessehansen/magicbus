@@ -58,7 +58,7 @@ describe('Subscriber', function() {
     var payload, messageTypes, msg;
 
     beforeEach(function() {
-      payload = payload;
+      payload = 'payload';
       messageTypes = ['type1', 'type2'];
       msg = {
         payload: payload,
