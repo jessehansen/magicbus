@@ -94,7 +94,7 @@ describe('Sender', function() {
       return new Sender(mockBroker, {
         routePattern: pattern
       }).send({hi:'world'}).then(function(){
-        expect(mockBroker.registerRoute).to.have.been.calledWith('send', pattern);
+        expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
       });
     });
 
