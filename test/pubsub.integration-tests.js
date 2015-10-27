@@ -22,7 +22,7 @@ describe('Pub/Sub integration', function() {
     publisher = new Publisher(broker);
     subscriber = new Subscriber(broker);
 
-    return new Binder(connectionInfo).bind(publisher.getPublishRoute(), subscriber.getRoute(), {pattern: '#'});
+    return new Binder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'});
   });
 
   after(function() {

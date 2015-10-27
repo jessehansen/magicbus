@@ -26,7 +26,7 @@ describe('Send/Receive integration', function() {
       routeName: 'subscribe'
     });
 
-    return new Binder(connectionInfo).bind(sender.getSendRoute(), receiver.getRoute(), {pattern: '#'});
+    return new Binder(connectionInfo).bind(sender.getRoute(), receiver.getRoute(), {pattern: '#'});
   });
 
   after(function() {
