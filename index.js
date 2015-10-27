@@ -1,16 +1,17 @@
 'use strict';
 
-var Sender = require('./lib/sender.js');
-var Receiver = require('./lib/receiver.js');
+var Publisher = require('./lib/publisher.js');
+var Consumer = require('./lib/consumer.js');
 
 module.exports = {
   Broker: require('./lib/broker.js'),
 
-  Publisher: Sender, // Deprecated, Publisher and Sender are now synonyms
+  Publisher: Publisher,
   Subscriber: require('./lib/subscriber-shim.js'),
 
-  Sender: Sender,
-  Receiver: Receiver,
+  Sender: Publisher, // Deprecated, Publisher and Sender are now synonyms
+  Receiver: Consumer, // Deprecated, Consumer and Receiver are now synonyms
+  Consumer: Consumer,
 
   AbstractEnvelope: require('./lib/abstract-envelope.js'),
   BasicEnvelope: require('./lib/basic-envelope.js'),
