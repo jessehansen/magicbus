@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha test",
     "test:integration": "mocha --recursive test/**/*.integration-tests.js test/*.integration-tests.js",
-    "test:unit": "mocha --recursive test/**/*.tests.js",
+    "test:unit": "mocha --recursive test/**/*.tests.js test/*.tests.js",
     "test:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:unit:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:cover": "istanbul cover node_modules/.bin/mocha -- -u exports -R spec --recursive test",
@@ -15,7 +15,7 @@
     "lint:watch": "esw --quiet --watch",
 
     "docs": "node_modules/.bin/esdoc -c esdoc.json",
-    "docs:watch": "onchange 'src/**/*' '*.json' 'test/**/*'  -- npm run docs",
+    "docs:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json'  -- npm run docs",
 
     "ci": "npm run test:cover && npm run test:cover"
   },
