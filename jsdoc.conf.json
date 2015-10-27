@@ -1,5 +1,5 @@
 {
-  "source": { "include": ["index.js", "lib"] },
+  "source": { "include": ["lib"] },
   "opts": {
     "readme": "./README.md",
     "package": "./package.json",
