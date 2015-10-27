@@ -2,7 +2,7 @@
   "name": "@leisurelink/magicbus",
   "version": "0.0.9",
   "description": "A message bus framework using RabbitMQ.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha test",
     "test:integration": "mocha --recursive test/**/*.integration-tests.js test/*.integration-tests.js",
@@ -14,7 +14,7 @@
     "lint:watch": "esw --quiet --watch",
     "docs": "node_modules/.bin/jsdoc -c ./jsdoc.conf.json",
     "docs:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json'  -- npm run docs",
-    "ci": "npm run test:cover && npm run test:cover"
+    "ci": "npm run lint && npm run test:cover"
   },
   "repository": {
     "type": "git",
