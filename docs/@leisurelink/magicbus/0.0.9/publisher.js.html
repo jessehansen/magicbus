@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: sender.js</title>
+    <title>JSDoc: Source: publisher.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: sender.js</h1>
+    <h1 class="page-title">Source: publisher.js</h1>
 
     
 
@@ -34,7 +34,7 @@ var BasicEnvelope = require('./basic-envelope.js');
 var ProducerPipeline = require('./middleware').ProducerPipeline;
 var PublisherRoutePattern = require('./route-patterns/publisher-route-pattern');
 
-module.exports = Sender;
+module.exports = Publisher;
 
 /**
  * Handles publishing of messages to the bus
@@ -48,7 +48,7 @@ module.exports = Sender;
  * @param {String} options.routeName - route name (default "send" for sending, "publish" for publishing)
  * @param {Object} options.routePattern - route pattern (default {@link PublisherRoutePattern})
  */
-function Sender(broker, options) {
+function Publisher(broker, options) {
   assert.object(broker, 'broker');
   assert.optionalObject(options, 'options');
 
@@ -87,19 +87,19 @@ function Sender(broker, options) {
   }
 }
 
-Sender.prototype._getMessage = function(data, kind) {
+Publisher.prototype._getMessage = function(data, kind) {
   return this._envelope.getMessage(data, kind);
 };
 
-Sender.prototype._getRoutingKey = function(data, kind) {
+Publisher.prototype._getRoutingKey = function(data, kind) {
   return this._envelope.getRoutingKey(data, kind);
 };
 
-Sender.prototype._getSerializedContent = function(payload) {
+Publisher.prototype._getSerializedContent = function(payload) {
   return this._envelope.serialize(payload);
 };
 
-Sender.prototype._getPublishOptions = function(msg, perCallPublishOptions) {
+Publisher.prototype._getPublishOptions = function(msg, perCallPublishOptions) {
   var publishOptions = {};
 
   var defaults = {
@@ -111,7 +111,7 @@ Sender.prototype._getPublishOptions = function(msg, perCallPublishOptions) {
   return publishOptions;
 };
 
-Sender.prototype._getRouteName = function(fallbackRouteName, options){
+Publisher.prototype._getRouteName = function(fallbackRouteName, options){
   var routeName = fallbackRouteName;
   if (options &amp;&amp; options.routeName) {
     routeName = options.routeName;
@@ -131,7 +131,7 @@ Sender.prototype._getRouteName = function(fallbackRouteName, options){
   return routeName;
 };
 
-Sender.prototype._publish = function(message, kind, fallbackRouteName, options){
+Publisher.prototype._publish = function(message, kind, fallbackRouteName, options){
   var routeName = this._getRouteName(fallbackRouteName, options);
   var self = this;
 
@@ -152,7 +152,7 @@ Sender.prototype._publish = function(message, kind, fallbackRouteName, options){
  * @method
  * @param {Function} middleware - middleware to run {@see middleware.contract}
  */
-Sender.prototype.use = function(middleware) {
+Publisher.prototype.use = function(middleware) {
   this._pipeline.use(middleware);
 };
 
@@ -166,7 +166,7 @@ Sender.prototype.use = function(middleware) {
  * @param {Object} options - publishing options (optional)
  * @returns {Promise} a promise that is fulfilled when the message is published
  */
-Sender.prototype.publish = function(eventName, data, options) {
+Publisher.prototype.publish = function(eventName, data, options) {
   assert.string(eventName, 'eventName');
   assert.optionalObject(data, 'data');
   assert.optionalObject(options, 'options');
@@ -184,7 +184,7 @@ Sender.prototype.publish = function(eventName, data, options) {
  * @param {Object} options - publishing options (optional)
  * @returns {Promise} a promise that is fulfilled when the message is sent
  */
-Sender.prototype.send = function(message, messageType, options) {
+Publisher.prototype.send = function(message, messageType, options) {
   assert.object(message, 'message');
   assert.optionalString(messageType, 'messageType');
   assert.optionalObject(options, 'options');
@@ -201,13 +201,13 @@ Sender.prototype.send = function(message, messageType, options) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-MagicBus.html">MagicBus</a></li></ul><h3>Classes</h3><ul><li><a href="AbstractEnvelope.html">AbstractEnvelope</a></li><li><a href="BasicEnvelope.html">BasicEnvelope</a></li><li><a href="Broker.html">Broker</a></li><li><a href="EventDispatcher.html">EventDispatcher</a></li><li><a href="Receiver.html">Receiver</a></li><li><a href="Sender.html">Sender</a></li><li><a href="Subscriber.html">Subscriber</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-MagicBus.html">MagicBus</a></li></ul><h3>Classes</h3><ul><li><a href="AbstractEnvelope.html">AbstractEnvelope</a></li><li><a href="BasicEnvelope.html">BasicEnvelope</a></li><li><a href="Broker.html">Broker</a></li><li><a href="Consumer.html">Consumer</a></li><li><a href="EventDispatcher.html">EventDispatcher</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="Subscriber.html">Subscriber</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Oct 27 2015 10:52:18 GMT-0600 (MDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Oct 27 2015 13:17:42 GMT-0600 (MDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,6 +1,6 @@
 'use strict';
 
-var Receiver = require('../lib/receiver.js');
+var Consumer = require('../lib/consumer.js');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -14,7 +14,7 @@ var Promise = require('bluebird');
 
 var WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern.js');
 
-describe('Receiver', function() {
+describe('Consumer', function() {
   var mockBroker;
 
   var eventName;
@@ -68,50 +68,50 @@ describe('Receiver', function() {
   describe('#ctor', function() {
 
     describe('default construction', function() {
-      var receiver;
+      var consumer;
 
       beforeEach(function() {
-        receiver = new Receiver(mockBroker);
+        consumer = new Consumer(mockBroker);
       });
 
       it('should use receive as the route name', function() {
-        expect(receiver._routeName).to.eq('receive');
+        expect(consumer._routeName).to.eq('receive');
       });
 
       it('should use the worker route pattern', function() {
-        expect(receiver._routePattern instanceof WorkerRoutePattern).to.eq(true);
+        expect(consumer._routePattern instanceof WorkerRoutePattern).to.eq(true);
       });
 
       it('should use the basic envelope', function() {
-        expect(receiver._envelope instanceof BasicEnvelope).to.eq(true);
+        expect(consumer._envelope instanceof BasicEnvelope).to.eq(true);
       });
     });
 
     describe('construction options', function() {
       it('should use the route name passed in the options', function() {
-        var receiver = new Receiver(mockBroker, {
+        var consumer = new Consumer(mockBroker, {
           routeName: 'my-route'
         });
 
-        expect(receiver._routeName).to.eq('my-route');
+        expect(consumer._routeName).to.eq('my-route');
       });
 
       it('should use the route pattern passed in the options', function() {
         var pattern = {};
-        var receiver = new Receiver(mockBroker, {
+        var consumer = new Consumer(mockBroker, {
           routePattern: pattern
         });
 
-        expect(receiver._routePattern).to.eq(pattern);
+        expect(consumer._routePattern).to.eq(pattern);
       });
 
       it('should use the envelope passed in the options', function() {
         var envelope = {};
-        var receiver = new Receiver(mockBroker, {
+        var consumer = new Consumer(mockBroker, {
           envelope: envelope
         });
 
-        expect(receiver._envelope).to.eq(envelope);
+        expect(consumer._envelope).to.eq(envelope);
       });
     });
 
@@ -120,7 +120,7 @@ describe('Receiver', function() {
         sinon.spy(mockBroker, 'registerRoute');
 
         var pattern = {};
-        new Receiver(mockBroker, {
+        new Consumer(mockBroker, {
           routePattern: pattern
         });
         expect(mockBroker.registerRoute).to.have.been.calledWith('receive', pattern);
@@ -130,7 +130,7 @@ describe('Receiver', function() {
     describe('constructor argument checking', function() {
       it('should throw an assertion error given no broker', function() {
         var fn = function() {
-          new Receiver();
+          new Consumer();
         };
 
         expect(fn).to.throw('AssertionError: broker (object) is required');
@@ -139,10 +139,10 @@ describe('Receiver', function() {
   });
 
   describe('#startReceiving', function() {
-    var receiver;
+    var consumer;
 
     beforeEach(function() {
-      receiver = new Receiver(mockBroker);
+      consumer = new Consumer(mockBroker);
     });
 
     describe('acknowledging messages based on handler results', function() {
@@ -152,7 +152,7 @@ describe('Receiver', function() {
           //Not throwing an exception here
         };
 
-        receiver.startReceiving(handler);
+        consumer.startReceiving(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('ack');
@@ -164,7 +164,7 @@ describe('Receiver', function() {
           throw new Error('Aw, snap!');
         };
 
-        receiver.startReceiving(handler);
+        consumer.startReceiving(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('reject');
@@ -182,7 +182,7 @@ describe('Receiver', function() {
           });
         };
 
-        receiver.startReceiving(handler);
+        consumer.startReceiving(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('ack');
@@ -201,7 +201,7 @@ describe('Receiver', function() {
           });
         };
 
-        receiver.startReceiving(handler);
+        consumer.startReceiving(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('reject');
@@ -241,8 +241,8 @@ describe('Receiver', function() {
         }
 
         it('should call middleware when provided', function() {
-          receiver.use(modify);
-          receiver.startReceiving(handler);
+          consumer.use(modify);
+          consumer.startReceiving(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('ack');
@@ -252,8 +252,8 @@ describe('Receiver', function() {
         });
 
         it('should ack when middleware calls ack', function() {
-          receiver.use(ack);
-          receiver.startReceiving(handler);
+          consumer.use(ack);
+          consumer.startReceiving(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('ack');
@@ -263,8 +263,8 @@ describe('Receiver', function() {
         });
 
         it('should nack when middleware calls nack', function() {
-          receiver.use(nack);
-          receiver.startReceiving(handler);
+          consumer.use(nack);
+          consumer.startReceiving(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('nack');
@@ -274,8 +274,8 @@ describe('Receiver', function() {
         });
 
         it('should reject when middleware calls reject', function() {
-          receiver.use(reject);
-          receiver.startReceiving(handler);
+          consumer.use(reject);
+          consumer.startReceiving(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('reject');
