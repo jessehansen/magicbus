@@ -22,7 +22,7 @@ describe('Subscriber', function() {
   beforeEach(function() {
     mockReceiver = {
       use: function( /* middleware */ ) {},
-      startReceiving: function(handler) {
+      startConsuming: function(handler) {
         this._handler = handler;
       }
     };
@@ -67,11 +67,11 @@ describe('Subscriber', function() {
     });
 
     it('should start the receiver', function() {
-      mockReceiver.startReceiving = sinon.spy();
+      mockReceiver.startConsuming = sinon.spy();
 
       subscriber.startSubscription();
 
-      expect(mockReceiver.startReceiving).to.have.been.called;
+      expect(mockReceiver.startConsuming).to.have.been.called;
     });
 
     it('should pass consumed events to the dispatcher', function() {

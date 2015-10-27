@@ -246,8 +246,7 @@ crashlytics-build.properties
 coverage
 npm-debug.log
 wallaby.json
+.idea
 
 # Mac
 .DS_Store
-
-

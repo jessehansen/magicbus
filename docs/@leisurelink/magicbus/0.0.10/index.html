@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3>@leisurelink/magicbus 0.0.10</h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>magicbus</h1><p>Helps messages <a href="https://www.youtube.com/watch?v=bl9bvuAV-Ao">get on the bus that takes me to you</a>.</p>
+<p>A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from <a href="https://www.rabbitmq.com/">RabbitMQ</a>. Internally, the primary library for interacting with RabbitMQ is <a href="https://github.com/squaremo/amqp.node">amqplib</a>.</p>
+<h2>What Does This Add to amqplib?</h2><ul>
+<li>A simple <a href="#user-content-interfaces-exposed-to-domain-services">interface</a> for application code to use (you'll never have to work directly with a channel)</li>
+<li>Setup local topology following the LeisureLink <a href="https://vacationroost.atlassian.net/wiki/display/EN/Event+Bus+Architecture">Event Bus Architecture</a> (cross-app topology/bindings out of scope)</li>
+<li>Pluggable &quot;envelope&quot; formats to be interoperable with other opinionated frameworks</li>
+<li>Middleware pipelines for producers and consumers</li>
+<li>Content serialization/deserialization</li>
+<li>Delayed retry support for consumers</li>
+<li>Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue</li>
+<li>Connection management (single connection, re-establishing a lost connection)</li>
+</ul>
+<h1>Installation</h1><pre class="prettyprint source lang-bash"><code>$ npm install @leisurelink/magicbus</code></pre><h1>Usage</h1><p>Usage is a broad topic due to the number of potential scenarios. A bare-bones pub-sub scenario is described below. For more examples, including best practices for usage in LeisureLink's &quot;Blue&quot; system, see the <a href="https://github.com/LeisureLink/messaging-examples">messaging-examples</a> repo.</p>
+<h2>Publishing App</h2><pre class="prettyprint source lang-javascript"><code>var MagicBus = require('@leisurelink/magicbus');
+var Broker = MagicBus.Broker;
+var Publisher = MagicBus.Publisher;
+
+var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
+
+var publisher = new Publisher(broker);
+
+publisher.publish('publisher-executed', {
+  some: 'data'
+});</code></pre><h2>Worker App</h2><pre class="prettyprint source lang-javascript"><code>var MagicBus = require('@leisurelink/magicbus');
+var Broker = MagicBus.Broker;
+var Consumer = MagicBus.Consumer;
+
+var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
+
+var consumer = new Consumer(broker);
+
+consumer.startConsuming(function(message, types){
+    console.log('Received message with types ' + types)
+    console.log(message);
+  })</code></pre><h2>Subscribing App</h2><pre class="prettyprint source lang-javascript"><code>var MagicBus = require('@leisurelink/magicbus');
+var Broker = MagicBus.Broker;
+var Consumer = MagicBus.Consumer;
+var Subscriber = MagicBus.Subscriber;
+var EventDispatcher = MagicBus.EventDispatcher;
+
+var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
+
+var subscriber = new Subscriber(new Consumer(broker), new EventDispatcher());
+
+subscriber.on('publisher-executed'), function(eventName, data, rawMessage) {
+  console.log('The publisher was executed!');
+  console.log(data);
+});
+
+subscriber.startSubscription();</code></pre><h2>Cross-app Bindings</h2><p>Since the publisher and subscriber above are two separate apps, and it's assumed that one app has no permission on any of the exchanges/queues in the other app's security domain, the framework does not setup any bindings.
+You'll need to manually bind the subscriber's queue to the producer's exchange for messages to reach the subscriber.</p>
+<h1>Framework Components</h1><h2>Broker</h2><ul>
+<li>Maintains a single connection to a single RabbitMQ server/vhost</li>
+<li>Maintains channels for each producer/consumer in the app</li>
+<li>Creates local (as opposed to cross-app) exchanges/queues for producers/consumers</li>
+<li>Provides delayed retry support for consumers</li>
+</ul>
+<p><strong>TODO: Is 'Broker' the right term for this component?</strong></p>
+<h2>Messaging Parties</h2><p>Each party is either a producer or consumer of messages. While publisher/subscriber pair is very similar to the sender/receiver pair, there are small semantic differences.</p>
+<h3>Publisher</h3><p>Publisher and Sender classes are synonyms</p>
+<h4>Publisher(broker, options)</h4><p>Creates a new instance of <code>Publisher</code> with the specified options.</p>
+<ul>
+<li><code>broker</code> is an instance of the <code>Broker</code> class, configured for connection to your desired endpoint</li>
+<li><code>options</code> is an optional collection of publishing options<ul>
+<li><code>options.envelope</code> is an instance of the <code>AbstractEnvelope</code> class, configured for your desired message envelope behavior. Defaults to a new <code>BasicEnvelope</code></li>
+<li><code>options.pipeline</code> can be:<ul>
+<li>an array of middleware functions</li>
+<li>an instance of the <code>Pipeline</code> class, configured for your desired middleware handling</li>
+</ul>
+</li>
+<li><code>options.routeName</code> is the name of the route for this producer (should be unique)</li>
+<li><code>options.routePattern</code> is an instance of the <code>RoutePattern</code> class, configured for your desired routing behavior</li>
+</ul>
+</li>
+</ul>
+<h4>#publish(eventName, data, options)</h4><p>Publish an event.</p>
+<ul>
+<li><code>eventName</code> is a required string</li>
+<li><code>data</code> is an optional parameter of any type</li>
+<li><code>options</code> is an optional collection of publishing options, overriding the options from the constructor</li>
+</ul>
+<p>This method is asynchronous and returns a promise.</p>
+<h4>#send(message, messageType, options)</h4><p>Send a command/message.</p>
+<ul>
+<li><code>message</code> is a require parameter of any type</li>
+<li><code>messageType</code> is an optional string</li>
+<li><code>options</code> is an optional collection of publishing options</li>
+</ul>
+<p>This method is asynchronous and returns a promise.</p>
+<h3>Consumer</h3><h4>Consumer(broker, options)</h4><p>Creates a new instance of <code>Consumer</code> with the specified options.</p>
+<ul>
+<li><code>broker</code> is an instance of the <code>Broker</code> class, configured for connection to your desired endpoint</li>
+<li><code>options</code> is an optional collection of publishing options<ul>
+<li><code>options.envelope</code> is an instance of the <code>AbstractEnvelope</code> class, configured for your desired message envelope behavior. Defaults to a new <code>BasicEnvelope</code></li>
+<li><code>options.pipeline</code> can be:<ul>
+<li>an array of middleware functions</li>
+<li>or, an instance of the <code>Pipeline</code> class, configured for your desired middleware handling</li>
+</ul>
+</li>
+<li><code>options.routeName</code> is the name of the route for this producer (should be unique)</li>
+<li><code>options.routePattern</code> is an instance of the <code>RoutePattern</code> class, configured for your desired routing behavior</li>
+</ul>
+</li>
+</ul>
+<h4>#startConsuming(handler)</h4><p>Register a handler for messages returned from a queue.</p>
+<ul>
+<li><code>handler</code> is a required function with the signature described below</li>
+</ul>
+<h4>Handler Signature</h4><pre class="prettyprint source lang-javascript"><code>function handleMessage(message, messageTypes, rawMessage) {
+  //Do work
+}</code></pre><p>Messages will be acked as long as the handler doesn't throw. If the handler does throw, the message will either be:</p>
+<ul>
+<li>failed and discarded or placed on a failure queue depending on subscriber configuration</li>
+<li>re-queued and retried later</li>
+</ul>
+<p>The type of error determines how the message is treated. Programmer errors will be treated as &quot;unrecoverable&quot; and will not be retried. Operational errors will be retried. See <a href="https://www.joyent.com/developers/node/design/errors">this article</a> for a description of the difference. Need to define our best guess at differentiating the two.</p>
+<p>Asynchronous handlers should return a promise. They should reject the promise using the same guidelines that applies for throwing errors from synchronous handlers.</p>
+<h3>Subscriber</h3><h4>Subscriber(consumer, eventDispatcher)</h4><p>Creates a new instance of <code>Subscriber</code> with the specified options.</p>
+<ul>
+<li><code>consumer</code> is an instance of the <code>Consumer</code> class</li>
+<li><code>eventDispatcher</code> is and instance of the <code>EventDispatcher</code> class</li>
+</ul>
+<h4>#on(eventNames, handler)</h4><p>Register a handler for an event.</p>
+<ul>
+<li><code>eventNames</code> is a required single string or regex, or an array of strings or regex. To handle all messages, use <code>/.*/</code>.</li>
+<li><code>handler</code> is a required function with the signature described below</li>
+</ul>
+<h4>Handler Signature</h4><p><strong>NOTE</strong> The order of arguments on a subscriber handler is different from the order of arguments on a consumer handler.</p>
+<pre class="prettyprint source lang-javascript"><code>function handleFooCreated(eventName, data, rawMessage) {
+  //Do work
+}</code></pre><p>Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, they are called in series, in the order they were registered. If any handler fails, no further handlers will be executed.</p>
+<p><strong>TODO: Is this the best way to handle errors with multiple handlers?</strong></p>
+<h4>#startSubscription()</h4><p>Starts consuming from the queue. Don't call this until you've finished registering your handlers or you may end up with unhandled messages that you would have handled if your handler registration were complete.</p>
+<p>This method is asynchronous and returns a promise.</p>
+<h1>Extension Points</h1><p>Magic bus provides default implementations of all components so you can be up and running quickly. However all the messaging parties also allow you to inject custom implementations of any component used in the message pipeline.</p>
+<h2>Envelopes</h2><p>An &quot;envelope&quot; is responsible for producing an initial message at the beginning of the producer messaging pipeline. In the consumer pipeline, it is responsible for reading values required by the messaging pipeline from wherever it put them when it produced the message.</p>
+<p>The initial message must have a payload property which will be serialized into a Buffer to pass as the <code>content</code> parameter to the <a href="http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish">amqplib publish method</a>. The <code>properties</code> property of the initial message will be used as the <code>options</code>
+parameter of the publish method so documentation of those options applies.</p>
+<p>The default envelope creates messages with the following shape:</p>
+<pre class="prettyprint source lang-javascript"><code>{
+  properties: {
+    contentType: 'application/prs.magicbus+json',
+    type: '&lt;the type>'
+  },
+  payload: &lt;the data>
+}</code></pre><h3>Choosing a Content Type</h3><p>The content type was chosen based on information from <a href="http://www.w3.org/Protocols/rfc1341/4_Content-Type.html">this standards doc</a> and <a href="https://en.wikipedia.org/wiki/Media_type">this Wikipedia article</a>. Specifically, our content type is in the &quot;Personal or Vanity Tree&quot; because at this time, MagicBus is a &quot;product[] that [is] not distributed commercially&quot;. When building an envelope to interoperate with another system, you probably want your envelope to use the other system's content type.</p>
+<h2>Content Serializers</h2><p>In the producer messaging pipeline, a content serializer is responsible for converting the <code>payload</code> property of the message into a Buffer. In the consumer messaging pipeline it is responsible for the reverse: converting the <code>content</code> property of the message received by the <a href="http://www.squaremobius.net/amqp.node/channel_api.html#channel_consume">amqplib consume callback</a> into an appropriate data structure.</p>
+<p>The default content serializer uses JSON.</p>
+<h2>Middleware</h2><p>Middleware can be added to any messaging party to manipulate the message produced or consumed. In the producer pipeline, middleware runs after the envelope creates the initial message, and before the payload is serialized.
+In the consumer pipeline, middleware runs after the content is deserialized and before the consumed message is sent to any handlers registered by the application. Middleware functions should have the following signature:</p>
+<pre class="prettyprint source lang-javascript"><code>function MyCoolMiddleware(message, actions) {
+  //do something cool
+}
+// ...
+publisher.use(MyCoolMiddleware);
+// ...
+consumer.use(MyOtherCoolMiddleware);
+// ...
+subscriber.use(YetAnotherMiddleware);</code></pre><p>The message parameter will always be a &quot;complete&quot; message, either created by an envelope, or provided to the amqplib consume callback. The actions available are different for producer and consumer middleware.</p>
+<p>There is no default middleware. The <a href="https://github.com/LeisureLink/messaging-examples">messaging-examples</a> repo demonstrates some of the middleware available from other repos.</p>
+<h3>Producer Middleware</h3><p>The actions available to producer middleware (both publisher and sender) are:</p>
+<ul>
+<li><code>actions.next()</code> - proceed to the next step.</li>
+<li><code>actions.error(err)</code> - abort publishing with the associated error.</li>
+</ul>
+<h3>Consumer Middleware</h3><p>The actions available to consumer middleware (both subscriber and receiver) ar:</p>
+<ul>
+<li><code>actions.next()</code> - proceed to the next step.</li>
+<li><code>actions.error(err)</code> - abort consumption of this message with the associated error.</li>
+<li><code>actions.ack()</code> - acknowledge the message (removing it from the queue) and stop processing.</li>
+<li><code>actions.nack()</code> - abort processing of this message, but leave it in the queue.</li>
+<li><code>actions.reject()</code> - abort processing of this message and remove it from the queue. Results in a NACK. Depending on route pattern and queue setup, may result in a requeue to a failure queue.</li>
+</ul>
+<h2>Customizing the Message Pipeline</h2><p>The main methods of all messaging parties are implemented as template methods so you can override an individual piece of the message pipeline if needed.</p>
+<h1>Contributing</h1><h2>Running Tests</h2><p>Run all tests with the usual command:</p>
+<pre class="prettyprint source lang-bash"><code>$ npm test</code></pre><p>This will run all unit tests. To run the integration tests, run:</p>
+<pre class="prettyprint source lang-bash"><code>$ RABBITMQ_HOST=localhost npm run-script integration-tests</code></pre><h3>Setting Up For Integration Tests</h3><p>You'll need access to a running RabbitMQ server. The easiest way to get rabbit running is with this <code>docker</code> command:</p>
+<pre class="prettyprint source lang-bash"><code>$ docker create --name rabbitmq -p 5672:5672 -p 15672:15672 \
+  rabbitmq:management</code></pre><p>You can also <a href="http://www.rabbitmq.com/download.html">download</a> and install it locally for free.</p>
+<p>Login to the RabbitMQ management interface at http://<host-ip>:15672/ and create the exchange and queue the integration tests use.</p>
+<p>New Exchange Info:</p>
+<pre class="prettyprint source"><code>Virtual Host: /
+Name:         magicbus.tests.publish
+Type:         topic
+Durability:   Durable
+Auto Delete:  No
+Internal:     No</code></pre><p>New Queue Info:</p>
+<pre class="prettyprint source"><code>Virtual Host: /
+Name:         magicbus.tests.subscribe
+Durability:   Durable
+Auto Delete:  No</code></pre><p>After creating the queue, bind it to the exchange:</p>
+<pre class="prettyprint source"><code>From Exchange: magicbus.tests.publish
+Routing Key:   #</code></pre><p><strong>NOTE: Running the integration tests will create the exchange and queue, but not the bindings. So you could save a couple manual steps.</strong></p>
+<h3>Todo</h3><ul>
+<li>Optionally batch ack and nack calls (on by default)</li>
+<li>Support event-messenger retry stuff</li>
+</ul></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-MagicBus.html">MagicBus</a></li></ul><h3>Classes</h3><ul><li><a href="AbstractEnvelope.html">AbstractEnvelope</a></li><li><a href="BasicEnvelope.html">BasicEnvelope</a></li><li><a href="Broker.html">Broker</a></li><li><a href="EventDispatcher.html">EventDispatcher</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="Subscriber.html">Subscriber</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Tue Oct 27 2015 13:54:31 GMT-0600 (MDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

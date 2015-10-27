@@ -30,13 +30,13 @@ Usage is a broad topic due to the number of potential scenarios. A bare-bones pu
 ```javascript
 var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
-var Sender = MagicBus.Sender;
+var Publisher = MagicBus.Publisher;
 
 var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
 
-var sender = new Sender(broker);
+var publisher = new Publisher(broker);
 
-sender.publish('publisher-executed', {
+publisher.publish('publisher-executed', {
   some: 'data'
 });
 ```
@@ -46,13 +46,13 @@ sender.publish('publisher-executed', {
 ```javascript
 var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
-var Receiver = MagicBus.Receiver;
+var Consumer = MagicBus.Consumer;
 
 var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
 
-var receiver = new Receiver(broker);
+var consumer = new Consumer(broker);
 
-receiver.startReceiving(function(message, types){
+consumer.startConsuming(function(message, types){
     console.log('Received message with types ' + types)
     console.log(message);
   })
@@ -63,11 +63,13 @@ receiver.startReceiving(function(message, types){
 ```javascript
 var MagicBus = require('@leisurelink/magicbus');
 var Broker = MagicBus.Broker;
+var Consumer = MagicBus.Consumer;
 var Subscriber = MagicBus.Subscriber;
+var EventDispatcher = MagicBus.EventDispatcher;
 
 var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
 
-var subscriber = new Subscriber(broker);
+var subscriber = new Subscriber(new Consumer(broker), new EventDispatcher());
 
 subscriber.on('publisher-executed'), function(eventName, data, rawMessage) {
   console.log('The publisher was executed!');
@@ -97,13 +99,13 @@ You'll need to manually bind the subscriber's queue to the producer's exchange f
 
 Each party is either a producer or consumer of messages. While publisher/subscriber pair is very similar to the sender/receiver pair, there are small semantic differences.
 
-### Sender
+### Publisher
 
-Sender and Publisher classes are synonyms
+Publisher and Sender classes are synonyms
 
-#### Sender(broker, options)
+#### Publisher(broker, options)
 
-Creates a new instance of `Sender` with the specified options.
+Creates a new instance of `Publisher` with the specified options.
 
 * `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
 * `options` is an optional collection of publishing options
@@ -134,11 +136,11 @@ Send a command/message.
 
 This method is asynchronous and returns a promise.
 
-### Receiver
+### Consumer
 
-#### Receiver(broker, options)
+#### Consumer(broker, options)
 
-Creates a new instance of `Receiver` with the specified options.
+Creates a new instance of `Consumer` with the specified options.
 
 * `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
 * `options` is an optional collection of publishing options
@@ -149,7 +151,7 @@ Creates a new instance of `Receiver` with the specified options.
   - `options.routeName` is the name of the route for this producer (should be unique)
   - `options.routePattern` is an instance of the `RoutePattern` class, configured for your desired routing behavior
 
-#### #startReceiving(handler)
+#### #startConsuming(handler)
 
 Register a handler for messages returned from a queue.
 
@@ -174,11 +176,11 @@ Asynchronous handlers should return a promise. They should reject the promise us
 
 ### Subscriber
 
-#### Subscriber(receiver, eventDispatcher)
+#### Subscriber(consumer, eventDispatcher)
 
 Creates a new instance of `Subscriber` with the specified options.
 
-* `receiver` is an instance of the `Receiver` class
+* `consumer` is an instance of the `Consumer` class
 * `eventDispatcher` is and instance of the `EventDispatcher` class
 
 #### #on(eventNames, handler)
@@ -190,7 +192,7 @@ Register a handler for an event.
 
 #### Handler Signature
 
-**NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a receiver handler.
+**NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a consumer handler.
 
 ```javascript
 function handleFooCreated(eventName, data, rawMessage) {
@@ -198,7 +200,7 @@ function handleFooCreated(eventName, data, rawMessage) {
 }
 ```
 
-Message acknowledgement is the same as with a Receiver handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, they are called in series, in the order they were registered. If any handler fails, no further handlers will be executed.
+Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, they are called in series, in the order they were registered. If any handler fails, no further handlers will be executed.
 
 **TODO: Is this the best way to handle errors with multiple handlers?**
 
@@ -251,9 +253,9 @@ function MyCoolMiddleware(message, actions) {
   //do something cool
 }
 // ...
-sender.use(MyCoolMiddleware);
+publisher.use(MyCoolMiddleware);
 // ...
-receiver.use(MyOtherCoolMiddleware);
+consumer.use(MyOtherCoolMiddleware);
 // ...
 subscriber.use(YetAnotherMiddleware);
 ```

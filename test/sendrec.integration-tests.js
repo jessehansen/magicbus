@@ -43,7 +43,7 @@ describe('Send/Receive integration', function() {
       done();
     };
 
-    receiver.startReceiving(handler).then(function() {
+    receiver.startConsuming(handler).then(function() {
       sender.send(message, messageType);
     });
   });
