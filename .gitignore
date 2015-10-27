@@ -245,6 +245,7 @@ crashlytics-build.properties
 
 coverage
 npm-debug.log
+wallaby.json
 
 # Mac
 .DS_Store
