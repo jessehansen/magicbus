@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Subscriber</title>
+    <title>JSDoc: Class: Consumer</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Subscriber</h1>
+    <h1 class="page-title">Class: Consumer</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-        Subscriber
+        Consumer
         </h2>
         
     
@@ -42,14 +42,14 @@
 
     
 
-    <h4 class="name" id="Subscriber"><span class="type-signature"></span>new Subscriber<span class="signature">(consumer, eventDispatcher)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Consumer"><span class="type-signature"></span>new Consumer<span class="signature">(broker, options)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Handles consumption of event messages from the bus
+    Handles general-purpose consumption of messages from the bus
 </div>
 
 
@@ -85,7 +85,7 @@
 
         <tr>
             
-                <td class="name"><code>consumer</code></td>
+                <td class="name"><code>broker</code></td>
             
 
             <td class="type">
@@ -101,14 +101,14 @@
 
             
 
-            <td class="description last">instance of the <a href="Consumer.html">Consumer</a> class</td>
+            <td class="description last">instance of the <a href="Broker.html">Broker</a> class</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>eventDispatcher</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
@@ -124,7 +124,125 @@
 
             
 
-            <td class="description last">instance of the <a href="EventDispatcher.html">EventDispatcher</a> class</td>
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>envelope</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">instance of the <a href="AbstractEnvelope.html">AbstractEnvelope</a> class</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pipeline</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">instance of the Middleware.Pipeline class</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>routeName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">route name (default "receive")</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>routePattern</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">route pattern (default WorkerRoutePattern)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -165,7 +283,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="subscriber.js.html">subscriber.js</a>, <a href="subscriber.js.html#line15">line 15</a>
+        <a href="consumer.js.html">consumer.js</a>, <a href="consumer.js.html#line23">line 23</a>
     </li></ul></dd>
     
 
@@ -214,14 +332,14 @@
 
     
 
-    <h4 class="name" id="on"><span class="type-signature"></span>on<span class="signature">(eventName, data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="startConsuming"><span class="type-signature"></span>startConsuming<span class="signature">(handler)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Subscribe to an event
+    Start consuming messages from the queue
 </div>
 
 
@@ -257,13 +375,13 @@
 
         <tr>
             
-                <td class="name"><code>eventName</code></td>
+                <td class="name"><code>handler</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type"><a href="Consumer.html#.handlerCallback">Consumer.handlerCallback</a></span>
 
 
             
@@ -273,30 +391,7 @@
 
             
 
-            <td class="description last">name of event (required)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Subscriber.html#.handlerCallback">Subscriber.handlerCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">data for event (optional)</td>
+            <td class="description last">message handler</td>
         </tr>
 
     
@@ -337,89 +432,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="subscriber.js.html">subscriber.js</a>, <a href="subscriber.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="startSubscription"><span class="type-signature"></span>startSubscription<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Start consuming events
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="subscriber.js.html">subscriber.js</a>, <a href="subscriber.js.html#line61">line 61</a>
+        <a href="consumer.js.html">consumer.js</a>, <a href="consumer.js.html#line227">line 227</a>
     </li></ul></dd>
     
 
@@ -550,7 +563,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="subscriber.js.html">subscriber.js</a>, <a href="subscriber.js.html#line51">line 51</a>
+        <a href="consumer.js.html">consumer.js</a>, <a href="consumer.js.html#line212">line 212</a>
     </li></ul></dd>
     
 
@@ -587,7 +600,7 @@
 
     
 
-    <h4 class="name" id=".handlerCallback"><span class="type-signature"></span>handlerCallback<span class="signature">(eventName, data, message)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".handlerCallback"><span class="type-signature"></span>handlerCallback<span class="signature">(data, messageTypes, message)</span><span class="type-signature"></span></h4>
 
     
 
@@ -630,36 +643,13 @@
 
         <tr>
             
-                <td class="name"><code>eventName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">name of event</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Any</span>
+<span class="param-type">Object</span>
 
 
             
@@ -669,7 +659,30 @@
 
             
 
-            <td class="description last">unpacked message data</td>
+            <td class="description last">unpacked data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>messageTypes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">unpacked message types</td>
         </tr>
 
     
@@ -733,7 +746,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="subscriber.js.html">subscriber.js</a>, <a href="subscriber.js.html#line65">line 65</a>
+        <a href="consumer.js.html">consumer.js</a>, <a href="consumer.js.html#line244">line 244</a>
     </li></ul></dd>
     
 

@@ -138,7 +138,7 @@ describe('Consumer', function() {
     });
   });
 
-  describe('#startReceiving', function() {
+  describe('#startConsuming', function() {
     var consumer;
 
     beforeEach(function() {
@@ -152,7 +152,7 @@ describe('Consumer', function() {
           //Not throwing an exception here
         };
 
-        consumer.startReceiving(handler);
+        consumer.startConsuming(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('ack');
@@ -164,7 +164,7 @@ describe('Consumer', function() {
           throw new Error('Aw, snap!');
         };
 
-        consumer.startReceiving(handler);
+        consumer.startConsuming(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('reject');
@@ -182,7 +182,7 @@ describe('Consumer', function() {
           });
         };
 
-        consumer.startReceiving(handler);
+        consumer.startConsuming(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('ack');
@@ -201,7 +201,7 @@ describe('Consumer', function() {
           });
         };
 
-        consumer.startReceiving(handler);
+        consumer.startConsuming(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
             expect(fakeMessage.__resolution).to.equal('reject');
@@ -242,7 +242,7 @@ describe('Consumer', function() {
 
         it('should call middleware when provided', function() {
           consumer.use(modify);
-          consumer.startReceiving(handler);
+          consumer.startConsuming(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('ack');
@@ -253,7 +253,7 @@ describe('Consumer', function() {
 
         it('should ack when middleware calls ack', function() {
           consumer.use(ack);
-          consumer.startReceiving(handler);
+          consumer.startConsuming(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('ack');
@@ -264,7 +264,7 @@ describe('Consumer', function() {
 
         it('should nack when middleware calls nack', function() {
           consumer.use(nack);
-          consumer.startReceiving(handler);
+          consumer.startConsuming(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('nack');
@@ -275,7 +275,7 @@ describe('Consumer', function() {
 
         it('should reject when middleware calls reject', function() {
           consumer.use(reject);
-          consumer.startReceiving(handler);
+          consumer.startConsuming(handler);
           return mockBroker.emulateConsumption()
             .then(function() {
               expect(fakeMessage.__resolution).to.equal('reject');
