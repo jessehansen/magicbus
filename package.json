@@ -10,11 +10,12 @@
     "test:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:unit:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json' -- npm run test",
     "test:coverage": "istanbul cover node_modules/.bin/_mocha -- -R spec --recursive test",
+    "test:unit:coverage": "istanbul cover node_modules/.bin/_mocha -- -R spec --recursive test/*.tests.js test/**/*.tests.js",
     "lint": "esw --quiet",
     "lint:watch": "esw --quiet --watch",
     "docs": "node_modules/.bin/jsdoc -c ./jsdoc.conf.json",
     "docs:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json'  -- npm run docs",
-    "ci": "npm run lint && npm run test:coverage"
+    "ci": "npm run lint && npm run test:unit:coverage"
   },
   "repository": {
     "type": "git",
