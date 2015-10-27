@@ -52,7 +52,7 @@ var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
 
 var receiver = new Receiver(broker);
 
-receiver.startReceiving(function(message, types){
+receiver.startConsuming(function(message, types){
     console.log('Received message with types ' + types)
     console.log(message);
   })
@@ -149,7 +149,7 @@ Creates a new instance of `Receiver` with the specified options.
   - `options.routeName` is the name of the route for this producer (should be unique)
   - `options.routePattern` is an instance of the `RoutePattern` class, configured for your desired routing behavior
 
-#### #startReceiving(handler)
+#### #startConsuming(handler)
 
 Register a handler for messages returned from a queue.
 
