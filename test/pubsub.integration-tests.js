@@ -1,8 +1,8 @@
 'use strict';
 
-var Broker = require('../').Broker;
-var Publisher = require('../').Publisher;
-var Subscriber = require('../').Subscriber;
+var Broker = require('../lib').Broker;
+var Publisher = require('../lib').Publisher;
+var Subscriber = require('../lib').Subscriber;
 var environment = require('./_test-env');
 
 var chai = require('chai');

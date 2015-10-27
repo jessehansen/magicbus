@@ -1,6 +1,6 @@
 'use strict';
 
-var Broker = require('../').Broker;
+var Broker = require('../lib').Broker;
 
 var chai = require('chai');
 var expect = chai.expect;

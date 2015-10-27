@@ -1,8 +1,8 @@
 'use strict';
 
-var Broker = require('../').Broker;
-var Sender = require('../').Sender;
-var Receiver = require('../').Receiver;
+var Broker = require('../lib').Broker;
+var Sender = require('../lib').Sender;
+var Receiver = require('../lib').Receiver;
 var environment = require('./_test-env');
 
 var chai = require('chai');
