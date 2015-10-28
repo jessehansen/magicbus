@@ -125,14 +125,14 @@ describe('EventDispatcher', function() {
           throw new Error('my bad');
         });
 
-        expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad');
+        return expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad');
       });
       it('should return an error after a failing asynchronous handler', function() {
         eventDispatcher.on(eventName, function(){
           return Promise.reject(new Error('my bad'));
         });
 
-        expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad');
+        return expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad');
       });
     });
   });
