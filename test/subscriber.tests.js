@@ -91,7 +91,7 @@ describe('Subscriber', function() {
 
     it('should fail given no handler is registered for the message type', function() {
       subscriber.startSubscription();
-      expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('No handler registered');
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('No handler registered');
     });
 
     it('should fail given handler fails', function() {
@@ -100,11 +100,7 @@ describe('Subscriber', function() {
       });
 
       subscriber.startSubscription();
-      return mockReceiver._handler(payload, messageTypes, msg).then(function() {
-        assert.fail('Did not expect to succeed here');
-      }).catch(function() {
-        /* This is what we want */
-      });
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened');
     });
 
   });
