@@ -132,7 +132,7 @@ describe('EventDispatcher', function() {
             expect(err).to.be.ok;
           });
       });
-      it('should not call successive handlers after a failing async handler', function() {
+      it('should return an error after a failing asynchronous handler', function() {
         eventDispatcher.on(eventName, function(){
           return Promise.reject(new Error('my bad'));
         });
