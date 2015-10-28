@@ -147,8 +147,8 @@ describe('Publisher', function() {
       var p = publisher.publish('something-happened');
 
       return p.then(function() {
-          expect(middlewareCalled).to.equal(true);
-        });
+        expect(middlewareCalled).to.equal(true);
+      });
     });
 
     it('should set persistent to true by default', function() {

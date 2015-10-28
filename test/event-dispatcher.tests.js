@@ -4,7 +4,6 @@ var EventDispatcher = require('../lib/event-dispatcher');
 
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -110,7 +109,6 @@ describe('EventDispatcher', function() {
       });
     });
     it('should call handlers when multiple event types are passed', function() {
-      var secondSpy = sinon.spy();
       eventDispatcher.on(eventName, handlerSpy);
 
       return eventDispatcher.dispatch([eventName, 'myColdEventName'], arg1, arg2, arg3).then(function(result) {

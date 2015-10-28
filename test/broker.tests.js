@@ -1,6 +1,6 @@
 'use strict';
 
-var Broker = require('../').Broker;
+var Broker = require('../lib').Broker;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -28,51 +28,39 @@ describe('Broker', function() {
 
   function setUpSuccessfulAmqpMocks() {
     mockChannel = {
-      publish: function(exchangeName, routingKey, content, options) {
+      publish: function(/* exchangeName, routingKey, content, options */) {
         return true;
       },
-      consume: function(queueName, callback, options) {
-        return new Promise(function(resolve, reject) {
-          resolve('the-consumer-tag');
+      consume: function(/* queueName, callback, options */) {
+        return Promise.resolve('the-consumer-tag');
+      },
+      ack: function(/* msg */) {},
+      nack: function(/* msg, allUpTo, requeue */) {},
+      assertExchange: function(/* exchangeName, type, options */) {
+        return Promise.resolve();
+      },
+      assertQueue: function(queueName /*, options */) {
+        return Promise.resolve({
+          queue: queueName,
+          messageCount: 0,
+          consumerCount: 0
         });
       },
-      ack: function(msg) {},
-      nack: function(msg, allUpTo, requeue) {},
-      assertExchange: function(exchangeName, type, options) {
-        return new Promise(function(resolve, reject) {
-          resolve();
-        });
-      },
-      assertQueue: function(queueName, options) {
-        return new Promise(function(resolve, reject) {
-          resolve({
-            queue: queueName,
-            messageCount: 0,
-            consumerCount: 0
-          });
-        });
-      },
-      bindQueue: function(queueName, exchangeName, pattern) {
-        return new Promise(function(resolve, reject) {
-          resolve();
-        });
+      bindQueue: function(/* queueName, exchangeName, pattern */) {
+        return Promise.resolve();
       }
     };
 
     mockConnection = {
       createChannel: function() {
-        return new Promise(function(resolve, reject) {
-          resolve(mockChannel);
-        });
+        return Promise.resolve(mockChannel);
       },
       close: function() {}
     };
 
     mockAmqp = {
-      connect: function(connectionString) {
-        return new Promise(function(resolve, reject) {
-          resolve(mockConnection);
-        });
+      connect: function(/* connectionString */) {
+        return Promise.resolve(mockConnection);
       }
     };
   }
@@ -161,7 +149,7 @@ describe('Broker', function() {
 
     it('should consume from a queue with the name returned from the route pattern', function() {
       var routeName = 'subscribe';
-      var callback = function(msg) {};
+      var callback = function(/* msg */) {};
       var options = {};
 
       sinon.spy(mockChannel, 'consume');

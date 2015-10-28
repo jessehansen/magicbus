@@ -1,6 +1,6 @@
 'use strict';
 
-var Broker = require('../').Broker;
+var Broker = require('../lib').Broker;
 var environment = require('./_test-env');
 
 var chai = require('chai');

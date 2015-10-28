@@ -291,10 +291,16 @@ Run all tests with the usual command:
 $ npm test
 ```
 
-This will run all unit tests. To run the integration tests, run:
+This will run all the tests, including integration tests. To run just the unit tests, run:
 
 ```bash
-$ RABBITMQ_HOST=localhost npm run-script integration-tests
+$ npm run-script test:unit
+```
+
+To run just the integration tests, run:
+
+```bash
+$ RABBITMQ_HOST=localhost npm run-script test:integration
 ```
 
 ### Setting Up For Integration Tests
@@ -338,7 +344,6 @@ Routing Key:   #
 
 **NOTE: Running the integration tests will create the exchange and queue, but not the bindings. So you could save a couple manual steps.**
 
-### Todo
+## Style Guidelines
 
-* Optionally batch ack and nack calls (on by default)
-* Support event-messenger retry stuff
+Prevent git from messing up the line endings on windows: `git config --global core.autocrlf false`

@@ -1,6 +1,6 @@
 'use strict';
 
-var Sender = require('../').Sender;
+var Sender = require('../lib').Sender;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -148,8 +148,8 @@ describe('Sender', function() {
       var p = sender.send(msg);
 
       return p.then(function() {
-          expect(middlewareCalled).to.equal(true);
-        });
+        expect(middlewareCalled).to.equal(true);
+      });
     });
   });
 });
