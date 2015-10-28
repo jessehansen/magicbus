@@ -293,10 +293,16 @@ Run all tests with the usual command:
 $ npm test
 ```
 
-This will run all unit tests. To run the integration tests, run:
+This will run all the tests, including integration tests. To run just the unit tests, run:
 
 ```bash
-$ RABBITMQ_HOST=localhost npm run-script integration-tests
+$ npm run-script test:unit
+```
+
+To run just the integration tests, run:
+
+```bash
+$ RABBITMQ_HOST=localhost npm run-script test:integration
 ```
 
 ### Setting Up For Integration Tests
