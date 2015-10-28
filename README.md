@@ -344,6 +344,10 @@ Routing Key:   #
 
 **NOTE: Running the integration tests will create the exchange and queue, but not the bindings. So you could save a couple manual steps.**
 
+## Style Guidelines
+
+Prevent git from messing up the line endings on windows: `git config --global core.autocrlf false`
+
 ### Todo
 
 * Optionally batch ack and nack calls (on by default)
