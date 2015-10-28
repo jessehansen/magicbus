@@ -347,8 +347,3 @@ Routing Key:   #
 ## Style Guidelines
 
 Prevent git from messing up the line endings on windows: `git config --global core.autocrlf false`
-
-### Todo
-
-* Optionally batch ack and nack calls (on by default)
-* Support event-messenger retry stuff
