@@ -4,7 +4,6 @@ var EventDispatcher = require('../lib/event-dispatcher');
 
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -90,15 +89,15 @@ describe('EventDispatcher', function() {
         expect(handlerSpy).to.have.been.calledWith(eventName);
       });
     });
-    it('should call multiple handlers', function() {
+    it('should only call the first handler when multiple handlers match', function() {
       var secondSpy = sinon.spy();
       eventDispatcher.on(eventName, handlerSpy);
-      eventDispatcher.on(eventName, secondSpy);
+      eventDispatcher.on(/my.*EventName/, secondSpy);
 
       return eventDispatcher.dispatch(eventName).then(function(result) {
         expect(result).to.equal(true);
         expect(handlerSpy).to.have.been.calledWith(eventName);
-        expect(secondSpy).to.have.been.calledWith(eventName);
+        expect(secondSpy).to.have.not.been.called;
       });
     });
     it('should call handlers with arguments', function() {
@@ -110,47 +109,28 @@ describe('EventDispatcher', function() {
       });
     });
     it('should call handlers when multiple event types are passed', function() {
-      var secondSpy = sinon.spy();
       eventDispatcher.on(eventName, handlerSpy);
-      eventDispatcher.on('myColdEventName', secondSpy);
 
       return eventDispatcher.dispatch([eventName, 'myColdEventName'], arg1, arg2, arg3).then(function(result) {
         expect(result).to.equal(true);
         expect(handlerSpy).to.have.been.calledWith(eventName, arg1, arg2, arg3);
-        expect(secondSpy).to.have.been.calledWith('myColdEventName', arg1, arg2, arg3);
       });
     });
 
     describe('error handling', function() {
-      it('should not call successive handlers after a failing synchronous handler', function() {
-        eventDispatcher.on(eventName, doNothing);
+      it('should return an error after a failing synchronous handler', function() {
         eventDispatcher.on(eventName, function(){
           throw new Error('my bad');
         });
-        eventDispatcher.on(eventName, handlerSpy);
 
-        return eventDispatcher.dispatch(eventName).then(function() {
-          assert.fail();
-        })
-        .catch(function(err) {
-          expect(err).to.be.ok;
-          expect(handlerSpy).to.have.not.been.called;
-        });
+        return expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad');
       });
-      it('should not call successive handlers after a failing async handler', function() {
-        eventDispatcher.on(eventName, doNothing);
+      it('should return an error after a failing asynchronous handler', function() {
         eventDispatcher.on(eventName, function(){
           return Promise.reject(new Error('my bad'));
         });
-        eventDispatcher.on(eventName, handlerSpy);
 
-        return eventDispatcher.dispatch(eventName).then(function() {
-          assert.fail();
-        })
-        .catch(function(err) {
-          expect(err).to.be.ok;
-          expect(handlerSpy).to.have.not.been.called;
-        });
+        return expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad');
       });
     });
   });

@@ -200,9 +200,7 @@ function handleFooCreated(eventName, data, rawMessage) {
 }
 ```
 
-Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, they are called in series, in the order they were registered. If any handler fails, no further handlers will be executed.
-
-**TODO: Is this the best way to handle errors with multiple handlers?**
+Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, only the first handler (by order of registration) is executed.
 
 #### #startSubscription()
 
@@ -327,7 +325,6 @@ You can also [download](http://www.rabbitmq.com/download.html) and install it lo
 
 The integration tests will automatically create the necessary exchanges, queues, and bindings.
 
-### Todo
+## Style Guidelines
 
-* Optionally batch ack and nack calls (on by default)
-* Support event-messenger retry stuff
+Prevent git from messing up the line endings on windows: `git config --global core.autocrlf false`

@@ -4,7 +4,6 @@ var Subscriber = require('../lib/subscriber.js');
 
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -58,7 +57,7 @@ describe('Subscriber', function() {
     var payload, messageTypes, msg;
 
     beforeEach(function() {
-      payload = payload;
+      payload = 'payload';
       messageTypes = ['type1', 'type2'];
       msg = {
         payload: payload,
@@ -91,7 +90,7 @@ describe('Subscriber', function() {
 
     it('should fail given no handler is registered for the message type', function() {
       subscriber.startSubscription();
-      expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('No handler registered');
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('No handler registered');
     });
 
     it('should fail given handler fails', function() {
@@ -100,11 +99,7 @@ describe('Subscriber', function() {
       });
 
       subscriber.startSubscription();
-      return mockReceiver._handler(payload, messageTypes, msg).then(function() {
-        assert.fail('Did not expect to succeed here');
-      }).catch(function() {
-        /* This is what we want */
-      });
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened');
     });
 
   });
