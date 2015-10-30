@@ -1,14 +1,14 @@
 'use strict';
 
-var Broker = require('../lib').Broker;
-var Binder = require('../lib').Binder;
+var magicbus = require('../lib');
+var Binder = magicbus.Classes.Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
 var expect = chai.expect;
 
-var PublisherRoutePattern = require('../').RoutePatterns.Publisher;
-var WorkerRoutePattern = require('../').RoutePatterns.Worker;
+var PublisherRoutePattern = require('../').Classes.RoutePatterns.Publisher;
+var WorkerRoutePattern = require('../').Classes.RoutePatterns.Worker;
 
 describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
@@ -31,7 +31,7 @@ describe('Broker really using RabbitMQ', function() {
   });
 
   beforeEach(function() {
-    broker = new Broker(serviceDomainName, appName, connectionInfo);
+    broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
   });
 
   afterEach(function() {
