@@ -3,6 +3,7 @@
 var Broker = require('../lib').Broker;
 var Sender = require('../lib').Sender;
 var Receiver = require('../lib').Receiver;
+var Binder = require('../lib').Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -24,6 +25,8 @@ describe('Send/Receive integration', function() {
     receiver = new Receiver(broker, {
       routeName: 'subscribe'
     });
+
+    return new Binder(connectionInfo).bind(sender.getRoute(), receiver.getRoute(), {pattern: '#'});
   });
 
   after(function() {

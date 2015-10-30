@@ -208,6 +208,16 @@ Starts consuming from the queue. Don't call this until you've finished registeri
 
 This method is asynchronous and returns a promise.
 
+### Binder
+
+#### Binder(connectionInfo)
+
+Creates a new instance of `Binder` with the specified connection info.
+
+#### #bind(publishingRoute, consumingRoute, options)
+
+Configures a binding from the publishing route to the consuming route.
+
 # Extension Points
 
 Magic bus provides default implementations of all components so you can be up and running quickly. However all the messaging parties also allow you to inject custom implementations of any component used in the message pipeline.
@@ -313,36 +323,7 @@ $ docker create --name rabbitmq -p 5672:5672 -p 15672:15672 \
 
 You can also [download](http://www.rabbitmq.com/download.html) and install it locally for free.
 
-Login to the RabbitMQ management interface at http://<host-ip>:15672/ and create the exchange and queue the integration tests use.
-
-New Exchange Info:
-
-```
-Virtual Host: /
-Name:         magicbus.tests.publish
-Type:         topic
-Durability:   Durable
-Auto Delete:  No
-Internal:     No
-```
-
-New Queue Info:
-
-```
-Virtual Host: /
-Name:         magicbus.tests.subscribe
-Durability:   Durable
-Auto Delete:  No
-```
-
-After creating the queue, bind it to the exchange:
-
-```
-From Exchange: magicbus.tests.publish
-Routing Key:   #
-```
-
-**NOTE: Running the integration tests will create the exchange and queue, but not the bindings. So you could save a couple manual steps.**
+The integration tests will automatically create the necessary exchanges, queues, and bindings.
 
 ## Style Guidelines
 

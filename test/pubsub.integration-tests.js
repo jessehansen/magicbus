@@ -3,6 +3,7 @@
 var Broker = require('../lib').Broker;
 var Publisher = require('../lib').Publisher;
 var Subscriber = require('../lib').Subscriber;
+var Binder = require('../lib').Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -20,6 +21,8 @@ describe('Pub/Sub integration', function() {
     broker = new Broker(serviceDomainName, appName, connectionInfo);
     publisher = new Publisher(broker);
     subscriber = new Subscriber(broker);
+
+    return new Binder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'});
   });
 
   after(function() {
