@@ -1,6 +1,7 @@
 'use strict';
 
-var Publisher = require('../').Publisher;
+var magicbus = require('../lib');
+var Publisher = require('../').Classes.Publisher;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -10,8 +11,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var BasicEnvelope = require('../lib/basic-envelope.js');
 
 var Promise = require('bluebird');
 
@@ -27,48 +26,7 @@ describe('Publisher', function() {
     };
   });
 
-  describe('default construction', function() {
-    var publisher;
-
-    beforeEach(function() {
-      publisher = new Publisher(mockBroker);
-    });
-
-    it('should use the basic envelope', function() {
-      expect(publisher._envelope instanceof BasicEnvelope).to.eq(true);
-    });
-  });
-
-  describe('construction options', function() {
-    it('should use the route name passed in the options', function() {
-      var publisher = new Publisher(mockBroker, {
-        routeName: 'my-route'
-      });
-
-      expect(publisher._routeName).to.eq('my-route');
-    });
-
-    it('should use the route pattern passed in the options', function() {
-      var pattern = {};
-
-      var publisher = new Publisher(mockBroker, {
-        routePattern: pattern
-      });
-
-      expect(publisher._routePattern).to.eq(pattern);
-    });
-
-    it('should use the envelope passed in the options', function() {
-      var envelope = {};
-      var publisher = new Publisher(mockBroker, {
-        envelope: envelope
-      });
-
-      expect(publisher._envelope).to.eq(envelope);
-    });
-  });
-
-  describe('constructor argument checking', function() {
+  describe('constructor', function() {
     it('should throw an assertion error given no broker', function() {
       var fn = function() {
         new Publisher();
@@ -76,25 +34,60 @@ describe('Publisher', function() {
 
       expect(fn).to.throw('AssertionError: broker (object) is required');
     });
+    it('should throw an assertion error given no envelope', function() {
+      var fn = function() {
+        new Publisher(mockBroker);
+      };
+
+      expect(fn).to.throw('AssertionError: envelope (object) is required');
+    });
+    it('should throw an assertion error given no pipeline', function() {
+      var fn = function() {
+        new Publisher(mockBroker, {});
+      };
+
+      expect(fn).to.throw('AssertionError: pipeline (object) is required');
+    });
+    it('should throw an assertion error given no routeName', function() {
+      var fn = function() {
+        new Publisher(mockBroker, {}, {});
+      };
+
+      expect(fn).to.throw('AssertionError: routeName (string) is required');
+    });
+    it('should throw an assertion error given no routePattern', function() {
+      var fn = function() {
+        new Publisher(mockBroker, {}, {}, 'route');
+      };
+
+      expect(fn).to.throw('AssertionError: routePattern (object) is required');
+    });
+    it('should register a route with the broker', function() {
+      sinon.spy(mockBroker, 'registerRoute');
+
+      var pattern = {};
+      new Publisher(mockBroker, {}, {}, 'route', pattern);
+      expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
+    });
   });
 
   describe('publish', function() {
     var publisher;
 
     beforeEach(function() {
-      publisher = new Publisher(mockBroker);
+      publisher = magicbus.createPublisher(mockBroker);
     });
 
     it('should register a route with the broker', function() {
       sinon.spy(mockBroker, 'registerRoute');
-
       var pattern = {};
-      return new Publisher(mockBroker, {
-        routePattern: pattern
-      }).publish('test-event')
-      .then(function(){
-        expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
+
+      publisher = magicbus.createPublisher(mockBroker, function (cfg) {
+        cfg.useRouteName('publish');
+        cfg.useRoutePattern(pattern);
       });
+
+      expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern);
     });
 
     it('should be rejected with an assertion error given no event name', function() {
