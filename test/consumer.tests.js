@@ -1,5 +1,6 @@
 'use strict';
 
+var magicbus = require('../');
 var Consumer = require('../lib/consumer.js');
 
 var chai = require('chai');
@@ -9,10 +10,7 @@ var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
-var BasicEnvelope = require('../lib/basic-envelope.js');
 var Promise = require('bluebird');
-
-var WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern.js');
 
 describe('Consumer', function() {
   var mockBroker;
@@ -65,66 +63,48 @@ describe('Consumer', function() {
     };
   });
 
-  describe('#ctor', function() {
+  describe('constructor', function() {
+    it('should throw an assertion error given no broker', function() {
+      var fn = function() {
+        new Consumer();
+      };
 
-    describe('default construction', function() {
-      var consumer;
-
-      beforeEach(function() {
-        consumer = new Consumer(mockBroker);
-      });
-
-      it('should use receive as the route name', function() {
-        expect(consumer._routeName).to.eq('receive');
-      });
-
-      it('should use the worker route pattern', function() {
-        expect(consumer._routePattern instanceof WorkerRoutePattern).to.eq(true);
-      });
-
-      it('should use the basic envelope', function() {
-        expect(consumer._envelope instanceof BasicEnvelope).to.eq(true);
-      });
+      expect(fn).to.throw('AssertionError: broker (object) is required');
     });
+    it('should throw an assertion error given no envelope', function() {
+      var fn = function() {
+        new Consumer(mockBroker);
+      };
 
-    describe('construction options', function() {
-      it('should use the route name passed in the options', function() {
-        var consumer = new Consumer(mockBroker, {
-          routeName: 'my-route'
-        });
-
-        expect(consumer._routeName).to.eq('my-route');
-      });
-
-      it('should use the route pattern passed in the options', function() {
-        var pattern = {};
-        var consumer = new Consumer(mockBroker, {
-          routePattern: pattern
-        });
-
-        expect(consumer._routePattern).to.eq(pattern);
-      });
-
-      it('should use the envelope passed in the options', function() {
-        var envelope = {};
-        var consumer = new Consumer(mockBroker, {
-          envelope: envelope
-        });
-
-        expect(consumer._envelope).to.eq(envelope);
-      });
+      expect(fn).to.throw('AssertionError: envelope (object) is required');
     });
+    it('should throw an assertion error given no pipeline', function() {
+      var fn = function() {
+        new Consumer(mockBroker, {});
+      };
 
-    describe('constructor broker wireup', function() {
-      it('should register a route with the broker', function() {
-        sinon.spy(mockBroker, 'registerRoute');
+      expect(fn).to.throw('AssertionError: pipeline (object) is required');
+    });
+    it('should throw an assertion error given no routeName', function() {
+      var fn = function() {
+        new Consumer(mockBroker, {}, {});
+      };
 
-        var pattern = {};
-        new Consumer(mockBroker, {
-          routePattern: pattern
-        });
-        expect(mockBroker.registerRoute).to.have.been.calledWith('receive', pattern);
-      });
+      expect(fn).to.throw('AssertionError: routeName (string) is required');
+    });
+    it('should throw an assertion error given no routePattern', function() {
+      var fn = function() {
+        new Consumer(mockBroker, {}, {}, 'route');
+      };
+
+      expect(fn).to.throw('AssertionError: routePattern (object) is required');
+    });
+    it('should register a route with the broker', function() {
+      sinon.spy(mockBroker, 'registerRoute');
+
+      var pattern = {};
+      new Consumer(mockBroker, {}, {}, 'route', pattern);
+      expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
 
     describe('constructor argument checking', function() {
@@ -142,7 +122,7 @@ describe('Consumer', function() {
     var consumer;
 
     beforeEach(function() {
-      consumer = new Consumer(mockBroker);
+      consumer = magicbus.createConsumer(mockBroker);
     });
 
     describe('acknowledging messages based on handler results', function() {

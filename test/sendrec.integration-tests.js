@@ -1,9 +1,7 @@
 'use strict';
 
-var Broker = require('../lib').Broker;
-var Sender = require('../lib').Sender;
-var Receiver = require('../lib').Receiver;
-var Binder = require('../lib').Binder;
+var magicbus = require('../lib');
+var Binder = require('../lib').Classes.Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -18,13 +16,9 @@ describe('Send/Receive integration', function() {
   var receiver;
 
   before(function() {
-    broker = new Broker(serviceDomainName, appName, connectionInfo);
-    sender = new Sender(broker, {
-      routeName: 'publish'
-    });
-    receiver = new Receiver(broker, {
-      routeName: 'subscribe'
-    });
+    broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
+    sender = magicbus.createPublisher(broker, function(cfg){ cfg.useRouteName('publish'); });
+    receiver = magicbus.createConsumer(broker, function(cfg){ cfg.useRouteName('subscribe'); });
 
     return new Binder(connectionInfo).bind(sender.getRoute(), receiver.getRoute(), {pattern: '#'});
   });
