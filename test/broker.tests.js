@@ -70,7 +70,7 @@ describe('Broker', function() {
     setUpSuccessfulAmqpMocks();
 
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo, function(cfg){
-      cfg.useCustomAmqpLib(mockAmqp)
+      cfg.useCustomAmqpLib(mockAmqp);
     });
   }
 
