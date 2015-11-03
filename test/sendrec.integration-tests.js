@@ -1,7 +1,6 @@
 'use strict';
 
 var magicbus = require('../lib');
-var Binder = require('../lib').Classes.Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -20,7 +19,7 @@ describe('Send/Receive integration', function() {
     sender = magicbus.createPublisher(broker, function(cfg){ cfg.useRouteName('publish'); });
     receiver = magicbus.createConsumer(broker, function(cfg){ cfg.useRouteName('subscribe'); });
 
-    return new Binder(connectionInfo).bind(sender.getRoute(), receiver.getRoute(), {pattern: '#'});
+    return magicbus.createBinder(connectionInfo).bind(sender.getRoute(), receiver.getRoute(), {pattern: '#'});
   });
 
   after(function() {

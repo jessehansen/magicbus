@@ -1,7 +1,6 @@
 'use strict';
 
 var magicbus = require('../lib');
-var Binder = require('../lib').Classes.Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -20,7 +19,7 @@ describe('Pub/Sub integration', function() {
     publisher = magicbus.createPublisher(broker);
     subscriber = magicbus.createSubscriber(broker);
 
-    return new Binder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'});
+    return magicbus.createBinder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'});
   });
 
   after(function() {

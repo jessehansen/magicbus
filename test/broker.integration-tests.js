@@ -1,7 +1,6 @@
 'use strict';
 
 var magicbus = require('../lib');
-var Binder = magicbus.Classes.Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -17,7 +16,7 @@ describe('Broker really using RabbitMQ', function() {
   var broker;
 
   before(function(){
-    return new Binder(connectionInfo).bind({
+    magicbus.createBinder(connectionInfo).bind({
       serviceDomainName: serviceDomainName,
       appName: appName,
       name: 'publish',
