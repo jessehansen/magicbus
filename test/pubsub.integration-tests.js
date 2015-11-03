@@ -1,9 +1,7 @@
 'use strict';
 
-var Broker = require('../lib').Broker;
-var Publisher = require('../lib').Publisher;
-var Subscriber = require('../lib').Subscriber;
-var Binder = require('../lib').Binder;
+var magicbus = require('../lib');
+var Binder = require('../lib').Classes.Binder;
 var environment = require('./_test-env');
 
 var chai = require('chai');
@@ -18,9 +16,9 @@ describe('Pub/Sub integration', function() {
   var subscriber;
 
   before(function() {
-    broker = new Broker(serviceDomainName, appName, connectionInfo);
-    publisher = new Publisher(broker);
-    subscriber = new Subscriber(broker);
+    broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
+    publisher = magicbus.createPublisher(broker);
+    subscriber = magicbus.createSubscriber(broker);
 
     return new Binder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'});
   });
