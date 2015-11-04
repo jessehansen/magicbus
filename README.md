@@ -109,7 +109,7 @@ This method is asynchronous and returns a promise.
 ## Consumer
 
 Use a Consumer to consume events and commands from RabbitMQ. The consumer does not handle dispatching messages by message type so there
-are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](user-content-subscriber).
+are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](#user-content-subscriber).
 
 ### createConsumer(broker, configurator)
 
