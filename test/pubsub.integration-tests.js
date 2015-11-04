@@ -15,8 +15,6 @@ describe('Pub/Sub integration', function() {
   var subscriber;
 
   before(function() {
-    magicbus.logSink.on('log', console.log);
-
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
     publisher = magicbus.createPublisher(broker);
     subscriber = magicbus.createSubscriber(broker);
