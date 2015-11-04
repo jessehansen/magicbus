@@ -6,6 +6,7 @@ var Publisher = require('../../lib/publisher');
 var Consumer = require('../../lib/consumer');
 var Subscriber = require('../../lib/subscriber');
 var Binder = require('../../lib/binder');
+var Logger = require('../../lib/logger');
 
 var BasicEnvelope = require('../../lib/basic-envelope');
 var ProducerPipeline = require('../../lib/middleware').ProducerPipeline;
@@ -21,12 +22,14 @@ var amqplib = require('amqplib');
 describe('Configurator', function(){
   var configurator;
   var broker;
+  var logger;
 
   beforeEach(function(){
     broker = {
       registerRoute: function(){}
     };
-    configurator = new Configurator();
+    logger = new Logger();
+    configurator = new Configurator(logger);
   });
 
   describe('#createBroker', function(){
@@ -44,6 +47,7 @@ describe('Configurator', function(){
 
       expect(broker).to.be.an.instanceOf(Broker);
       expect(broker._amqp).to.equal(amqplib);
+      expect(broker._logger).to.equal(logger);
     });
 
     it('should allow caller to override amqplib', function(){
@@ -78,6 +82,7 @@ describe('Configurator', function(){
       expect(publisher._pipeline).to.be.an.instanceOf(ProducerPipeline);
       expect(publisher._routeName).to.equal('publish');
       expect(publisher._routePattern).to.be.an.instanceOf(PublisherRoutePattern);
+      expect(publisher._logger).to.equal(logger);
     });
 
     it('should allow caller to override the envelope', function(){
@@ -130,6 +135,7 @@ describe('Configurator', function(){
       expect(consumer._pipeline).to.be.an.instanceOf(ConsumerPipeline);
       expect(consumer._routeName).to.equal('receive');
       expect(consumer._routePattern).to.be.an.instanceOf(WorkerRoutePattern);
+      expect(consumer._logger).to.equal(logger);
     });
 
     it('should allow caller to override the envelope', function(){
@@ -178,6 +184,7 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker);
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
+      expect(subscriber._logger).to.equal(logger);
       var consumer = subscriber._consumer;
 
       expect(consumer).to.be.an.instanceOf(Consumer);
@@ -185,6 +192,7 @@ describe('Configurator', function(){
       expect(consumer._pipeline).to.be.an.instanceOf(ConsumerPipeline);
       expect(consumer._routeName).to.equal('subscribe');
       expect(consumer._routePattern).to.be.an.instanceOf(WorkerRoutePattern);
+      expect(consumer._logger).to.equal(logger);
     });
 
     it('should allow caller to override the envelope', function(){
@@ -255,6 +263,7 @@ describe('Configurator', function(){
 
       expect(binder).to.be.an.instanceOf(Binder);
       expect(binder._amqp).to.equal(amqplib);
+      expect(binder._logger).to.equal(logger);
     });
 
     it('should allow caller to override amqplib', function(){
