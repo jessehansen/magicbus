@@ -13,9 +13,11 @@ chai.use(sinonChai);
 chai.use(require('chai-as-promised'));
 
 var Promise = require('bluebird');
+var Logger = require('../lib/logger');
 
 describe('Publisher', function() {
   var mockBroker;
+  var logger;
 
   beforeEach(function() {
     mockBroker = {
@@ -24,6 +26,7 @@ describe('Publisher', function() {
         return Promise.resolve();
       }
     };
+    logger = new Logger();
   });
 
   describe('constructor', function() {
@@ -62,11 +65,18 @@ describe('Publisher', function() {
 
       expect(fn).to.throw('AssertionError: routePattern (object) is required');
     });
+    it('should throw an assertion error given no logger', function() {
+      var fn = function() {
+        new Publisher(mockBroker, {}, {}, 'route', {});
+      };
+
+      expect(fn).to.throw('AssertionError: logger (object) is required');
+    });
     it('should register a route with the broker', function() {
       sinon.spy(mockBroker, 'registerRoute');
 
       var pattern = {};
-      new Publisher(mockBroker, {}, {}, 'route', pattern);
+      new Publisher(mockBroker, {}, {}, 'route', pattern, logger);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
   });

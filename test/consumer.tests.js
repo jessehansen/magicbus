@@ -11,9 +11,11 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 var Promise = require('bluebird');
+var Logger = require('../lib/logger');
 
 describe('Consumer', function() {
   var mockBroker;
+  var logger;
 
   var eventName;
   var fakeMessage;
@@ -28,6 +30,7 @@ describe('Consumer', function() {
       },
       content: new Buffer(JSON.stringify('the payload'))
     };
+    logger = new Logger();
     mockBroker = {
       registerRoute: function( /* name, pattern */ ) {},
       consume: function(routeName, callback /* , options */ ) {
@@ -99,11 +102,18 @@ describe('Consumer', function() {
 
       expect(fn).to.throw('AssertionError: routePattern (object) is required');
     });
+    it('should throw an assertion error given no logger', function() {
+      var fn = function() {
+        new Consumer(mockBroker, {}, {}, 'route', {});
+      };
+
+      expect(fn).to.throw('AssertionError: logger (object) is required');
+    });
     it('should register a route with the broker', function() {
       sinon.spy(mockBroker, 'registerRoute');
 
       var pattern = {};
-      new Consumer(mockBroker, {}, {}, 'route', pattern);
+      new Consumer(mockBroker, {}, {}, 'route', pattern, logger);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
 
