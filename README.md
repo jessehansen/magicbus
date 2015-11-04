@@ -45,7 +45,7 @@ var magicbus = require('@leisurelink/magicbus');
 
 var broker = magicbus.createBroker('my-domain', 'my-subscriber', {'host':'localhost'});
 
-var subscriber = magicbus.createSubscriber(new Consumer(broker), new EventDispatcher());
+var subscriber = magicbus.createSubscriber(broker);
 
 subscriber.on('publisher-executed', function(eventName, data, rawMessage) {
   console.log('The publisher was executed!');
