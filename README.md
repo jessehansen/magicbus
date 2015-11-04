@@ -38,21 +38,6 @@ publisher.publish('publisher-executed', {
 });
 ```
 
-## Worker App
-
-```javascript
-var magicbus = require('@leisurelink/magicbus');
-
-var broker = magicbus.createBroker('my-domain', 'my-worker', {'host':'localhost'});
-
-var consumer = magicbus.createConsumer(broker);
-
-consumer.startConsuming(function(message, types){
-    console.log('Received message with types ' + types)
-    console.log(message);
-  })
-```
-
 ## Subscribing App
 
 ```javascript
