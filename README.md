@@ -47,7 +47,7 @@ var broker = magicbus.createBroker('my-domain', 'my-subscriber', {'host':'localh
 
 var subscriber = magicbus.createSubscriber(new Consumer(broker), new EventDispatcher());
 
-subscriber.on('publisher-executed'), function(eventName, data, rawMessage) {
+subscriber.on('publisher-executed', function(eventName, data, rawMessage) {
   console.log('The publisher was executed!');
   console.log(data);
 });
