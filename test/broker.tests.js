@@ -1,6 +1,7 @@
 'use strict';
 
-var Broker = require('../lib').Broker;
+var magicbus = require('../lib');
+var Broker = magicbus.Classes.Broker;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -68,14 +69,22 @@ describe('Broker', function() {
   function setUpBrokerWithSuccessfulAmqpMocks() {
     setUpSuccessfulAmqpMocks();
 
-    broker = new Broker(serviceDomainName, appName, connectionInfo);
-    broker._amqp = mockAmqp;
+    broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo, function(cfg){
+      cfg.useCustomAmqpLib(mockAmqp);
+    });
   }
 
   describe('constructor', function() {
-    it('should throw an assertion error given no service domain name', function() {
+    it('should throw an assertion error given no amqp implementation', function() {
       var fn = function() {
         new Broker();
+      };
+
+      expect(fn).to.throw('AssertionError: amqp (object) is required');
+    });
+    it('should throw an assertion error given no service domain name', function() {
+      var fn = function() {
+        new Broker({});
       };
 
       expect(fn).to.throw('AssertionError: serviceDomainName (string) is required');
@@ -83,7 +92,7 @@ describe('Broker', function() {
 
     it('should throw an assertion error given no app name', function() {
       var fn = function() {
-        new Broker('my-domain');
+        new Broker({}, 'my-domain');
       };
 
       expect(fn).to.throw('AssertionError: appName (string) is required');
@@ -91,7 +100,7 @@ describe('Broker', function() {
 
     it('should throw an assertion error given no connection info', function() {
       var fn = function() {
-        new Broker('my-domain', 'my-app');
+        new Broker({}, 'my-domain', 'my-app');
       };
 
       expect(fn).to.throw('AssertionError: connectionInfo (object) is required');
@@ -247,7 +256,7 @@ describe('Broker', function() {
     });
 
     it('should not error given it has not created a connection', function() {
-      var broker = new Broker(serviceDomainName, appName, connectionInfo);
+      var broker = new Broker({}, serviceDomainName, appName, connectionInfo);
       broker.shutdown();
     });
   });

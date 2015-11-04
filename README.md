@@ -28,50 +28,26 @@ Usage is a broad topic due to the number of potential scenarios. A bare-bones pu
 ## Publishing App
 
 ```javascript
-var MagicBus = require('@leisurelink/magicbus');
-var Broker = MagicBus.Broker;
-var Publisher = MagicBus.Publisher;
+var magicbus = require('@leisurelink/magicbus');
+var broker = magicbus.createBroker('domain-one', 'my-api', {'host':'localhost'});
 
-var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
-
-var publisher = new Publisher(broker);
+var publisher = magicbus.createPublisher(broker);
 
 publisher.publish('publisher-executed', {
   some: 'data'
 });
 ```
 
-## Worker App
-
-```javascript
-var MagicBus = require('@leisurelink/magicbus');
-var Broker = MagicBus.Broker;
-var Consumer = MagicBus.Consumer;
-
-var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
-
-var consumer = new Consumer(broker);
-
-consumer.startConsuming(function(message, types){
-    console.log('Received message with types ' + types)
-    console.log(message);
-  })
-```
-
 ## Subscribing App
 
 ```javascript
-var MagicBus = require('@leisurelink/magicbus');
-var Broker = MagicBus.Broker;
-var Consumer = MagicBus.Consumer;
-var Subscriber = MagicBus.Subscriber;
-var EventDispatcher = MagicBus.EventDispatcher;
+var magicbus = require('@leisurelink/magicbus');
 
-var broker = new Broker('my-domain', 'my-publisher', {'host':'localhost'});
+var broker = magicbus.createBroker('domain-two', 'my-worker', {'host':'localhost'});
 
-var subscriber = new Subscriber(new Consumer(broker), new EventDispatcher());
+var subscriber = magicbus.createSubscriber(broker);
 
-subscriber.on('publisher-executed'), function(eventName, data, rawMessage) {
+subscriber.on('publisher-executed', function(eventName, data, rawMessage) {
   console.log('The publisher was executed!');
   console.log(data);
 });
@@ -81,8 +57,9 @@ subscriber.startSubscription();
 
 ## Cross-app Bindings
 
-Since the publisher and subscriber above are two separate apps, and it's assumed that one app has no permission on any of the exchanges/queues in the other app's security domain, the framework does not setup any bindings.
-You'll need to manually bind the subscriber's queue to the producer's exchange for messages to reach the subscriber.
+Since the publisher and subscriber above are in two two separate domains, and it's assumed that one app has no permission on any of the exchanges/queues
+in the other app's security domain, the framework does not setup any bindings. You'll need to use a `Binder` to bind the subscriber's queue to the publisher's
+exchange for messages to reach the subscriber. Typically this is done by a configuration app with elevated permissions.
 
 # Framework Components
 
@@ -91,32 +68,25 @@ You'll need to manually bind the subscriber's queue to the producer's exchange f
 * Maintains a single connection to a single RabbitMQ server/vhost
 * Maintains channels for each producer/consumer in the app
 * Creates local (as opposed to cross-app) exchanges/queues for producers/consumers
-* Provides delayed retry support for consumers
+* Provides delayed retry support for consumers (planned, not implemented yet)
 
 **TODO: Is 'Broker' the right term for this component?**
 
-## Messaging Parties
+You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is thought
+to be a RabbitMQ best practice.
 
-Each party is either a producer or consumer of messages. While publisher/subscriber pair is very similar to the sender/receiver pair, there are small semantic differences.
+## Publisher
 
-### Publisher
+Use a Publisher to publish events and send commands through RabbitMQ.
 
-Publisher and Sender classes are synonyms
+### createPublisher(broker, configurator)
 
-#### Publisher(broker, options)
-
-Creates a new instance of `Publisher` with the specified options.
+Creates a new instance of `Publisher`.
 
 * `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
-* `options` is an optional collection of publishing options
-  - `options.envelope` is an instance of the `AbstractEnvelope` class, configured for your desired message envelope behavior. Defaults to a new `BasicEnvelope`
-  - `options.pipeline` can be:
-    + an array of middleware functions
-    + an instance of the `Pipeline` class, configured for your desired middleware handling
-  - `options.routeName` is the name of the route for this producer (should be unique)
-  - `options.routePattern` is an instance of the `RoutePattern` class, configured for your desired routing behavior
+* `configurator` is a function that will be called and allow you to override default implementations of internal components
 
-#### #publish(eventName, data, options)
+### #publish(eventName, data, options)
 
 Publish an event.
 
@@ -126,7 +96,7 @@ Publish an event.
 
 This method is asynchronous and returns a promise.
 
-#### #send(message, messageType, options)
+### #send(message, messageType, options)
 
 Send a command/message.
 
@@ -136,28 +106,25 @@ Send a command/message.
 
 This method is asynchronous and returns a promise.
 
-### Consumer
+## Consumer
 
-#### Consumer(broker, options)
+Use a Consumer to consume events and commands from RabbitMQ. The consumer does not handle dispatching messages by message type so there
+are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](#user-content-subscriber).
 
-Creates a new instance of `Consumer` with the specified options.
+### createConsumer(broker, configurator)
+
+Creates a new instance of `Consumer`.
 
 * `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
-* `options` is an optional collection of publishing options
-  - `options.envelope` is an instance of the `AbstractEnvelope` class, configured for your desired message envelope behavior. Defaults to a new `BasicEnvelope`
-  - `options.pipeline` can be:
-    + an array of middleware functions
-    + or, an instance of the `Pipeline` class, configured for your desired middleware handling
-  - `options.routeName` is the name of the route for this producer (should be unique)
-  - `options.routePattern` is an instance of the `RoutePattern` class, configured for your desired routing behavior
+* `configurator` is a function that will be called and allow you to override default implementations of internal components
 
-#### #startConsuming(handler)
+### #startConsuming(handler)
 
 Register a handler for messages returned from a queue.
 
 * `handler` is a required function with the signature described below
 
-#### Handler Signature
+### Handler Signature
 
 ```javascript
 function handleMessage(message, messageTypes, rawMessage) {
@@ -170,27 +137,31 @@ Messages will be acked as long as the handler doesn't throw. If the handler does
 * failed and discarded or placed on a failure queue depending on subscriber configuration
 * re-queued and retried later
 
-The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable" and will not be retried. Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference. Need to define our best guess at differentiating the two.
+The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable" and will not be retried.
+Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference.
+Need to define our best guess at differentiating the two.
 
 Asynchronous handlers should return a promise. They should reject the promise using the same guidelines that applies for throwing errors from synchronous handlers.
 
-### Subscriber
+## Subscriber
 
-#### Subscriber(consumer, eventDispatcher)
+Use a Subscriber to consume events and commands from RabbitMQ and have those messages dispatched to handlers based on message type.
 
-Creates a new instance of `Subscriber` with the specified options.
+### createSubscriber(broker, configurator)
 
-* `consumer` is an instance of the `Consumer` class
-* `eventDispatcher` is and instance of the `EventDispatcher` class
+Creates a new instance of `Subscriber`.
 
-#### #on(eventNames, handler)
+* `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
+* `configurator` is a function that will be called and allow you to override default implementations of internal components
+
+### #on(eventNames, handler)
 
 Register a handler for an event.
 
 * `eventNames` is a required single string or regex, or an array of strings or regex. To handle all messages, use `/.*/`.
 * `handler` is a required function with the signature described below
 
-#### Handler Signature
+### Handler Signature
 
 **NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a consumer handler.
 
@@ -202,19 +173,21 @@ function handleFooCreated(eventName, data, rawMessage) {
 
 Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, only the first handler (by order of registration) is executed.
 
-#### #startSubscription()
+### #startSubscription()
 
 Starts consuming from the queue. Don't call this until you've finished registering your handlers or you may end up with unhandled messages that you would have handled if your handler registration were complete.
 
 This method is asynchronous and returns a promise.
 
-### Binder
+## Binder
 
-#### Binder(connectionInfo)
+Link a publishing route to a consuming route by binding an exchange to a queue. Typically useful in configuration apps and integration tests.
+
+### createBinder(connectionInfo, configurator)
 
 Creates a new instance of `Binder` with the specified connection info.
 
-#### #bind(publishingRoute, consumingRoute, options)
+### #bind(publishingRoute, consumingRoute, options)
 
 Configures a binding from the publishing route to the consuming route.
 
