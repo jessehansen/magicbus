@@ -283,7 +283,7 @@ $ npm run-script test:unit
 To run just the integration tests, run:
 
 ```bash
-$ RABBITMQ_HOST=$(docker-machine ip dev) npm run-script test:integration
+$ RABBITMQ_HOST=$YOUR_RABBIT_HOST_NAME_OR_IP npm run-script test:integration
 ```
 
 ### Setting Up For Integration Tests
