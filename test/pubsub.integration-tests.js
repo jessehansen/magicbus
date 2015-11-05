@@ -9,7 +9,7 @@ var expect = chai.expect;
 describe('Pub/Sub integration', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = environment.rabbit;
+  var connectionInfo = environment.rabbit.protocol + '://' + environment.rabbit.username + ':' + environment.rabbit.password + '@' + environment.rabbit.hostname + '/' + environment.rabbit.vhost;
   var broker;
   var publisher;
   var subscriber;
