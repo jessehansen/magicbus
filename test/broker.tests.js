@@ -16,9 +16,9 @@ describe('Broker', function() {
   var serviceDomainName = 'my-domain';
   var appName = 'my-app';
   var connectionInfo = {
-    host: 'localhost',
+    hostname: 'localhost',
     vhost: '/',
-    user: 'guest',
+    username: 'guest',
     password: 'guest'
   };
   var broker;
