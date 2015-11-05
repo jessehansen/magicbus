@@ -16,10 +16,10 @@ describe('Broker', function() {
   var serviceDomainName = 'my-domain';
   var appName = 'my-app';
   var connectionInfo = {
-    server: 'localhost',
+    hostname: 'localhost',
     vhost: '/',
-    user: 'guest',
-    pass: 'guest'
+    username: 'guest',
+    password: 'guest'
   };
   var broker;
 
@@ -104,6 +104,19 @@ describe('Broker', function() {
       };
 
       expect(fn).to.throw('AssertionError: connectionInfo (object) is required');
+    });
+
+    it('should accept a connection string', function() {
+      var connectionString = 'amqp://usr:pass@host/vhost';
+      var broker = new Broker({}, 'my-domain', 'my-app', connectionString);
+
+      expect(broker._connectionInfo).to.eq(connectionString);
+    });
+
+    it('should accept a connection object', function() {
+      var broker = new Broker({}, 'my-domain', 'my-app', connectionInfo);
+
+      expect(broker._connectionInfo).to.eq(connectionInfo);
     });
   });
 

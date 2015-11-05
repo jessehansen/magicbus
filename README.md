@@ -29,7 +29,7 @@ Usage is a broad topic due to the number of potential scenarios. A bare-bones pu
 
 ```javascript
 var magicbus = require('@leisurelink/magicbus');
-var broker = magicbus.createBroker('domain-one', 'my-api', {'host':'localhost'});
+var broker = magicbus.createBroker('domain-one', 'my-api', 'amqp://guest:guest@docker.dev/');
 
 var publisher = magicbus.createPublisher(broker);
 
@@ -43,7 +43,7 @@ publisher.publish('publisher-executed', {
 ```javascript
 var magicbus = require('@leisurelink/magicbus');
 
-var broker = magicbus.createBroker('domain-two', 'my-worker', {'host':'localhost'});
+var broker = magicbus.createBroker('domain-two', 'my-worker', 'amqp://guest:guest@docker.dev/');
 
 var subscriber = magicbus.createSubscriber(broker);
 
@@ -185,7 +185,7 @@ Link a publishing route to a consuming route by binding an exchange to a queue. 
 
 ### createBinder(connectionInfo, configurator)
 
-Creates a new instance of `Binder` with the specified connection info.
+Creates a new instance of `Binder` with the specified connection info. Connection info can be any url that amqplib's connect method supports.
 
 ### #bind(publishingRoute, consumingRoute, options)
 
@@ -283,7 +283,7 @@ $ npm run-script test:unit
 To run just the integration tests, run:
 
 ```bash
-$ RABBITMQ_HOST=localhost npm run-script test:integration
+$ RABBITMQ_HOST=$YOUR_RABBIT_HOST_NAME_OR_IP npm run-script test:integration
 ```
 
 ### Setting Up For Integration Tests

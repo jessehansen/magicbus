@@ -2,9 +2,10 @@
 
 module.exports = {
   rabbit: {
-    host: process.env.RABBITMQ_HOST || 'localhost',
+    protocol: 'amqp',
+    hostname: process.env.RABBITMQ_HOST || 'localhost',
     vhost: '/',
-    user: 'guest',
-    pass: 'guest'
+    username: 'guest',
+    password: 'guest'
   }
 };
