@@ -8,28 +8,44 @@ var expect = chai.expect;
 
 describe('Logger', function(){
   var logger;
+  var callCount;
+  var logParam;
+  var kindEventParam;
   beforeEach(function(){
     logger = new Logger();
+    callCount = 0;
   });
+
+  function watch(kind) {
+    logger.on('log', function(log){
+      callCount++;
+      logParam = log;
+    });
+    logger.on('log:' + kind, function(message){
+      callCount++;
+      kindEventParam = message;
+    });
+  }
+
+  function expectCallsToHaveBeenMadeFor(kind, message, err) {
+    expect(callCount).to.eql(2);
+
+    expect(logParam.kind).to.eql(kind);
+    expect(logParam.message).to.eql(message);
+    expect(logParam.err).to.eql(err);
+
+    expect(kindEventParam).to.eql(message);
+  }
 
   describe('#log', function(){
 
     it('should emit two events', function(done){
-      var callCount = 0;
-      logger.on('log', function(l){
-        expect(l.kind).to.eql('info');
-        expect(l.message).to.eql('message');
-        callCount++;
-      });
-      logger.on('log:info', function(message){
-        expect(message).to.eql('message');
-        callCount++;
-      });
+      watch('info');
 
       logger.log('info', 'message');
 
       process.nextTick(function(){
-        expect(callCount).to.eql(2);
+        expectCallsToHaveBeenMadeFor('info', 'message');
         done();
       });
     });
@@ -38,23 +54,14 @@ describe('Logger', function(){
   _.each(['debug', 'info', 'warn', 'error'], function(kind){
     describe('#' + kind, function(){
       it('should emit two events', function(done){
+        watch(kind);
+
         var err = new Error('hi');
-        var callCount = 0;
-        logger.on('log', function(l){
-          expect(l.kind).to.eql(kind);
-          expect(l.message).to.eql('message');
-          expect(l.err).to.eql(err);
-          callCount++;
-        });
-        logger.on('log:' + kind, function(message){
-          expect(message).to.eql('message');
-          callCount++;
-        });
 
         logger.log(kind, 'message', err);
 
         process.nextTick(function(){
-          expect(callCount).to.eql(2);
+          expectCallsToHaveBeenMadeFor(kind, 'message', err);
           done();
         });
       });
