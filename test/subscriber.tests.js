@@ -1,6 +1,6 @@
 'use strict';
 
-var Subscriber = require('../lib/subscriber.js');
+var Subscriber = require('../lib/subscriber');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -11,12 +11,14 @@ chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
 
-var EventDispatcher = require('../lib/event-dispatcher.js');
+var EventDispatcher = require('../lib/event-dispatcher');
+var Logger = require('../lib/logger');
 
 describe('Subscriber', function() {
   var mockReceiver;
   var eventDispatcher;
   var subscriber;
+  var logger;
 
   beforeEach(function() {
     mockReceiver = {
@@ -26,8 +28,9 @@ describe('Subscriber', function() {
       }
     };
     eventDispatcher = new EventDispatcher();
+    logger = new Logger();
 
-    subscriber = new Subscriber(mockReceiver, eventDispatcher);
+    subscriber = new Subscriber(mockReceiver, eventDispatcher, logger);
   });
 
   describe('#on', function() {

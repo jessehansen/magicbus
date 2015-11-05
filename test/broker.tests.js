@@ -11,6 +11,7 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 var Promise = require('bluebird');
+var Logger = require('../lib/logger');
 
 describe('Broker', function() {
   var serviceDomainName = 'my-domain';
@@ -22,6 +23,7 @@ describe('Broker', function() {
     password: 'guest'
   };
   var broker;
+  var logger = new Logger();
 
   var mockAmqp;
   var mockConnection;
@@ -106,15 +108,23 @@ describe('Broker', function() {
       expect(fn).to.throw('AssertionError: connectionInfo (object) is required');
     });
 
+    it('should throw an assertion error given no logger', function() {
+      var fn = function() {
+        new Broker({}, 'my-domain', 'my-app', {});
+      };
+
+      expect(fn).to.throw('AssertionError: logger (object) is required');
+    });
+
     it('should accept a connection string', function() {
       var connectionString = 'amqp://usr:pass@host/vhost';
-      var broker = new Broker({}, 'my-domain', 'my-app', connectionString);
+      var broker = new Broker({}, 'my-domain', 'my-app', connectionString, logger);
 
       expect(broker._connectionInfo).to.eq(connectionString);
     });
 
     it('should accept a connection object', function() {
-      var broker = new Broker({}, 'my-domain', 'my-app', connectionInfo);
+      var broker = new Broker({}, 'my-domain', 'my-app', connectionInfo, logger);
 
       expect(broker._connectionInfo).to.eq(connectionInfo);
     });
@@ -269,7 +279,7 @@ describe('Broker', function() {
     });
 
     it('should not error given it has not created a connection', function() {
-      var broker = new Broker({}, serviceDomainName, appName, connectionInfo);
+      var broker = new Broker({}, serviceDomainName, appName, connectionInfo, logger);
       broker.shutdown();
     });
   });
