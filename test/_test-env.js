@@ -3,8 +3,8 @@
 module.exports = {
   rabbit: {
     host: process.env.RABBITMQ_HOST || 'localhost',
-    vhost: '/',
-    user: 'guest',
-    pass: 'guest'
+    vhost: 'testing',
+    user: 'guest2',
+    password: 'guest2'
   }
 };
