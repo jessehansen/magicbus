@@ -113,7 +113,7 @@ describe('Broker', function() {
       expect(broker._connectionInfo).to.eq(connectionString);
     });
 
-    it('should accept a connection object and format it for amqplib', function() {
+    it('should accept a connection object', function() {
       var broker = new Broker({}, 'my-domain', 'my-app', connectionInfo);
 
       expect(broker._connectionInfo).to.eq(connectionInfo);
