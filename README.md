@@ -29,7 +29,7 @@ Usage is a broad topic due to the number of potential scenarios. A bare-bones pu
 
 ```javascript
 var magicbus = require('@leisurelink/magicbus');
-var broker = magicbus.createBroker('domain-one', 'my-api', {'host':'localhost'});
+var broker = magicbus.createBroker('domain-one', 'my-api', {'hostname':'localhost'});
 
 var publisher = magicbus.createPublisher(broker);
 
