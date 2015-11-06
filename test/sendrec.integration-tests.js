@@ -9,7 +9,7 @@ var expect = chai.expect;
 describe('Send/Receive integration', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = environment.rabbit;
+  var connectionInfo = environment.rabbitConnectionObject;
   var broker;
   var sender;
   var receiver;
