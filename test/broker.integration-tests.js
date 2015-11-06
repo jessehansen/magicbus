@@ -12,7 +12,7 @@ var WorkerRoutePattern = require('../').Classes.RoutePatterns.Worker;
 describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = environment.rabbit;
+  var connectionInfo = environment.rabbitConnectionObject;
   var broker;
 
   before(function(){
