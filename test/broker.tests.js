@@ -58,7 +58,9 @@ describe('Broker', function() {
       createChannel: function() {
         return Promise.resolve(mockChannel);
       },
-      close: function() {}
+      close: function() {},
+      on: function() {},
+      removeAllListeners: function() {}
     };
 
     mockAmqp = {
