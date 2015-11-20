@@ -204,6 +204,38 @@ describe('Broker', function() {
     });
   });
 
+  describe('isConnected', function(){
+    var routeName;
+    var options;
+    var consumeCllbk;
+    var queueName;
+
+    beforeEach(function() {
+      setUpBrokerWithSuccessfulAmqpMocks();
+      routeName = 'subscribe';
+      queueName = 'the-queue';
+      options = {};
+      consumeCllbk = function () {};
+      broker.registerRoute(routeName, {
+        assertRoute: function() {
+          return Promise.resolve({
+            queueName: queueName
+          });
+        }
+      });
+    });
+
+    it('returns true when there is a connection present', function(){
+      return broker.consume(routeName, consumeCllbk, options).then(function() {
+        expect(broker.isConnected()).to.eq(true);
+      });
+    });
+
+    it('returns false if the connection is null', function(){
+      expect(broker.isConnected()).to.eq(false);
+    });
+  });
+
   describe('ack', function() {
     beforeEach(function() {
       setUpBrokerWithSuccessfulAmqpMocks();
