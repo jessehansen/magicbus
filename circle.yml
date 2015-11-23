@@ -1,0 +1,10 @@
+machine:
+  timezone:
+    America/Denver
+  node:
+    version: 4
+  services:
+    - rabbitmq-server
+dependencies:
+  post:
+    - rm -r ~/.gradle
