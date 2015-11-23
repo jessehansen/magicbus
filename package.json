@@ -4,6 +4,7 @@
   "description": "A message bus framework using RabbitMQ.",
   "main": "lib/index.js",
   "scripts": {
+    "pretest" : "npm run lint",
     "test": "mocha test",
     "test:integration": "mocha --recursive test/**/*.integration-tests.js test/*.integration-tests.js",
     "test:unit": "mocha --recursive test/**/*.tests.js test/*.tests.js",
@@ -15,7 +16,7 @@
     "lint:watch": "esw --quiet --watch",
     "docs": "node_modules/.bin/jsdoc -c ./jsdoc.conf.json",
     "docs:watch": "onchange 'lib/**/*' 'test/**/*' '*.js' '*.json'  -- npm run docs",
-    "ci": "npm run lint && npm run test:unit:coverage"
+    "ci": "npm test"
   },
   "repository": {
     "type": "git",
