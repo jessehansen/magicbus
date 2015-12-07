@@ -5,6 +5,9 @@ machine:
     version: 4
   services:
     - rabbitmq-server
+general:
+  artifacts:
+    - "coverage"
 dependencies:
   pre:
     - rm -rf node_modules/
