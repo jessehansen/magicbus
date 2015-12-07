@@ -6,5 +6,13 @@ machine:
   services:
     - rabbitmq-server
 dependencies:
+  pre:
+    - rm -rf node_modules/
   post:
     - rm -r ~/.gradle
+deployment:
+  release:
+    tag: /v.*/
+    owner: LeisureLink
+    commands:
+      - npm publish
