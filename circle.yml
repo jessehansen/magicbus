@@ -8,6 +8,7 @@ machine:
 dependencies:
   pre:
     - rm -rf node_modules/
+    - npm install mocha-junit-reporter
   post:
     - rm -r ~/.gradle
 deployment:
@@ -16,3 +17,7 @@ deployment:
     owner: LeisureLink
     commands:
       - npm publish
+test:
+  override:
+    - mkdir -p $CIRCLE_TEST_REPORTS
+    - MOCHA_FILE=$CIRCLE_TEST_REPORTS/mocha-results.xml MOCHA_REPORTER=mocha-junit-reporter npm run ci
