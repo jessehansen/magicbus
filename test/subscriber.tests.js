@@ -19,6 +19,7 @@ describe('Subscriber', function() {
   var eventDispatcher;
   var subscriber;
   var logger;
+  var logs;
 
   beforeEach(function() {
     mockReceiver = {
@@ -28,7 +29,11 @@ describe('Subscriber', function() {
       }
     };
     eventDispatcher = new EventDispatcher();
+    logs = [];
     logger = new Logger();
+    logger.on('log', function(data) {
+      logs.push(data);
+    });
 
     subscriber = new Subscriber(mockReceiver, eventDispatcher, logger);
   });
@@ -91,18 +96,33 @@ describe('Subscriber', function() {
       });
     });
 
+    it('should fail given synchronous handler fails', function() {
+      eventDispatcher.on(messageTypes[0], function(){
+        throw new Error('Something happened');
+      });
+
+      subscriber.startSubscription();
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened')
+        .then(function(){
+          expect(logs[logs.length-1].err).to.be.ok;
+        });
+    });
+
     it('should fail given no handler is registered for the message type', function() {
       subscriber.startSubscription();
       return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('No handler registered');
     });
 
-    it('should fail given handler fails', function() {
+    it('should fail given async handler fails', function() {
       eventDispatcher.on(messageTypes[0], function(){
         return Promise.reject(new Error('Something happened'));
       });
 
       subscriber.startSubscription();
-      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened');
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened')
+        .then(function(){
+          expect(logs[logs.length-1].err).to.be.ok;
+        });
     });
 
   });

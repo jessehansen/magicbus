@@ -15,6 +15,7 @@ var Logger = require('../lib/logger');
 
 describe('Consumer', function() {
   var mockBroker;
+  var logs;
   var logger;
 
   var eventName;
@@ -30,7 +31,12 @@ describe('Consumer', function() {
       },
       content: new Buffer(JSON.stringify('the payload'))
     };
+    logs = [];
     logger = new Logger();
+    logger.on('log', function(data) {
+      logs.push(data);
+    });
+
     mockBroker = {
       registerRoute: function( /* name, pattern */ ) {},
       consume: function(routeName, callback /* , options */ ) {
@@ -132,7 +138,9 @@ describe('Consumer', function() {
     var consumer;
 
     beforeEach(function() {
-      consumer = magicbus.createConsumer(mockBroker);
+      consumer = magicbus.createConsumer(mockBroker, function (cfg) {
+        cfg.useLogger(logger);
+      });
     });
 
     describe('acknowledging messages based on handler results', function() {
@@ -157,6 +165,8 @@ describe('Consumer', function() {
         consumer.startConsuming(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
+            expect(logs.length).to.be.greaterThan(1);
+            expect(logs[logs.length-2].err).to.be.ok;
             expect(fakeMessage.__resolution).to.equal('reject');
           });
       });
@@ -194,6 +204,8 @@ describe('Consumer', function() {
         consumer.startConsuming(handler);
         return mockBroker.emulateConsumption()
           .then(function() {
+            expect(logs.length).to.be.greaterThan(1);
+            expect(logs[logs.length-2].err).to.be.ok;
             expect(fakeMessage.__resolution).to.equal('reject');
             expect(handlerCompleted).to.equal(true);
           });
