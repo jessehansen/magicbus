@@ -6,8 +6,8 @@ var environment = require('./_test-env');
 var chai = require('chai');
 var expect = chai.expect;
 
-var PublisherRoutePattern = require('../').Classes.RoutePatterns.Publisher;
-var WorkerRoutePattern = require('../').Classes.RoutePatterns.Worker;
+var PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern');
+var WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern');
 
 describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
@@ -15,38 +15,37 @@ describe('Broker really using RabbitMQ', function() {
   var connectionInfo = environment.rabbitConnectionObject;
   var broker;
 
-  before(function(){
-    magicbus.createBinder(connectionInfo).bind({
-      serviceDomainName: serviceDomainName,
-      appName: appName,
-      name: 'publish',
-      pattern: new PublisherRoutePattern()
-    }, {
-      serviceDomainName: serviceDomainName,
-      appName: appName,
-      name: 'subscribe',
-      pattern: new WorkerRoutePattern()
-    }, {pattern: '#'});
-  });
+  // before(function(){
+  //   return magicbus.createBinder(connectionInfo).bind({
+  //     serviceDomainName: serviceDomainName,
+  //     appName: appName,
+  //     name: 'publish',
+  //     pattern: new PublisherRoutePattern()
+  //   }, {
+  //     serviceDomainName: serviceDomainName,
+  //     appName: appName,
+  //     name: 'subscribe',
+  //     pattern: new WorkerRoutePattern()
+  //   }, {pattern: '#'});
+  // });
 
   beforeEach(function() {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
   });
 
   afterEach(function() {
-    broker.shutdown();
+    return broker.shutdown();
   });
 
-  it('should be able to publish and consume messages', function(done) {
+  it.only('should be able to publish and consume messages', function(done) {
     var theMessage = 'Can I buy your magic bus?';
 
-    var handler = function(msg) {
+    var handler = function(msg, ops) {
       var messageContent = new Buffer(msg.content).toString();
       expect(messageContent).to.eq(theMessage);
 
-      broker.ack('subscribe', msg).then(function() {
-        done();
-      });
+      ops.ack()
+      done();
     };
 
     broker.registerRoute('publish', new PublisherRoutePattern());

@@ -1,7 +1,7 @@
 'use strict';
 
 var magicbus = require('../lib');
-var Broker = magicbus.Classes.Broker;
+var Broker = require('../lib/broker');
 
 var chai = require('chai');
 var expect = chai.expect;

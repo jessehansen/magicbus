@@ -1,7 +1,7 @@
 'use strict';
 
 var magicbus = require('../lib');
-var Publisher = require('../').Classes.Publisher;
+var Publisher = require('../lib/publisher');
 
 var chai = require('chai');
 var expect = chai.expect;

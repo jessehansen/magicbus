@@ -34,7 +34,9 @@
   "devDependencies": {
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
+    "chalk": "^1.1.1",
     "eslint": "^2.4.0",
+    "eslint-config-leisurelink": "^1.0.1",
     "eslint-watch": "^2.1.2",
     "istanbul": "^0.4.0",
     "jsdoc": "^3.3.3",
@@ -50,6 +52,7 @@
     "lodash": "^4.6.1",
     "machina": "^2.0.0-1",
     "monologue.js": "^0.3.4",
+    "node-uuid": "^1.4.7",
     "postal": "^1.0.8",
     "shortid": "^2.2.4"
   }

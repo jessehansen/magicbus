@@ -3,10 +3,7 @@
     "node": true
   },
   "rules": {
-    "indent": [2, 2, {"SwitchCase": 1}],
-    "quotes": [ 2, "single" ],
-    "linebreak-style": [ 2,"unix"],
-    "semi": [2,"always"]
-  },
-  "extends": "eslint:recommended"
+    "no-underscore-dangle": 2
+  }
+  "extends": "leisurelink"
 }
