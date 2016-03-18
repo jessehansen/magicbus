@@ -39,10 +39,13 @@ describe('Broker really using RabbitMQ', function() {
   });
 
   afterEach(function() {
-    return broker.shutdown();
+    return broker.shutdown()
+      .then(function() {
+        broker = null;
+      });
   });
 
-  it.only('should be able to publish and consume messages', function(done) {
+  it('should be able to publish and consume messages', function(done) {
     var theMessage = 'Can I buy your magic bus?';
 
     var handler = function(msg, ops) {
@@ -58,17 +61,13 @@ describe('Broker really using RabbitMQ', function() {
     });
   });
 
-  it('should be able to nack messages and have them end up in a failed queue', function(done) {
+  it('should be able to reject messages and have them end up in a failed queue', function(done) {
     var theMessage = 'Can I buy your magic bus?';
 
-    var handler = function(msg) {
-      broker.nack('subscribe', msg, false, false).then(function() {
-        done();
-      });
+    var handler = function(msg, ops) {
+      ops.reject();
+      done();
     };
-
-    broker.registerRoute('publish', new PublisherRoutePattern());
-    broker.registerRoute('subscribe', new WorkerRoutePattern());
 
     broker.consume('subscribe', handler).then(function() {
       broker.publish('publish', 'fail', new Buffer(theMessage));
