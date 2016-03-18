@@ -73,4 +73,27 @@ describe('Broker really using RabbitMQ', function() {
       broker.publish('publish', 'fail', new Buffer(theMessage));
     });
   });
+
+  it.only('should be able to ack and nack multiple messages and have them be batched', function(done) {
+    var messageCount = 0, targetCount = 10;
+
+    var handler = function(msg, ops) {
+      messageCount++;
+      var messageContent = Number(new Buffer(msg.content).toString());
+      if (messageContent > 3 && messageContent < 7){
+        ops.ack();
+      } else {
+        ops.reject();
+      }
+      if (messageCount === targetCount) {
+        done();
+      }
+    };
+
+    broker.consume('subscribe', handler).then(function() {
+      for (var i = 0; i < targetCount; i++) {
+        broker.publish('publish', 'fail', new Buffer(String(i)));
+      }
+    });
+  });
 });
