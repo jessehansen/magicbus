@@ -31,6 +31,11 @@ describe('Broker really using RabbitMQ', function() {
 
   beforeEach(function() {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
+
+    broker.registerRoute('publish', new PublisherRoutePattern());
+    broker.registerRoute('subscribe', new WorkerRoutePattern());
+
+    return broker.drainRouteQueue('subscribe');
   });
 
   afterEach(function() {
@@ -47,9 +52,6 @@ describe('Broker really using RabbitMQ', function() {
       ops.ack()
       done();
     };
-
-    broker.registerRoute('publish', new PublisherRoutePattern());
-    broker.registerRoute('subscribe', new WorkerRoutePattern());
 
     broker.consume('subscribe', handler).then(function() {
       broker.publish('publish', 'succeed', new Buffer(theMessage));
