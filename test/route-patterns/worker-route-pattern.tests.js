@@ -14,19 +14,19 @@ chai.use(require('chai-as-promised'));
 var Promise = require('bluebird');
 
 describe('WorkerRoutePattern', function() {
-  describe('assertRoute', function() {
-    var mockChannel;
+  describe('createTopology', function() {
+    var mockTopology;
     var routePattern;
 
     beforeEach(function() {
-      mockChannel = {
-        assertExchange: function() {
+      mockTopology = {
+        createExchange: function() {
           return Promise.resolve();
         },
-        assertQueue: function() {
+        createQueue: function() {
           return Promise.resolve();
         },
-        bindQueue: function() {
+        createBinding: function() {
           return Promise.resolve();
         }
       };
@@ -35,49 +35,61 @@ describe('WorkerRoutePattern', function() {
     });
 
     it('should assert a dead letter exchange', function() {
-      sinon.spy(mockChannel, 'assertExchange');
+      sinon.spy(mockTopology, 'createExchange');
 
-      return routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel).then(function(){
-        expect(mockChannel.assertExchange).to.have.been.calledWith('my-domain.my-app.my-route.failed', 'fanout', {durable: true});
+      return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function(){
+        expect(mockTopology.createExchange).to.have.been.calledWith({
+          name: 'my-domain.my-app.my-route.failed',
+          type: 'fanout',
+          durable: true
+        });
       });
     });
 
     it('should assert a queue to hold failed messages', function() {
-      sinon.spy(mockChannel, 'assertQueue');
+      sinon.spy(mockTopology, 'createQueue');
 
-      return routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel).then(function(){
-        expect(mockChannel.assertQueue).to.have.been.calledWith('my-domain.my-app.my-route.failed');
+      return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function(){
+        expect(mockTopology.createQueue).to.have.been.calledWith({
+          name: 'my-domain.my-app.my-route.failed'
+        });
       });
     });
 
     it('should bind the failed message queue to the dead letter exchange', function() {
-      sinon.spy(mockChannel, 'bindQueue');
+      sinon.spy(mockTopology, 'createBinding');
 
-      return routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel).then(function(){
-        expect(mockChannel.bindQueue).to.have.been.calledWith('my-domain.my-app.my-route.failed', 'my-domain.my-app.my-route.failed', '');
+      return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function(){
+        expect(mockTopology.createBinding).to.have.been.calledWith({
+          source: 'my-domain.my-app.my-route.failed',
+          target: 'my-domain.my-app.my-route.failed'
+        });
       });
     });
 
     it('should assert the queue to consume from and connect it to the dead letter exchange', function() {
-      sinon.spy(mockChannel, 'assertQueue');
+      sinon.spy(mockTopology, 'createQueue');
 
-      return routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel).then(function(){
-        expect(mockChannel.assertQueue).to.have.been.calledWith('my-domain.my-app.my-route', {deadLetterExchange: 'my-domain.my-app.my-route.failed'});
+      return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function(){
+        expect(mockTopology.createQueue).to.have.been.calledWith({
+          name: 'my-domain.my-app.my-route',
+          deadLetter: 'my-domain.my-app.my-route.failed'
+        });
       });
     });
 
     it('should return the name of the queue to consume from', function() {
-      var p = routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel);
+      var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
 
       return expect(p).to.eventually.eql({queueName: 'my-domain.my-app.my-route'});
     });
 
     it('should reject if any of the topology cannot be created', function() {
-      mockChannel.assertQueue = function() {
+      mockTopology.createQueue = function() {
         return Promise.reject(new Error('Nuts!'));
       };
 
-      var p = routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel);
+      var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
 
       return expect(p).to.be.rejectedWith('Nuts!');
     });

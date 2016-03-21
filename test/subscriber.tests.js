@@ -13,6 +13,7 @@ chai.use(require('chai-as-promised'));
 
 var EventDispatcher = require('../lib/event-dispatcher');
 var Logger = require('../lib/logger');
+var EventEmitter = require('events').EventEmitter;
 
 describe('Subscriber', function() {
   var mockReceiver;
@@ -30,8 +31,9 @@ describe('Subscriber', function() {
     };
     eventDispatcher = new EventDispatcher();
     logs = [];
-    logger = new Logger();
-    logger.on('log', function(data) {
+    var logEvents = new EventEmitter();
+    logger = new Logger(logEvents);
+    logEvents.on('log', function(data) {
       logs.push(data);
     });
 

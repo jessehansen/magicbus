@@ -16,7 +16,6 @@ var WorkerRoutePattern = require('../../lib/route-patterns/worker-route-pattern'
 
 var chai = require('chai');
 var expect = chai.expect;
-
 var amqplib = require('amqplib');
 
 describe('Configurator', function(){
@@ -46,30 +45,7 @@ describe('Configurator', function(){
       var broker = configurator.createBroker(serviceDomainName, appName, connectionInfo);
 
       expect(broker).to.be.an.instanceOf(Broker);
-      expect(broker._amqp).to.equal(amqplib);
       expect(broker._logger).to.equal(logger);
-    });
-
-    it('should allow caller to override amqplib', function(){
-      var myCustomAmqp = {};
-      var broker = configurator.createBroker(serviceDomainName, appName, connectionInfo, function(cfg){
-        cfg.useCustomAmqpLib(myCustomAmqp);
-      });
-
-      expect(broker).to.be.an.instanceOf(Broker);
-      expect(broker._amqp).to.equal(myCustomAmqp);
-    });
-
-    it('should allow caller to override amqplib with a factory', function(){
-      var myCustomAmqp = {};
-      var broker = configurator.createBroker(serviceDomainName, appName, connectionInfo, function(cfg){
-        cfg.useCustomAmqpLib(function(){
-          return myCustomAmqp;
-        });
-      });
-
-      expect(broker).to.be.an.instanceOf(Broker);
-      expect(broker._amqp).to.equal(myCustomAmqp);
     });
   });
 

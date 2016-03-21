@@ -2,6 +2,7 @@
 
 var magicbus = require('../');
 var Consumer = require('../lib/consumer.js');
+var EventEmitter = require('events').EventEmitter;
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -32,8 +33,9 @@ describe('Consumer', function() {
       content: new Buffer(JSON.stringify('the payload'))
     };
     logs = [];
-    logger = new Logger();
-    logger.on('log', function(data) {
+    var logEvents = new EventEmitter();
+    logger = new Logger(logEvents);
+    logEvents.on('log', function(data) {
       logs.push(data);
     });
 
@@ -46,26 +48,23 @@ describe('Consumer', function() {
       emulateConsumption: function() {
         var self = this;
         return new Promise(function(resolve) {
-          self.ack = function(routeName, message) {
-            message.__routeName = routeName;
-            message.__resolution = 'ack';
-            resolve();
-          };
-          self.nack = function(routeName, message, allUpTo, requeue) {
-            message.__routeName = routeName;
-            if (requeue)
-              message.__resolution = 'nack';
-            else
-              message.__resolution = 'reject';
-
-            if (allUpTo)
-              message.__resolution += '-allUpTo';
-
-            resolve();
+          var ops = {
+            ack: function() {
+              fakeMessage.__resolution = 'ack';
+              resolve();
+            },
+            nack: function() {
+              fakeMessage.__resolution = 'nack';
+              resolve();
+            },
+            reject: function() {
+              fakeMessage.__resolution = 'reject';
+              resolve();
+            }
           };
 
           process.nextTick(function() {
-            self._consumer(fakeMessage);
+            self._consumer(fakeMessage, ops);
           });
         });
       }

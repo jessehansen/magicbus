@@ -1,6 +1,7 @@
 'use strict';
 
 var Logger = require('../lib/logger');
+var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
 
 var chai = require('chai');
@@ -11,17 +12,19 @@ describe('Logger', function(){
   var callCount;
   var logParam;
   var kindEventParam;
+  var logEvents;
   beforeEach(function(){
-    logger = new Logger();
+    logEvents = new EventEmitter();
+    logger = new Logger(logEvents);
     callCount = 0;
   });
 
   function watch(kind) {
-    logger.on('log', function(log){
+    logEvents.on('log', function(log){
       callCount++;
       logParam = log;
     });
-    logger.on('log:' + kind, function(message){
+    logEvents.on('log:' + kind, function(message){
       callCount++;
       kindEventParam = message;
     });

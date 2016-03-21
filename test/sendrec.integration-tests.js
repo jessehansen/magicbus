@@ -20,7 +20,7 @@ describe('Send/Receive integration', function() {
     receiver = magicbus.createConsumer(broker, function(cfg){ cfg.useRouteName('subscribe'); });
 
     return magicbus.createBinder(connectionInfo).bind(sender.getRoute(), receiver.getRoute(), {pattern: '#'})
-      .then(function(){
+      .then(function() {
         return receiver.purgeQueue();
       });
   });
