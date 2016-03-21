@@ -4,10 +4,10 @@ var ConsumerPipeline = require('../../lib/middleware').ConsumerPipeline;
 
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
-
-chai.use(chaiAsPromised);
 var expect = chai.expect;
 var assert = chai.assert;
+
+chai.use(chaiAsPromised);
 
 function simpleMiddleware(message, actions){
   message.properties.headers.push('first: true');
@@ -20,14 +20,21 @@ describe('ConsumerPipeline', function() {
 
   beforeEach(function() {
     consumerPipeline = new ConsumerPipeline();
-    message = {properties: {headers:[]}, payload:'data'};
+    message = {
+      properties: {
+        headers:[]
+      },
+      payload:'data'
+    };
   });
 
   describe('#execute', function(){
     var funcs = ['ack', 'nack', 'reject'];
-    for (var i = 0; i < funcs.length; i++){
-      var fn = funcs[i];
-      it('should not call successive functions when middleware calls ' + fn, function(){
+    var i, fn;
+    for (i = 0; i < funcs.length; i++){
+      fn = funcs[i];
+      /* eslint no-loop-func: 1 */
+      it('should not call successive functions when middleware calls ' + fn, function (){
         consumerPipeline = new ConsumerPipeline();
         consumerPipeline.use(function(msg, actions){
           actions[fn]({});
@@ -41,12 +48,13 @@ describe('ConsumerPipeline', function() {
         });
       });
       it('should emit event when middleware calls ' + fn, function(){
+        var emitted;
         consumerPipeline = new ConsumerPipeline();
         consumerPipeline.use(function(msg, actions){
           actions[fn]({});
         });
 
-        var emitted = 0;
+        emitted = 0;
 
         return consumerPipeline.prepare(function(eventSink){
           eventSink.on(fn, function(){

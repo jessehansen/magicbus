@@ -2,6 +2,8 @@
 
 var PublisherRoutePattern = require('../../lib/route-patterns/publisher-route-pattern.js');
 
+var Promise = require('bluebird');
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -10,8 +12,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var Promise = require('bluebird');
 
 describe('PublisherRoutePattern', function() {
   describe('default construction', function() {
@@ -65,7 +65,7 @@ describe('PublisherRoutePattern', function() {
     it('should return the name of the exchange it created', function() {
       var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
 
-      return expect(p).to.eventually.eql({exchangeName: 'my-domain.my-app.my-route'});
+      return expect(p).to.eventually.eql({ exchangeName: 'my-domain.my-app.my-route' });
     });
 
     it('should reject if the exchange cannot be created', function() {
@@ -73,9 +73,7 @@ describe('PublisherRoutePattern', function() {
         return Promise.reject(new Error('Shoot!'));
       };
 
-      var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
-
-      return expect(p).to.be.rejectedWith('Shoot!');
+      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).to.be.rejectedWith('Shoot!');
     });
   });
 });

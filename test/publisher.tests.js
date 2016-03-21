@@ -3,6 +3,9 @@
 var magicbus = require('../lib');
 var Publisher = require('../lib/publisher');
 
+var Promise = require('bluebird');
+var Logger = require('../lib/logger');
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -11,9 +14,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var Promise = require('bluebird');
-var Logger = require('../lib/logger');
 
 describe('Publisher', function() {
   var mockBroker;
@@ -73,9 +73,9 @@ describe('Publisher', function() {
       expect(fn).to.throw('AssertionError: logger (object) is required');
     });
     it('should register a route with the broker', function() {
+      var pattern = {};
       sinon.spy(mockBroker, 'registerRoute');
 
-      var pattern = {};
       new Publisher(mockBroker, {}, {}, 'route', pattern, logger);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
@@ -89,8 +89,8 @@ describe('Publisher', function() {
     });
 
     it('should register a route with the broker', function() {
-      sinon.spy(mockBroker, 'registerRoute');
       var pattern = {};
+      sinon.spy(mockBroker, 'registerRoute');
 
       publisher = magicbus.createPublisher(mockBroker, function (cfg) {
         cfg.useRouteName('publish');
@@ -113,9 +113,7 @@ describe('Publisher', function() {
         return Promise.resolve();
       };
 
-      var p = publisher.publish('something-happened');
-
-      return expect(p).to.be.fulfilled;
+      return expect(publisher.publish('something-happened')).to.be.fulfilled;
     });
 
     it('should be rejected given the broker.publish call is rejected', function() {
@@ -125,9 +123,7 @@ describe('Publisher', function() {
         return brokerPromise;
       };
 
-      var p = publisher.publish('something-happened');
-
-      return expect(p).to.be.rejectedWith('Aw, snap!');
+      return expect(publisher.publish('something-happened')).to.be.rejectedWith('Aw, snap!');
     });
 
     it('should be rejected given the middleware rejects the message', function() {
@@ -135,9 +131,7 @@ describe('Publisher', function() {
         actions.error(new Error('Aw, snap!'));
       });
 
-      var p = publisher.publish('something-happened');
-
-      return expect(p).to.be.rejectedWith('Aw, snap!');
+      return expect(publisher.publish('something-happened')).to.be.rejectedWith('Aw, snap!');
     });
 
     it('should call middleware with the message', function() {
@@ -147,9 +141,7 @@ describe('Publisher', function() {
         actions.next();
       });
 
-      var p = publisher.publish('something-happened');
-
-      return p.then(function() {
+      return publisher.publish('something-happened').then(function() {
         expect(middlewareCalled).to.equal(true);
       });
     });
@@ -158,7 +150,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({persistent: true}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ persistent: true }));
       });
     });
 
@@ -166,35 +158,35 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({type: 'something-happened'}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ type: 'something-happened' }));
       });
     });
 
     it('should copy properties from the publishOptions property of the options to the publish options', function() {
-      sinon.spy(mockBroker, 'publish');
-
       var options = {
         publishOptions: {
           correlationId: '123'
         }
       };
 
+      sinon.spy(mockBroker, 'publish');
+
       return publisher.publish('something-happened', null, options).then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({correlationId: '123'}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ correlationId: '123' }));
       });
     });
 
     it('should overwrite publish options set from anywhere else with values from the publishOptions property of the options', function() {
-      sinon.spy(mockBroker, 'publish');
-
       var options = {
         publishOptions: {
           persistent: false
         }
       };
 
+      sinon.spy(mockBroker, 'publish');
+
       return publisher.publish('something-happened', null, options).then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({persistent: false}));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ persistent: false }));
       });
     });
   });

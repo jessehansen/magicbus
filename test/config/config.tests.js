@@ -158,10 +158,10 @@ describe('Configurator', function(){
   describe('#createSubscriber', function(){
     it('should create a subscriber with the default params', function(){
       var subscriber = configurator.createSubscriber(broker);
+      var consumer;
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       expect(subscriber._logger).to.equal(logger);
-      var consumer = subscriber._consumer;
 
       expect(consumer).to.be.an.instanceOf(Consumer);
       expect(consumer._envelope).to.be.an.instanceOf(BasicEnvelope);
@@ -176,9 +176,10 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.useEnvelope(myEnvelope);
       });
+      var consumer;
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
-      var consumer = subscriber._consumer;
+      consumer = subscriber._consumer;
       expect(consumer._envelope).to.equal(myEnvelope);
     });
 
@@ -187,9 +188,10 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.usePipeline(myPipeline);
       });
+      var consumer;
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
-      var consumer = subscriber._consumer;
+      consumer = subscriber._consumer;
       expect(consumer._pipeline).to.equal(myPipeline);
     });
 
@@ -198,9 +200,10 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.useRouteName(myRouteName);
       });
+      var consumer;
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
-      var consumer = subscriber._consumer;
+      consumer = subscriber._consumer;
       expect(consumer._routeName).to.equal(myRouteName);
     });
 
@@ -209,9 +212,10 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.useRoutePattern(myRoutePattern);
       });
+      var consumer;
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
-      var consumer = subscriber._consumer;
+      consumer = subscriber._consumer;
       expect(consumer._routePattern).to.equal(myRoutePattern);
     });
 

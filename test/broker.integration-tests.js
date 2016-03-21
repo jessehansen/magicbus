@@ -26,7 +26,7 @@ describe('Broker really using RabbitMQ', function() {
       appName: appName,
       name: 'subscribe',
       pattern: new WorkerRoutePattern()
-    }, {pattern: '#'});
+    }, { pattern: '#' });
   });
 
   beforeEach(function() {
@@ -52,7 +52,7 @@ describe('Broker really using RabbitMQ', function() {
       var messageContent = new Buffer(msg.content).toString();
       expect(messageContent).to.eq(theMessage);
 
-      ops.ack()
+      ops.ack();
       done();
     };
 
@@ -78,8 +78,8 @@ describe('Broker really using RabbitMQ', function() {
     var messageCount = 0, targetCount = 10;
 
     var handler = function(msg, ops) {
-      messageCount++;
       var messageContent = parseInt(new Buffer(msg.content).toString(), 10);
+      messageCount++;
       if (messageContent > 3 && messageContent < 7){
         ops.ack();
       } else {
@@ -92,7 +92,8 @@ describe('Broker really using RabbitMQ', function() {
     };
 
     broker.consume('subscribe', handler).then(function() {
-      for (var i = 0; i < targetCount; i++) {
+      var i;
+      for (i = 0; i < targetCount; i++) {
         broker.publish('publish', 'fail', new Buffer(String(i)));
       }
     });

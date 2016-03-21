@@ -57,9 +57,8 @@ describe('Logger', function(){
   _.each(['debug', 'info', 'warn', 'error'], function(kind){
     describe('#' + kind, function(){
       it('should emit two events', function(done){
-        watch(kind);
-
         var err = new Error('hi');
+        watch(kind);
 
         logger.log(kind, 'message', err);
 

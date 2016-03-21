@@ -2,6 +2,8 @@
 
 var magicbus = require('../lib');
 var Broker = require('../lib/broker');
+var Promise = require('bluebird');
+var Logger = require('../lib/logger');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -9,9 +11,6 @@ var expect = chai.expect;
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
-
-var Promise = require('bluebird');
-var Logger = require('../lib/logger');
 
 xdescribe('Broker', function() {
   var serviceDomainName = 'my-domain';
@@ -150,11 +149,12 @@ xdescribe('Broker', function() {
       var routingKey = 'the.routing.key';
       var content = new Buffer('content');
       var options = {};
+      var exchangeName, mockRoutePattern;
 
       sinon.spy(mockChannel, 'publish');
 
-      var exchangeName = 'the-exchange';
-      var mockRoutePattern = {
+      exchangeName = 'the-exchange';
+      mockRoutePattern = {
         createTopology: function() {
           return Promise.resolve({
             exchangeName: exchangeName
@@ -178,11 +178,12 @@ xdescribe('Broker', function() {
       var routeName = 'subscribe';
       var callback = function(/* msg */) {};
       var options = {};
+      var queueName, mockRoutePattern;
 
       sinon.spy(mockChannel, 'consume');
 
-      var queueName = 'the-queue';
-      var mockRoutePattern = {
+      queueName = 'the-queue';
+      mockRoutePattern = {
         createTopology: function() {
           return Promise.resolve({
             queueName: queueName
@@ -237,11 +238,12 @@ xdescribe('Broker', function() {
     it('should ack through a channel given a message', function() {
       var routeName = 'subscribe';
       var msg = {};
+      var queueName, mockRoutePattern;
 
       sinon.spy(mockChannel, 'ack');
 
-      var queueName = 'the-queue';
-      var mockRoutePattern = {
+      queueName = 'the-queue';
+      mockRoutePattern = {
         createTopology: function() {
           return Promise.resolve({
             queueName: queueName
@@ -264,11 +266,12 @@ xdescribe('Broker', function() {
     it('should nack through a channel given a message', function() {
       var routeName = 'subscribe';
       var msg = {};
+      var queueName, mockRoutePattern;
 
       sinon.spy(mockChannel, 'nack');
 
-      var queueName = 'the-queue';
-      var mockRoutePattern = {
+      queueName = 'the-queue';
+      mockRoutePattern = {
         createTopology: function() {
           return Promise.resolve({
             queueName: queueName
@@ -285,12 +288,13 @@ xdescribe('Broker', function() {
 
   describe('shutdown', function() {
     it('should close the connection given it has created a connection', function() {
+      var queueName, mockRoutePattern;
       setUpBrokerWithSuccessfulAmqpMocks();
 
       sinon.spy(mockConnection, 'close');
 
-      var queueName = 'the-queue';
-      var mockRoutePattern = {
+      queueName = 'the-queue';
+      mockRoutePattern = {
         createTopology: function() {
           return Promise.resolve({
             queueName: queueName

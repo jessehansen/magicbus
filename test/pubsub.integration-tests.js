@@ -19,7 +19,7 @@ describe('Pub/Sub integration', function() {
     publisher = magicbus.createPublisher(broker);
     subscriber = magicbus.createSubscriber(broker);
 
-    return magicbus.createBinder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'})
+    return magicbus.createBinder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), { pattern: '#' })
       .then(function(){
         return subscriber.purgeQueue();
       });

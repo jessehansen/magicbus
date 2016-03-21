@@ -2,6 +2,8 @@
 
 var WorkerRoutePattern = require('../../lib/route-patterns/worker-route-pattern.js');
 
+var Promise = require('bluebird');
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -10,8 +12,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var Promise = require('bluebird');
 
 describe('WorkerRoutePattern', function() {
   describe('createTopology', function() {
@@ -81,7 +81,7 @@ describe('WorkerRoutePattern', function() {
     it('should return the name of the queue to consume from', function() {
       var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
 
-      return expect(p).to.eventually.eql({queueName: 'my-domain.my-app.my-route'});
+      return expect(p).to.eventually.eql({ queueName: 'my-domain.my-app.my-route' });
     });
 
     it('should reject if any of the topology cannot be created', function() {
@@ -89,9 +89,7 @@ describe('WorkerRoutePattern', function() {
         return Promise.reject(new Error('Nuts!'));
       };
 
-      var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
-
-      return expect(p).to.be.rejectedWith('Nuts!');
+      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).to.be.rejectedWith('Nuts!');
     });
   });
 });

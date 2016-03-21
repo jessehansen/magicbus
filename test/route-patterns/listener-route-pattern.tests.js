@@ -1,6 +1,7 @@
 'use strict';
 
 var ListenerRoutePattern = require('../../lib/route-patterns/listener-route-pattern.js');
+var Promise = require('bluebird');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -10,8 +11,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var Promise = require('bluebird');
 
 describe('ListenerRoutePattern', function() {
   describe('createTopology', function() {
@@ -82,9 +81,7 @@ describe('ListenerRoutePattern', function() {
         return Promise.reject(new Error('Nuts!'));
       };
 
-      var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
-
-      return expect(p).to.be.rejectedWith('Nuts!');
+      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).to.be.rejectedWith('Nuts!');
     });
   });
 });

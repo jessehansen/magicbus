@@ -2,6 +2,9 @@
 
 var EventDispatcher = require('../lib/event-dispatcher');
 
+var eventName = 'myCoolEventName';
+var reallyBadEventName = '/\\^$*+?.()|[]{}';
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -10,9 +13,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var eventName = 'myCoolEventName';
-var reallyBadEventName = '/\\^$*+?.()|[]{}';
 
 describe('EventDispatcher', function() {
   var doNothing = function() {};
