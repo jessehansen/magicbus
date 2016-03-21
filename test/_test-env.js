@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  rabbitConnectionObject: {
+  rabbit: {
     server: process.env.RABBITMQ_HOST || 'localhost',
     user: 'guest',
     pass: 'guest',

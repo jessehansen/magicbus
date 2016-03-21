@@ -12,7 +12,7 @@ var WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern');
 describe('Broker really using RabbitMQ', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = environment.rabbitConnectionObject;
+  var connectionInfo = environment.rabbit;
   var broker;
 
   before(function(){
@@ -35,7 +35,7 @@ describe('Broker really using RabbitMQ', function() {
     broker.registerRoute('publish', new PublisherRoutePattern());
     broker.registerRoute('subscribe', new WorkerRoutePattern());
 
-    return broker.drainRouteQueue('subscribe');
+    return broker.purgeRouteQueue('subscribe');
   });
 
   afterEach(function() {
@@ -74,13 +74,12 @@ describe('Broker really using RabbitMQ', function() {
     });
   });
 
-  it.only('should be able to ack and nack multiple messages and have them be batched', function(done) {
+  it('should be able to ack and nack multiple messages and have them be batched', function(done) {
     var messageCount = 0, targetCount = 10;
 
     var handler = function(msg, ops) {
       messageCount++;
       var messageContent = parseInt(new Buffer(msg.content).toString(), 10);
-      console.log(`Received ${messageContent}`);
       if (messageContent > 3 && messageContent < 7){
         ops.ack();
       } else {
