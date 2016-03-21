@@ -15,19 +15,19 @@ describe('Broker really using RabbitMQ', function() {
   var connectionInfo = environment.rabbitConnectionObject;
   var broker;
 
-  // before(function(){
-  //   return magicbus.createBinder(connectionInfo).bind({
-  //     serviceDomainName: serviceDomainName,
-  //     appName: appName,
-  //     name: 'publish',
-  //     pattern: new PublisherRoutePattern()
-  //   }, {
-  //     serviceDomainName: serviceDomainName,
-  //     appName: appName,
-  //     name: 'subscribe',
-  //     pattern: new WorkerRoutePattern()
-  //   }, {pattern: '#'});
-  // });
+  before(function(){
+    return magicbus.createBinder(connectionInfo).bind({
+      serviceDomainName: serviceDomainName,
+      appName: appName,
+      name: 'publish',
+      pattern: new PublisherRoutePattern()
+    }, {
+      serviceDomainName: serviceDomainName,
+      appName: appName,
+      name: 'subscribe',
+      pattern: new WorkerRoutePattern()
+    }, {pattern: '#'});
+  });
 
   beforeEach(function() {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
@@ -74,12 +74,13 @@ describe('Broker really using RabbitMQ', function() {
     });
   });
 
-  it.only('should be able to ack and nack multiple messages and have them be batched', function(done) {
+  it.only('should be able to ack and nack multiple messages and have them be batched and flushed upon shutdown', function(done) {
     var messageCount = 0, targetCount = 10;
 
     var handler = function(msg, ops) {
       messageCount++;
-      var messageContent = Number(new Buffer(msg.content).toString());
+      var messageContent = parseInt(new Buffer(msg.content).toString(), 10);
+      console.log(`Received ${messageContent}`);
       if (messageContent > 3 && messageContent < 7){
         ops.ack();
       } else {
