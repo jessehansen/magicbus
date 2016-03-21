@@ -162,7 +162,7 @@ describe('Configurator', function(){
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       expect(subscriber._logger).to.equal(logger);
-
+      consumer = subscriber._consumer;
       expect(consumer).to.be.an.instanceOf(Consumer);
       expect(consumer._envelope).to.be.an.instanceOf(BasicEnvelope);
       expect(consumer._pipeline).to.be.an.instanceOf(ConsumerPipeline);
