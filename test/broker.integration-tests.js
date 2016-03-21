@@ -74,7 +74,7 @@ describe('Broker really using RabbitMQ', function() {
     });
   });
 
-  it.only('should be able to ack and nack multiple messages and have them be batched and flushed upon shutdown', function(done) {
+  it.only('should be able to ack and nack multiple messages and have them be batched', function(done) {
     var messageCount = 0, targetCount = 10;
 
     var handler = function(msg, ops) {
@@ -88,6 +88,7 @@ describe('Broker really using RabbitMQ', function() {
       }
       if (messageCount === targetCount) {
         done();
+        // right now, I'm manually verifying that the subscribe queue is empty after broker shutdown
       }
     };
 
