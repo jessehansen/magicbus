@@ -14,28 +14,25 @@ describe('Broker really using RabbitMQ', function() {
   var appName = 'tests';
   var connectionInfo = environment.rabbit;
   var broker;
-
-  before(function(){
-    return magicbus.createBinder(connectionInfo).bind({
-      serviceDomainName: serviceDomainName,
-      appName: appName,
-      name: 'publish',
-      pattern: new PublisherRoutePattern()
-    }, {
-      serviceDomainName: serviceDomainName,
-      appName: appName,
-      name: 'subscribe',
-      pattern: new WorkerRoutePattern()
-    }, { pattern: '#' });
-  });
+  var bound;
 
   beforeEach(function() {
+    var p;
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
 
     broker.registerRoute('publish', new PublisherRoutePattern());
     broker.registerRoute('subscribe', new WorkerRoutePattern());
 
-    return broker.purgeRouteQueue('subscribe');
+    p = Promise.resolve();
+    if (!bound){
+      p = p.then(function(){
+        broker.bind('publish', 'subscribe', { pattern: '#' });
+        bound = true;
+      });
+    }
+    return p.then(function(){
+      return broker.purgeRouteQueue('subscribe');
+    });
   });
 
   afterEach(function() {
