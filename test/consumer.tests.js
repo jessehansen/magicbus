@@ -75,42 +75,42 @@ describe('Consumer', function() {
   describe('constructor', function() {
     it('should throw an assertion error given no broker', function() {
       var fn = function() {
-        new Consumer();
+        Consumer();
       };
 
       expect(fn).to.throw('AssertionError: broker (object) is required');
     });
     it('should throw an assertion error given no envelope', function() {
       var fn = function() {
-        new Consumer(mockBroker);
+        Consumer(mockBroker);
       };
 
       expect(fn).to.throw('AssertionError: envelope (object) is required');
     });
     it('should throw an assertion error given no pipeline', function() {
       var fn = function() {
-        new Consumer(mockBroker, {});
+        Consumer(mockBroker, {});
       };
 
       expect(fn).to.throw('AssertionError: pipeline (object) is required');
     });
     it('should throw an assertion error given no routeName', function() {
       var fn = function() {
-        new Consumer(mockBroker, {}, {});
+        Consumer(mockBroker, {}, {});
       };
 
       expect(fn).to.throw('AssertionError: routeName (string) is required');
     });
     it('should throw an assertion error given no routePattern', function() {
       var fn = function() {
-        new Consumer(mockBroker, {}, {}, 'route');
+        Consumer(mockBroker, {}, {}, 'route');
       };
 
       expect(fn).to.throw('AssertionError: routePattern (object) is required');
     });
     it('should throw an assertion error given no logger', function() {
       var fn = function() {
-        new Consumer(mockBroker, {}, {}, 'route', {});
+        Consumer(mockBroker, {}, {}, 'route', {});
       };
 
       expect(fn).to.throw('AssertionError: logger (object) is required');
@@ -120,14 +120,14 @@ describe('Consumer', function() {
       sinon.spy(mockBroker, 'registerRoute');
 
       pattern = {};
-      new Consumer(mockBroker, {}, {}, 'route', pattern, logger);
+      Consumer(mockBroker, {}, {}, 'route', pattern, logger);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
 
     describe('constructor argument checking', function() {
       it('should throw an assertion error given no broker', function() {
         var fn = function() {
-          new Consumer();
+          Consumer();
         };
 
         expect(fn).to.throw('AssertionError: broker (object) is required');

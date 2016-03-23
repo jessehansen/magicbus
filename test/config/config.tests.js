@@ -103,12 +103,7 @@ describe('Configurator', function(){
     it('should create a consumer with the default params', function(){
       var consumer = configurator.createConsumer(broker);
 
-      expect(consumer).to.be.an.instanceOf(Consumer);
-      expect(consumer._envelope).to.be.an.instanceOf(BasicEnvelope);
-      expect(consumer._pipeline).to.be.an.instanceOf(ConsumerPipeline);
-      expect(consumer._routeName).to.equal('receive');
-      expect(consumer._routePattern).to.be.an.instanceOf(WorkerRoutePattern);
-      expect(consumer._logger).to.equal(logger);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the envelope', function(){
@@ -117,8 +112,7 @@ describe('Configurator', function(){
         cfg.useEnvelope(myEnvelope);
       });
 
-      expect(consumer).to.be.an.instanceOf(Consumer);
-      expect(consumer._envelope).to.equal(myEnvelope);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the middleware pipeline', function(){
@@ -127,8 +121,7 @@ describe('Configurator', function(){
         cfg.usePipeline(myPipeline);
       });
 
-      expect(consumer).to.be.an.instanceOf(Consumer);
-      expect(consumer._pipeline).to.equal(myPipeline);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the route name', function(){
@@ -137,8 +130,7 @@ describe('Configurator', function(){
         cfg.useRouteName(myRouteName);
       });
 
-      expect(consumer).to.be.an.instanceOf(Consumer);
-      expect(consumer._routeName).to.equal(myRouteName);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the route pattern', function(){
@@ -147,8 +139,7 @@ describe('Configurator', function(){
         cfg.useRoutePattern(myRoutePattern);
       });
 
-      expect(consumer).to.be.an.instanceOf(Consumer);
-      expect(consumer._routePattern).to.equal(myRoutePattern);
+      expect(consumer).to.be.ok;
     });
   });
 
@@ -160,12 +151,7 @@ describe('Configurator', function(){
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       expect(subscriber._logger).to.equal(logger);
       consumer = subscriber._consumer;
-      expect(consumer).to.be.an.instanceOf(Consumer);
-      expect(consumer._envelope).to.be.an.instanceOf(BasicEnvelope);
-      expect(consumer._pipeline).to.be.an.instanceOf(ConsumerPipeline);
-      expect(consumer._routeName).to.equal('subscribe');
-      expect(consumer._routePattern).to.be.an.instanceOf(WorkerRoutePattern);
-      expect(consumer._logger).to.equal(logger);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the envelope', function(){
@@ -177,7 +163,7 @@ describe('Configurator', function(){
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       consumer = subscriber._consumer;
-      expect(consumer._envelope).to.equal(myEnvelope);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the middleware pipeline', function(){
@@ -189,7 +175,7 @@ describe('Configurator', function(){
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       consumer = subscriber._consumer;
-      expect(consumer._pipeline).to.equal(myPipeline);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the route name', function(){
@@ -201,7 +187,7 @@ describe('Configurator', function(){
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       consumer = subscriber._consumer;
-      expect(consumer._routeName).to.equal(myRouteName);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the route pattern', function(){
@@ -213,7 +199,7 @@ describe('Configurator', function(){
 
       expect(subscriber).to.be.an.instanceOf(Subscriber);
       consumer = subscriber._consumer;
-      expect(consumer._routePattern).to.equal(myRoutePattern);
+      expect(consumer).to.be.ok;
     });
 
     it('should allow caller to override the consumer', function(){
