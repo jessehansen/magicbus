@@ -1,11 +1,9 @@
 'use strict';
 
 var Configurator = require('../../lib/config');
-var Broker = require('../../lib/broker');
 var Publisher = require('../../lib/publisher');
 var Consumer = require('../../lib/consumer');
 var Subscriber = require('../../lib/subscriber');
-var Binder = require('../../lib/binder');
 var Logger = require('../../lib/logger');
 
 var BasicEnvelope = require('../../lib/basic-envelope');
@@ -16,7 +14,6 @@ var WorkerRoutePattern = require('../../lib/route-patterns/worker-route-pattern'
 
 var chai = require('chai');
 var expect = chai.expect;
-var amqplib = require('amqplib');
 
 describe('Configurator', function(){
   var configurator;
@@ -44,8 +41,8 @@ describe('Configurator', function(){
     it('should create a broker with the default params', function(){
       var broker = configurator.createBroker(serviceDomainName, appName, connectionInfo);
 
-      expect(broker).to.be.an.instanceOf(Broker);
-      expect(broker._logger).to.equal(logger);
+      expect(broker).to.be.ok;
+      expect(broker.shutdown).to.be.ok;
     });
   });
 
