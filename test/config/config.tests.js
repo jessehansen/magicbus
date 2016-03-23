@@ -241,31 +241,8 @@ describe('Configurator', function(){
     it('should create a binder with the default params', function(){
       var binder = configurator.createBinder(connectionInfo);
 
-      expect(binder).to.be.an.instanceOf(Binder);
-      expect(binder._amqp).to.equal(amqplib);
-      expect(binder._logger).to.equal(logger);
-    });
-
-    it('should allow caller to override amqplib', function(){
-      var myCustomAmqp = {};
-      var binder = configurator.createBinder(connectionInfo, function(cfg){
-        cfg.useCustomAmqpLib(myCustomAmqp);
-      });
-
-      expect(binder).to.be.an.instanceOf(Binder);
-      expect(binder._amqp).to.equal(myCustomAmqp);
-    });
-
-    it('should allow caller to override amqplib with a factory', function(){
-      var myCustomAmqp = {};
-      var binder = configurator.createBinder(connectionInfo, function(cfg){
-        cfg.useCustomAmqpLib(function(){
-          return myCustomAmqp;
-        });
-      });
-
-      expect(binder).to.be.an.instanceOf(Binder);
-      expect(binder._amqp).to.equal(myCustomAmqp);
+      expect(binder).to.be.ok;
+      expect(binder.bind).to.be.ok;
     });
   });
 
