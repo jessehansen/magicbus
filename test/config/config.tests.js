@@ -50,12 +50,7 @@ describe('Configurator', function(){
     it('should create a publisher with the default params', function(){
       var publisher = configurator.createPublisher(broker);
 
-      expect(publisher).to.be.an.instanceOf(Publisher);
-      expect(publisher._envelope).to.be.an.instanceOf(BasicEnvelope);
-      expect(publisher._pipeline).to.be.an.instanceOf(ProducerPipeline);
-      expect(publisher._routeName).to.equal('publish');
-      expect(publisher._routePattern).to.be.an.instanceOf(PublisherRoutePattern);
-      expect(publisher._logger).to.equal(logger);
+      expect(publisher).to.be.ok;
     });
 
     it('should allow caller to override the envelope', function(){
@@ -64,8 +59,7 @@ describe('Configurator', function(){
         cfg.useEnvelope(myEnvelope);
       });
 
-      expect(publisher).to.be.an.instanceOf(Publisher);
-      expect(publisher._envelope).to.equal(myEnvelope);
+      expect(publisher).to.be.ok;
     });
 
     it('should allow caller to override the middleware pipeline', function(){
@@ -74,8 +68,7 @@ describe('Configurator', function(){
         cfg.usePipeline(myPipeline);
       });
 
-      expect(publisher).to.be.an.instanceOf(Publisher);
-      expect(publisher._pipeline).to.equal(myPipeline);
+      expect(publisher).to.be.ok;
     });
 
     it('should allow caller to override the route name', function(){
@@ -84,8 +77,7 @@ describe('Configurator', function(){
         cfg.useRouteName(myRouteName);
       });
 
-      expect(publisher).to.be.an.instanceOf(Publisher);
-      expect(publisher._routeName).to.equal(myRouteName);
+      expect(publisher).to.be.ok;
     });
 
     it('should allow caller to override the route pattern', function(){
@@ -94,8 +86,7 @@ describe('Configurator', function(){
         cfg.useRoutePattern(myRoutePattern);
       });
 
-      expect(publisher).to.be.an.instanceOf(Publisher);
-      expect(publisher._routePattern).to.equal(myRoutePattern);
+      expect(publisher).to.be.ok;
     });
   });
 
