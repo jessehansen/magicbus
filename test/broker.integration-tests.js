@@ -54,7 +54,7 @@ describe('Broker really using RabbitMQ', function() {
     };
 
     broker.consume('subscribe', handler).then(function() {
-      broker.publish('publish', 'succeed', new Buffer(theMessage));
+      broker.publish('publish', { routingKey: 'succeed', payload: new Buffer(theMessage) });
     });
   });
 
@@ -67,7 +67,7 @@ describe('Broker really using RabbitMQ', function() {
     };
 
     broker.consume('subscribe', handler).then(function() {
-      broker.publish('publish', 'fail', new Buffer(theMessage));
+      broker.publish('publish', { routingKey: 'fail', payload: new Buffer(theMessage) });
     });
   });
 
@@ -91,7 +91,7 @@ describe('Broker really using RabbitMQ', function() {
     broker.consume('subscribe', handler).then(function() {
       var i;
       for (i = 0; i < targetCount; i++) {
-        broker.publish('publish', 'fail', new Buffer(String(i)));
+        broker.publish('publish', { routingKey: 'fail', payload: new Buffer(String(i)) });
       }
     });
   });

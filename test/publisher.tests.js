@@ -150,7 +150,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ persistent: true }));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, persistent: true }));
       });
     });
 
@@ -158,7 +158,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened').then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ type: 'something-happened' }));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, type: 'something-happened' }));
       });
     });
 
@@ -172,7 +172,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened', null, options).then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ correlationId: '123' }));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, correlationId: '123' }));
       });
     });
 
@@ -186,7 +186,7 @@ describe('Publisher', function() {
       sinon.spy(mockBroker, 'publish');
 
       return publisher.publish('something-happened', null, options).then(function(){
-        expect(mockBroker.publish).to.have.been.calledWith('publish', 'something-happened', null, sinon.match({ persistent: false }));
+        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, persistent: false }));
       });
     });
   });
