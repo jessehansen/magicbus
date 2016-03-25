@@ -1,16 +1,7 @@
 'use strict';
 
 var Configurator = require('../../lib/config');
-var Publisher = require('../../lib/publisher');
-var Consumer = require('../../lib/consumer');
-var Subscriber = require('../../lib/subscriber');
 var Logger = require('../../lib/logger');
-
-var BasicEnvelope = require('../../lib/basic-envelope');
-var ProducerPipeline = require('../../lib/middleware').ProducerPipeline;
-var ConsumerPipeline = require('../../lib/middleware').ConsumerPipeline;
-var PublisherRoutePattern = require('../../lib/route-patterns/publisher-route-pattern');
-var WorkerRoutePattern = require('../../lib/route-patterns/worker-route-pattern');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -137,12 +128,8 @@ describe('Configurator', function(){
   describe('#createSubscriber', function(){
     it('should create a subscriber with the default params', function(){
       var subscriber = configurator.createSubscriber(broker);
-      var consumer;
 
-      expect(subscriber).to.be.an.instanceOf(Subscriber);
-      expect(subscriber._logger).to.equal(logger);
-      consumer = subscriber._consumer;
-      expect(consumer).to.be.ok;
+      expect(subscriber).to.be.ok;
     });
 
     it('should allow caller to override the envelope', function(){
@@ -150,11 +137,8 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.useEnvelope(myEnvelope);
       });
-      var consumer;
 
-      expect(subscriber).to.be.an.instanceOf(Subscriber);
-      consumer = subscriber._consumer;
-      expect(consumer).to.be.ok;
+      expect(subscriber).to.be.ok;
     });
 
     it('should allow caller to override the middleware pipeline', function(){
@@ -162,11 +146,8 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.usePipeline(myPipeline);
       });
-      var consumer;
 
-      expect(subscriber).to.be.an.instanceOf(Subscriber);
-      consumer = subscriber._consumer;
-      expect(consumer).to.be.ok;
+      expect(subscriber).to.be.ok;
     });
 
     it('should allow caller to override the route name', function(){
@@ -174,11 +155,8 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.useRouteName(myRouteName);
       });
-      var consumer;
 
-      expect(subscriber).to.be.an.instanceOf(Subscriber);
-      consumer = subscriber._consumer;
-      expect(consumer).to.be.ok;
+      expect(subscriber).to.be.ok;
     });
 
     it('should allow caller to override the route pattern', function(){
@@ -186,11 +164,8 @@ describe('Configurator', function(){
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.useRoutePattern(myRoutePattern);
       });
-      var consumer;
 
-      expect(subscriber).to.be.an.instanceOf(Subscriber);
-      consumer = subscriber._consumer;
-      expect(consumer).to.be.ok;
+      expect(subscriber).to.be.ok;
     });
 
     it('should allow caller to override the consumer', function(){
@@ -199,8 +174,7 @@ describe('Configurator', function(){
         cfg.useConsumer(myConsumer);
       });
 
-      expect(subscriber).to.be.an.instanceOf(Subscriber);
-      expect(subscriber._consumer).to.equal(myConsumer);
+      expect(subscriber).to.be.ok;
     });
   });
 
