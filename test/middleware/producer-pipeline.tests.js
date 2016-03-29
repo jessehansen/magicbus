@@ -41,10 +41,11 @@ describe('ProducerPipeline', function() {
       producerPipeline.use(simpleMiddleware);
       clone = producerPipeline.clone();
       clone.use(secondMiddleware);
-      expect(producerPipeline._pipe.length).to.equal(1);
-      expect(clone._pipe.length).to.equal(2);
-      expect(clone._pipe[0]).to.equal(simpleMiddleware);
-      expect(clone._pipe[1]).to.equal(secondMiddleware);
+
+      producerPipeline.prepare()(message);
+      expect(message.properties.headers.length).to.equal(1);
+      clone.prepare()(message);
+      expect(message.properties.headers.length).to.equal(3);
     });
   });
 
