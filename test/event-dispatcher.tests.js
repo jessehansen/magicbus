@@ -45,6 +45,24 @@ describe('EventDispatcher', function() {
     });
   });
 
+  describe('#once', function() {
+    it('should not allow empty eventNames paramter', function() {
+      expect(function() {
+        eventDispatcher.once(null, doNothing);
+      }).to.throw();
+    });
+    it('should not allow empty handler', function() {
+      expect(function() {
+        eventDispatcher.once('something', null);
+      }).to.throw();
+    });
+    it('should not have trouble with strings containing regex special characters', function() {
+      expect(function() {
+        eventDispatcher.once(reallyBadEventName, doNothing);
+      }).to.not.throw();
+    });
+  });
+
   describe('#dispatch', function() {
     it('should not allow no event name', function() {
       expect(function() {
@@ -114,6 +132,24 @@ describe('EventDispatcher', function() {
       return eventDispatcher.dispatch([eventName, 'myColdEventName'], arg1, arg2, arg3).then(function(result) {
         expect(result).to.equal(true);
         expect(handlerSpy).to.have.been.calledWith(eventName, arg1, arg2, arg3);
+      });
+    });
+    it('should call handler only once when it is registered using once', function() {
+      eventDispatcher.once(eventName, handlerSpy);
+      return eventDispatcher.dispatch(eventName).then(function(result) {
+        expect(result).to.equal(true);
+        expect(handlerSpy).to.have.been.calledOnce;
+        return eventDispatcher.dispatch(eventName);
+      }).then(function(result) {
+        expect(result).to.equal(false);
+        expect(handlerSpy).to.have.been.calledOnce;
+      });
+    });
+    it('should resolve promise when handler is dispatched', function() {
+      let promise = eventDispatcher.once(eventName, handlerSpy);
+      return eventDispatcher.dispatch(eventName).then(function() {
+        expect(promise.then).to.be.ok;
+        return promise;
       });
     });
 
