@@ -23,7 +23,7 @@ describe('EventDispatcher', function() {
   var arg3 = 'primitive';
 
   beforeEach(function() {
-    eventDispatcher = new EventDispatcher();
+    eventDispatcher = EventDispatcher();
     handlerSpy = sinon.spy();
   });
 
