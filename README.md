@@ -11,7 +11,6 @@ A message bus framework implementing configurable pipelines to prepare messages 
 * Pluggable "envelope" formats to be interoperable with other opinionated frameworks
 * Middleware pipelines for producers and consumers
 * Content serialization/deserialization
-* Delayed retry support for consumers
 * Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue
 * Connection management (single connection, re-establishing a lost connection)
 
