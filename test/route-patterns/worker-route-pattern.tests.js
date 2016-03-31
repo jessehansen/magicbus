@@ -71,10 +71,10 @@ describe('WorkerRoutePattern', function() {
       sinon.spy(mockTopology, 'createQueue');
 
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function(){
-        expect(mockTopology.createQueue).to.have.been.calledWith({
+        expect(mockTopology.createQueue).to.have.been.calledWith(sinon.match({
           name: 'my-domain.my-app.my-route',
           deadLetter: 'my-domain.my-app.my-route.failed'
-        });
+        }));
       });
     });
 
