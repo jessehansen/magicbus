@@ -107,6 +107,24 @@ describe('Broker really using RabbitMQ', function() {
       });
     });
 
+    it('should be able to nack messages and have them redelivered', function(done) {
+      var theMessage = 'Can I buy your magic bus?';
+      let count = 0;
+
+      var handler = function(msg, ops) {
+        if (count++ === 1) {
+          ops.nack();
+        } else {
+          ops.ack();
+          done();
+        }
+      };
+
+      broker.consume('subscribe', handler).then(function() {
+        broker.publish('publish', { routingKey: 'fail', payload: new Buffer(theMessage) });
+      });
+    });
+
     it('should be able to ack and nack multiple messages and have them be batched', function(done) {
       var messageCount = 0, targetCount = 10;
 
@@ -115,10 +133,8 @@ describe('Broker really using RabbitMQ', function() {
         messageCount++;
         if (messageContent > 3 && messageContent < 7){
           ops.ack();
-        } else if (messageContent < 7) {
-          ops.reject();
         } else {
-          ops.nack();
+          ops.reject();
         }
         if (messageCount === targetCount) {
           done();
