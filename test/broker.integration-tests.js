@@ -178,10 +178,12 @@ describe('Broker really using RabbitMQ', function() {
           ops.ack();
         } else if (messageContent < 7) {
           ops.reject();
-        } else {
+        } else if (messageCount === targetCount){
           ops.nack();
+        } else {
+          ops.ack();
         }
-        if (messageCount === targetCount) {
+        if (messageCount === targetCount + 1) {
           done();
           // right now, I'm manually verifying that the subscribe queue is empty after broker shutdown
         }
@@ -197,14 +199,6 @@ describe('Broker really using RabbitMQ', function() {
   });
 
   describe('with noAck specified', function(){
-    beforeEach(function(){
-      broker.registerRoute('publishNoAck', new PublisherRoutePattern());
-      broker.registerRoute('subscribeNoAck', new WorkerRoutePattern({ noAck: true }));
-      return broker.bind('publishNoAck', 'subscribeNoAck', { pattern: '#' }).then(()=>{
-        return broker.purgeRouteQueue('subscribeNoAck');
-      });
-    });
-
     it('should be able to publish and consume messages', function(done) {
       var theMessage = 'Can I buy your magic bus?';
 
@@ -216,8 +210,8 @@ describe('Broker really using RabbitMQ', function() {
         done();
       };
 
-      broker.consume('subscribeNoAck', handler).then(function() {
-        broker.publish('publishNoAck', { routingKey: 'succeed', payload: new Buffer(theMessage) });
+      broker.consume('subscribe', handler, { noAck: true }).then(function() {
+        broker.publish('publish', { routingKey: 'succeed', payload: new Buffer(theMessage) });
       });
     });
 
@@ -239,62 +233,45 @@ describe('Broker really using RabbitMQ', function() {
         }
       };
 
-      broker.consume('subscribeNoAck', handler).then(function() {
+      broker.consume('subscribe', handler, { noAck: true }).then(function() {
         var i;
         for (i = 0; i < targetCount; i++) {
-          broker.publish('publishNoAck', { routingKey: 'fail', payload: new Buffer(String(i)) });
+          broker.publish('publish', { routingKey: 'fail', payload: new Buffer(String(i)) });
         }
       });
     });
   });
 
   describe('with noAck and noBatch specified', function(){
-    beforeEach(function(){
-      broker.registerRoute('publishNoAck', new PublisherRoutePattern());
-      broker.registerRoute('subscribeNoAck', new WorkerRoutePattern({ noAck: true }));
-      return broker.bind('publishNoAck', 'subscribeNoAck', { pattern: '#' }).then(()=>{
-        return broker.purgeRouteQueue('subscribeNoAck');
-      });
-    });
-
     it('should be able to publish and consume messages', function(done) {
       var theMessage = 'Can I buy your magic bus?';
 
-      var handler = function(msg, ops) {
+      var handler = function(msg) {
         var messageContent = new Buffer(msg.content).toString();
         expect(messageContent).to.eq(theMessage);
 
-        ops.ack();
         done();
       };
 
-      broker.consume('subscribeNoAck', handler, { noBatch: true, limit: 10 }).then(function() {
-        broker.publish('publishNoAck', { routingKey: 'succeed', payload: new Buffer(theMessage) });
+      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(function() {
+        broker.publish('publish', { routingKey: 'succeed', payload: new Buffer(theMessage) });
       });
     });
 
-    it('should be able to ack, reject, and nack messages', function(done) {
+    it('should be able to receive multiple messages', function(done) {
       var messageCount = 0, targetCount = 10;
 
-      var handler = function(msg, ops) {
-        var messageContent = parseInt(new Buffer(msg.content).toString(), 10);
+      var handler = function() {
         messageCount++;
-        if (messageContent > 3 && messageContent < 7){
-          ops.ack();
-        } else if (messageContent < 7) {
-          ops.reject();
-        } else {
-          ops.nack();
-        }
         if (messageCount === targetCount) {
           done();
         }
       };
 
-      broker.consume('subscribeNoAck', handler, { noBatch: true, limit: 10 }).then(function() {
+      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(function() {
         var i;
         for (i = 0; i < targetCount; i++) {
-          broker.publish('publishNoAck', { routingKey: 'fail', payload: new Buffer(String(i)) });
+          broker.publish('publish', { routingKey: 'fail', payload: new Buffer(String(i)) });
         }
       });
     });
