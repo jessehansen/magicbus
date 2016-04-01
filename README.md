@@ -54,6 +54,73 @@ subscriber.on('publisher-executed', function(eventName, data, rawMessage) {
 subscriber.startSubscription();
 ```
 
+## Event
+
+The magicbus library will emit the following events (subscribed to via the `on` function).
+
+### log (compatible with @leisurelink/skinny-loggins consumeFrom function)
+
+Example event data:
+```js
+{
+  kind: 'silly|debug|verbose|info|warn|error',
+  message: 'message',
+  namespace: 'magicbus[.specific namespace]',
+  err: new Error('magicbus error')
+}
+```
+
+### log (compatible with @leisurelink/skinny-loggins consumeFrom function)
+
+Example event data:
+```js
+{
+  kind: 'silly|debug|verbose|info|warn|error',
+  message: 'message',
+  namespace: 'magicbus[.specific namespace]',
+  err: new Error('magicbus error')
+}
+```
+
+### unhandled-error
+
+Fired when a subscriber event handler or consumer handler returns or throws an Error.
+
+Example event data:
+```js
+{
+  data: /* deserialized message payload */,
+  messageTypes: /* deserialized message type(s), array */,
+  message: /* raw rabbitmq message */,
+  error: /* the Error */
+}
+```
+
+### unhandled-middleware-error
+
+Fired when middleware returns an Error.
+
+Example event data:
+```js
+{
+  message: /* raw rabbitmq message */,
+  error: /* the Error */
+}
+```
+
+### unhandled-event
+
+Fired when a subscriber receives a message that does not have a corresponding handler.
+
+Example event data:
+```js
+{
+  data: /* deserialized message payload */,
+  messageTypes: /* deserialized message type(s), array */,
+  message: /* raw rabbitmq message */
+}
+```
+
 ## Cross-app Bindings
 
 Since the publisher and subscriber above are in two two separate domains, and it's assumed that one app has no permission on any of the exchanges/queues

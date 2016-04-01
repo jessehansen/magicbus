@@ -17,13 +17,14 @@ chai.use(sinonChai);
 describe('Consumer', function() {
   var mockBroker;
   var logs;
+  var logEvents;
   var logger;
 
   var eventName;
   var fakeMessage;
 
   beforeEach(function() {
-    var logEvents = new EventEmitter();
+    logEvents = new EventEmitter();
     logs = [];
     logger = Logger('magicbus.tests', logEvents);
     logEvents.on('log', function(data) {
@@ -115,12 +116,19 @@ describe('Consumer', function() {
 
       expect(fn).to.throw('AssertionError: logger (object) is required');
     });
+    it('should throw an assertion error given no events', function() {
+      var fn = function() {
+        Consumer(mockBroker, {}, {}, 'route', {}, {});
+      };
+
+      expect(fn).to.throw('AssertionError: events (object) is required');
+    });
     it('should register a route with the broker', function() {
       var pattern;
       sinon.spy(mockBroker, 'registerRoute');
 
       pattern = {};
-      Consumer(mockBroker, {}, {}, 'route', pattern, logger);
+      Consumer(mockBroker, {}, {}, 'route', pattern, logger, logEvents);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
 

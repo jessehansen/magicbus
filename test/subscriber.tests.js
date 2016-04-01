@@ -37,7 +37,7 @@ describe('Subscriber', function() {
     };
     eventDispatcher = new EventDispatcher();
 
-    subscriber = Subscriber(mockReceiver, eventDispatcher, logger);
+    subscriber = Subscriber(mockReceiver, eventDispatcher, logger, logEvents);
   });
 
   describe('#on', function() {
