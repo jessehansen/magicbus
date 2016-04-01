@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/LeisureLink/magicbus#readme",
   "devDependencies": {
-    "@leisurelink/skinny-loggins": "^1.0.1",
+    "@leisurelink/skinny-loggins": "^1.1.0",
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
     "chalk": "^1.1.1",
