@@ -133,13 +133,10 @@ exchange for messages to reach the subscriber. Typically this is done by a confi
 
 * Maintains a single connection to a single RabbitMQ server/vhost
 * Maintains channels for each producer/consumer in the app
-* Creates local (as opposed to cross-app) exchanges/queues for producers/consumers
+* Creates local (as opposed to cross-app) exchanges/queues/bindings for producers/consumers
 * Provides delayed retry support for consumers (planned, not implemented yet)
 
-**TODO: Is 'Broker' the right term for this component?**
-
-You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is thought
-to be a RabbitMQ best practice.
+You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is thought to be a RabbitMQ best practice.
 
 ## Publisher
 
@@ -174,8 +171,7 @@ This method is asynchronous and returns a promise.
 
 ## Consumer
 
-Use a Consumer to consume events and commands from RabbitMQ. The consumer does not handle dispatching messages by message type so there
-are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](#user-content-subscriber).
+Use a Consumer to consume all messages from a RabbitMQ queue. The consumer does not handle dispatching messages by message type so there are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](#user-content-subscriber).
 
 ### createConsumer(broker, configurator)
 

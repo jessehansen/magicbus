@@ -21,6 +21,9 @@
     "preversion": "./scripts/check_branch.sh",
     "postversion": "git push origin master --tags"
   },
+  "engines": {
+    "node": ">=4.1.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LeisureLink/magicbus.git"
