@@ -5,7 +5,7 @@ var Consumer = require('../lib/consumer.js');
 var EventEmitter = require('events').EventEmitter;
 
 var Promise = require('bluebird');
-var Logger = require('../lib/logger');
+var Logger = require('@leisurelink/skinny-event-loggins');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -25,7 +25,7 @@ describe('Consumer', function() {
   beforeEach(function() {
     var logEvents = new EventEmitter();
     logs = [];
-    logger = new Logger(logEvents);
+    logger = Logger('magicbus.tests', logEvents);
     logEvents.on('log', function(data) {
       logs.push(data);
     });

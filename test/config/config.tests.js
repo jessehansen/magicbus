@@ -1,7 +1,7 @@
 'use strict';
 
 var Configurator = require('../../lib/config');
-var Logger = require('../../lib/logger');
+var Logger = require('@leisurelink/skinny-event-loggins');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -15,7 +15,7 @@ describe('Configurator', function(){
     broker = {
       registerRoute: function(){}
     };
-    logger = new Logger();
+    logger = Logger('magicbus.tests');
     configurator = new Configurator(logger);
   });
 

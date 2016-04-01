@@ -3,7 +3,7 @@
 var Subscriber = require('../lib/subscriber');
 
 var EventDispatcher = require('../lib/event-dispatcher');
-var Logger = require('../lib/logger');
+var Logger = require('@leisurelink/skinny-event-loggins');
 var EventEmitter = require('events').EventEmitter;
 
 var chai = require('chai');
@@ -25,7 +25,7 @@ describe('Subscriber', function() {
   beforeEach(function() {
     var logEvents = new EventEmitter();
     logs = [];
-    logger = new Logger(logEvents);
+    logger = Logger('magicbus.tests', logEvents);
     logEvents.on('log', function(data) {
       logs.push(data);
     });

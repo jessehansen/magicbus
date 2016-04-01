@@ -4,7 +4,7 @@ var magicbus = require('../lib');
 var Publisher = require('../lib/publisher');
 
 var Promise = require('bluebird');
-var Logger = require('../lib/logger');
+var Logger = require('@leisurelink/skinny-event-loggins');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -26,7 +26,7 @@ describe('Publisher', function() {
         return Promise.resolve();
       }
     };
-    logger = new Logger();
+    logger = Logger();
   });
 
   describe('constructor', function() {
