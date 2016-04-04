@@ -4,6 +4,30 @@ Helps messages [get on the bus that takes me to you](https://www.youtube.com/wat
 
 A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
 
+## Important Note for version 2.0!
+
+There are breaking changes in the way you connect for version 2.0. If you are using a connection string, then you should be ok. Otherwise, the connectionInfo options are as below:
+
+```js
+let broker = magicbus.createBroker('service.domain', 'app', {
+  name: 'default',      // connection name
+  server: 'docker.dev', // server hostname (can be a list, separated by ,)
+  port: 5672,           // server port (can be a list, separated by , with the same # of entries as s erver)
+  heartbeat: 30,        // heartbeat timer, 30 seconds if omitted
+  protocol: 'amqp://',  // protocol, usually ok to default
+  user: 'guest',        // user name
+  pass: 'guest',        // password
+  vhost: '%2f',         //vhost to connect to, defaults to '%2f' which is '/'
+  timeout: 0,           // connection timeout, defaults to never timeout
+  // used for TLS connections
+  certPath: null,       // certificate file path
+  keyPath: null,        // key file path
+  caPath: null,         // certificate authority file path(s), separated by ','
+  passphrase: null,     // certificate passphrase
+  pfxPath: null         // pfx file path
+});
+```
+
 ## What Does This Add to amqplib?
 
 * A simple [interface](#user-content-interfaces-exposed-to-domain-services) for application code to use (you'll never have to work directly with a channel)
@@ -351,3 +375,7 @@ The integration tests will automatically create the necessary exchanges, queues,
 ## Style Guidelines
 
 Prevent git from messing up the line endings on windows: `git config --global core.autocrlf false`
+
+## License
+
+MIT license
