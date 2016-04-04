@@ -54,21 +54,9 @@ subscriber.on('publisher-executed', function(eventName, data, rawMessage) {
 subscriber.startSubscription();
 ```
 
-## Event
+## Events
 
 The magicbus library will emit the following events (subscribed to via the `on` function).
-
-### log (compatible with @leisurelink/skinny-loggins consumeFrom function)
-
-Example event data:
-```js
-{
-  kind: 'silly|debug|verbose|info|warn|error',
-  message: 'message',
-  namespace: 'magicbus[.specific namespace]',
-  err: new Error('magicbus error')
-}
-```
 
 ### log (compatible with @leisurelink/skinny-loggins consumeFrom function)
 
