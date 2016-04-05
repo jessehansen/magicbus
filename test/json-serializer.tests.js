@@ -75,7 +75,7 @@ describe('JsonSerializer', function() {
         serializer.deserialize();
       };
 
-      expect(fn).to.throw('AssertionError: content (Buffer) is required');
+      expect(fn).to.throw('AssertionError: content (buffer) is required');
     });
   });
 });

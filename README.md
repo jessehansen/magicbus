@@ -4,6 +4,30 @@ Helps messages [get on the bus that takes me to you](https://www.youtube.com/wat
 
 A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
 
+## Important Note for version 2.0!
+
+There are breaking changes in the way you connect for version 2.0. If you are using a connection string, then you should be ok. Otherwise, the connectionInfo options are as below:
+
+```js
+let broker = magicbus.createBroker('service.domain', 'app', {
+  name: 'default',      // connection name
+  server: 'docker.dev', // server hostname (can be a list, separated by ,)
+  port: 5672,           // server port (can be a list, separated by , with the same # of entries as s erver)
+  heartbeat: 30,        // heartbeat timer, 30 seconds if omitted
+  protocol: 'amqp://',  // protocol, usually ok to default
+  user: 'guest',        // user name
+  pass: 'guest',        // password
+  vhost: '%2f',         //vhost to connect to, defaults to '%2f' which is '/'
+  timeout: 0,           // connection timeout, defaults to never timeout
+  // used for TLS connections
+  certPath: null,       // certificate file path
+  keyPath: null,        // key file path
+  caPath: null,         // certificate authority file path(s), separated by ','
+  passphrase: null,     // certificate passphrase
+  pfxPath: null         // pfx file path
+});
+```
+
 ## What Does This Add to amqplib?
 
 * A simple [interface](#user-content-interfaces-exposed-to-domain-services) for application code to use (you'll never have to work directly with a channel)
@@ -11,7 +35,6 @@ A message bus framework implementing configurable pipelines to prepare messages 
 * Pluggable "envelope" formats to be interoperable with other opinionated frameworks
 * Middleware pipelines for producers and consumers
 * Content serialization/deserialization
-* Delayed retry support for consumers
 * Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue
 * Connection management (single connection, re-establishing a lost connection)
 
@@ -55,6 +78,61 @@ subscriber.on('publisher-executed', function(eventName, data, rawMessage) {
 subscriber.startSubscription();
 ```
 
+## Events
+
+The magicbus library will emit the following events (subscribed to via the `on` function).
+
+### log (compatible with @leisurelink/skinny-loggins consumeFrom function)
+
+Example event data:
+```js
+{
+  kind: 'silly|debug|verbose|info|warn|error',
+  message: 'message',
+  namespace: 'magicbus[.specific namespace]',
+  err: new Error('magicbus error')
+}
+```
+
+### unhandled-error
+
+Fired when a subscriber event handler or consumer handler returns or throws an Error.
+
+Example event data:
+```js
+{
+  data: /* deserialized message payload */,
+  messageTypes: /* deserialized message type(s), array */,
+  message: /* raw rabbitmq message */,
+  error: /* the Error */
+}
+```
+
+### unhandled-middleware-error
+
+Fired when middleware returns an Error.
+
+Example event data:
+```js
+{
+  message: /* raw rabbitmq message */,
+  error: /* the Error */
+}
+```
+
+### unhandled-event
+
+Fired when a subscriber receives a message that does not have a corresponding handler.
+
+Example event data:
+```js
+{
+  data: /* deserialized message payload */,
+  messageTypes: /* deserialized message type(s), array */,
+  message: /* raw rabbitmq message */
+}
+```
+
 ## Cross-app Bindings
 
 Since the publisher and subscriber above are in two two separate domains, and it's assumed that one app has no permission on any of the exchanges/queues
@@ -67,13 +145,10 @@ exchange for messages to reach the subscriber. Typically this is done by a confi
 
 * Maintains a single connection to a single RabbitMQ server/vhost
 * Maintains channels for each producer/consumer in the app
-* Creates local (as opposed to cross-app) exchanges/queues for producers/consumers
+* Creates local (as opposed to cross-app) exchanges/queues/bindings for producers/consumers
 * Provides delayed retry support for consumers (planned, not implemented yet)
 
-**TODO: Is 'Broker' the right term for this component?**
-
-You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is thought
-to be a RabbitMQ best practice.
+You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is thought to be a RabbitMQ best practice.
 
 ## Publisher
 
@@ -108,8 +183,7 @@ This method is asynchronous and returns a promise.
 
 ## Consumer
 
-Use a Consumer to consume events and commands from RabbitMQ. The consumer does not handle dispatching messages by message type so there
-are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](#user-content-subscriber).
+Use a Consumer to consume all messages from a RabbitMQ queue. The consumer does not handle dispatching messages by message type so there are only limited scenarios where you want to use a Consumer directly. You probably want to use a [Subscriber](#user-content-subscriber).
 
 ### createConsumer(broker, configurator)
 
@@ -301,3 +375,7 @@ The integration tests will automatically create the necessary exchanges, queues,
 ## Style Guidelines
 
 Prevent git from messing up the line endings on windows: `git config --global core.autocrlf false`
+
+## License
+
+MIT license

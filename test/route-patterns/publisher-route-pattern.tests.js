@@ -2,6 +2,8 @@
 
 var PublisherRoutePattern = require('../../lib/route-patterns/publisher-route-pattern.js');
 
+var Promise = require('bluebird');
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -10,8 +12,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var Promise = require('bluebird');
 
 describe('PublisherRoutePattern', function() {
   describe('default construction', function() {
@@ -36,13 +36,13 @@ describe('PublisherRoutePattern', function() {
     });
   });
 
-  describe('assertRoute', function() {
-    var mockChannel;
+  describe('createTopology', function() {
+    var mockTopology;
     var routePattern;
 
     beforeEach(function() {
-      mockChannel = {
-        assertExchange: function() {
+      mockTopology = {
+        createExchange: function() {
           return Promise.resolve();
         }
       };
@@ -51,27 +51,29 @@ describe('PublisherRoutePattern', function() {
     });
 
     it('should assert an exchange with a conventional name and the specified type', function() {
-      sinon.spy(mockChannel, 'assertExchange');
+      sinon.spy(mockTopology, 'createExchange');
 
-      return routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel).then(function(){
-        expect(mockChannel.assertExchange).to.have.been.calledWith('my-domain.my-app.my-route', routePattern.exchangeType, {durable: true});
+      return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function(){
+        expect(mockTopology.createExchange).to.have.been.calledWith({
+          name: 'my-domain.my-app.my-route',
+          type: routePattern.exchangeType,
+          durable: true
+        });
       });
     });
 
     it('should return the name of the exchange it created', function() {
-      var p = routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel);
+      var p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route');
 
-      return expect(p).to.eventually.eql({exchangeName: 'my-domain.my-app.my-route'});
+      return expect(p).to.eventually.eql({ exchangeName: 'my-domain.my-app.my-route' });
     });
 
     it('should reject if the exchange cannot be created', function() {
-      mockChannel.assertExchange = function() {
+      mockTopology.createExchange = function() {
         return Promise.reject(new Error('Shoot!'));
       };
 
-      var p = routePattern.assertRoute('my-domain', 'my-app', 'my-route', mockChannel);
-
-      return expect(p).to.be.rejectedWith('Shoot!');
+      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).to.be.rejectedWith('Shoot!');
     });
   });
 });

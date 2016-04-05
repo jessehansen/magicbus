@@ -3,11 +3,11 @@
 var ProducerPipeline = require('../../lib/middleware').ProducerPipeline;
 
 var chai = require('chai');
+var expect = chai.expect;
+var assert = chai.assert;
 var chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
-var expect = chai.expect;
-var assert = chai.assert;
 
 function simpleMiddleware(message, actions){
   message.properties.headers.push('first: true');
@@ -27,18 +27,25 @@ describe('ProducerPipeline', function() {
 
   beforeEach(function() {
     producerPipeline = new ProducerPipeline();
-    message = {properties: {headers:[]}, payload:'data'};
+    message = {
+      properties: {
+        headers:[]
+      },
+      payload:'data'
+    };
   });
 
   describe('#clone', function(){
     it('should return equivalent (but separate) pipeline', function(){
+      var clone;
       producerPipeline.use(simpleMiddleware);
-      var clone = producerPipeline.clone();
+      clone = producerPipeline.clone();
       clone.use(secondMiddleware);
-      expect(producerPipeline._pipe.length).to.equal(1);
-      expect(clone._pipe.length).to.equal(2);
-      expect(clone._pipe[0]).to.equal(simpleMiddleware);
-      expect(clone._pipe[1]).to.equal(secondMiddleware);
+
+      producerPipeline.prepare()(message);
+      expect(message.properties.headers.length).to.equal(1);
+      clone.prepare()(message);
+      expect(message.properties.headers.length).to.equal(3);
     });
   });
 
@@ -83,8 +90,8 @@ describe('ProducerPipeline', function() {
       });
     });
     it('should not impact past messages', function(){
-      var msg1 = {properties: {headers:[]}};
-      var msg2 = {properties: {headers:[]}};
+      var msg1 = { properties: { headers:[] } };
+      var msg2 = { properties: { headers:[] } };
       producerPipeline.use(simpleMiddleware);
       return producerPipeline.prepare()(msg1).then(function(){
         producerPipeline.prepare()(msg2);

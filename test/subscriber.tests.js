@@ -2,6 +2,10 @@
 
 var Subscriber = require('../lib/subscriber');
 
+var EventDispatcher = require('../lib/event-dispatcher');
+var Logger = require('@leisurelink/skinny-event-loggins');
+var EventEmitter = require('events').EventEmitter;
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -11,9 +15,6 @@ chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
 
-var EventDispatcher = require('../lib/event-dispatcher');
-var Logger = require('../lib/logger');
-
 describe('Subscriber', function() {
   var mockReceiver;
   var eventDispatcher;
@@ -22,27 +23,28 @@ describe('Subscriber', function() {
   var logs;
 
   beforeEach(function() {
+    var logEvents = new EventEmitter();
+    logs = [];
+    logger = Logger('magicbus.tests', logEvents);
+    logEvents.on('log', function(data) {
+      logs.push(data);
+    });
     mockReceiver = {
-      use: function( /* middleware */ ) {},
+      use: function(/* middleware */) {},
       startConsuming: function(handler) {
         this._handler = handler;
       }
     };
     eventDispatcher = new EventDispatcher();
-    logs = [];
-    logger = new Logger();
-    logger.on('log', function(data) {
-      logs.push(data);
-    });
 
-    subscriber = new Subscriber(mockReceiver, eventDispatcher, logger);
+    subscriber = Subscriber(mockReceiver, eventDispatcher, logger, logEvents);
   });
 
   describe('#on', function() {
     it('should pass through to the event dispatcher', function() {
-      eventDispatcher.on = sinon.spy();
       var eventName = 'myEvent',
         handler = function() {};
+      eventDispatcher.on = sinon.spy();
 
       subscriber.on(eventName, handler);
 
@@ -52,8 +54,8 @@ describe('Subscriber', function() {
 
   describe('#use', function() {
     it('should pass through to the reciever', function() {
-      mockReceiver.use = sinon.spy();
       var middleware = function() {};
+      mockReceiver.use = sinon.spy();
 
       subscriber.use(middleware);
 

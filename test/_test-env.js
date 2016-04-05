@@ -1,12 +1,10 @@
 'use strict';
 
 module.exports = {
-  rabbitConnectionObject: {
-    protocol: 'amqp',
-    hostname: process.env.RABBITMQ_HOST || 'localhost',
-    vhost: '',
-    username: 'guest',
-    password: 'guest'
+  rabbit: {
+    server: process.env.RABBITMQ_HOST || 'localhost',
+    user: 'guest',
+    pass: 'guest'
   },
-  rabbitConnectionString: 'amqp://guest:guest@' + (process.env.RABBITMQ_HOST || 'localhost') + '/'
+  rabbitString: `amqp://guest:guest@${process.env.RABBITMQ_HOST || 'localhost'}/`
 };

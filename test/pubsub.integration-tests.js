@@ -9,7 +9,7 @@ var expect = chai.expect;
 describe('Pub/Sub integration', function() {
   var serviceDomainName = 'magicbus';
   var appName = 'tests';
-  var connectionInfo = environment.rabbitConnectionString;
+  var connectionInfo = environment.rabbitString;
   var broker;
   var publisher;
   var subscriber;
@@ -19,7 +19,10 @@ describe('Pub/Sub integration', function() {
     publisher = magicbus.createPublisher(broker);
     subscriber = magicbus.createSubscriber(broker);
 
-    return magicbus.createBinder(connectionInfo).bind(publisher.getRoute(), subscriber.getRoute(), {pattern: '#'});
+    return broker.bind(publisher.getRoute().name, subscriber.getRoute().name, { pattern: '#' })
+      .then(function(){
+        return subscriber.purgeQueue();
+      });
   });
 
   after(function() {

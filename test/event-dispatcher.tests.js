@@ -2,6 +2,9 @@
 
 var EventDispatcher = require('../lib/event-dispatcher');
 
+var eventName = 'myCoolEventName';
+var reallyBadEventName = '/\\^$*+?.()|[]{}';
+
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -10,9 +13,6 @@ var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
 chai.use(require('chai-as-promised'));
-
-var eventName = 'myCoolEventName';
-var reallyBadEventName = '/\\^$*+?.()|[]{}';
 
 describe('EventDispatcher', function() {
   var doNothing = function() {};
@@ -23,7 +23,7 @@ describe('EventDispatcher', function() {
   var arg3 = 'primitive';
 
   beforeEach(function() {
-    eventDispatcher = new EventDispatcher();
+    eventDispatcher = EventDispatcher();
     handlerSpy = sinon.spy();
   });
 
@@ -41,6 +41,24 @@ describe('EventDispatcher', function() {
     it('should not have trouble with strings containing regex special characters', function() {
       expect(function() {
         eventDispatcher.on(reallyBadEventName, doNothing);
+      }).to.not.throw();
+    });
+  });
+
+  describe('#once', function() {
+    it('should not allow empty eventNames paramter', function() {
+      expect(function() {
+        eventDispatcher.once(null, doNothing);
+      }).to.throw();
+    });
+    it('should not allow empty handler', function() {
+      expect(function() {
+        eventDispatcher.once('something', null);
+      }).to.throw();
+    });
+    it('should not have trouble with strings containing regex special characters', function() {
+      expect(function() {
+        eventDispatcher.once(reallyBadEventName, doNothing);
       }).to.not.throw();
     });
   });
@@ -114,6 +132,24 @@ describe('EventDispatcher', function() {
       return eventDispatcher.dispatch([eventName, 'myColdEventName'], arg1, arg2, arg3).then(function(result) {
         expect(result).to.equal(true);
         expect(handlerSpy).to.have.been.calledWith(eventName, arg1, arg2, arg3);
+      });
+    });
+    it('should call handler only once when it is registered using once', function() {
+      eventDispatcher.once(eventName, handlerSpy);
+      return eventDispatcher.dispatch(eventName).then(function(result) {
+        expect(result).to.equal(true);
+        expect(handlerSpy).to.have.been.calledOnce;
+        return eventDispatcher.dispatch(eventName);
+      }).then(function(result) {
+        expect(result).to.equal(false);
+        expect(handlerSpy).to.have.been.calledOnce;
+      });
+    });
+    it('should resolve promise when handler is dispatched', function() {
+      let promise = eventDispatcher.once(eventName, handlerSpy);
+      return eventDispatcher.dispatch(eventName).then(function() {
+        expect(promise.then).to.be.ok;
+        return promise;
       });
     });
 
