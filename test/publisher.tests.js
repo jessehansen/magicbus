@@ -18,6 +18,7 @@ chai.use(require('chai-as-promised'));
 describe('Publisher', function() {
   var mockBroker;
   var logger;
+  var fakePipeline;
 
   beforeEach(function() {
     mockBroker = {
@@ -27,6 +28,7 @@ describe('Publisher', function() {
       }
     };
     logger = Logger();
+    fakePipeline = { useLogger: function () { } };
   });
 
   describe('constructor', function() {
@@ -53,21 +55,21 @@ describe('Publisher', function() {
     });
     it('should throw an assertion error given no routeName', function() {
       var fn = function() {
-        Publisher(mockBroker, {}, {});
+        Publisher(mockBroker, {}, fakePipeline);
       };
 
       expect(fn).to.throw('AssertionError: routeName (string) is required');
     });
     it('should throw an assertion error given no routePattern', function() {
       var fn = function() {
-        Publisher(mockBroker, {}, {}, 'route');
+        Publisher(mockBroker, {}, fakePipeline, 'route');
       };
 
       expect(fn).to.throw('AssertionError: routePattern (object) is required');
     });
     it('should throw an assertion error given no logger', function() {
       var fn = function() {
-        Publisher(mockBroker, {}, {}, 'route', {});
+        Publisher(mockBroker, {}, fakePipeline, 'route', {});
       };
 
       expect(fn).to.throw('AssertionError: logger (object) is required');
@@ -76,7 +78,7 @@ describe('Publisher', function() {
       var pattern = {};
       sinon.spy(mockBroker, 'registerRoute');
 
-      Publisher(mockBroker, {}, {}, 'route', pattern, logger);
+      Publisher(mockBroker, {}, fakePipeline, 'route', pattern, logger);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
   });

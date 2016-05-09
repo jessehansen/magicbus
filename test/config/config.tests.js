@@ -57,7 +57,7 @@ describe('Configurator', function(){
     });
 
     it('should allow caller to override the middleware pipeline', function(){
-      var myPipeline = {};
+      var myPipeline = { useLogger: function() {} };
       var publisher = configurator.createPublisher(broker, function(cfg){
         cfg.usePipeline(myPipeline);
       });
@@ -101,7 +101,7 @@ describe('Configurator', function(){
     });
 
     it('should allow caller to override the middleware pipeline', function(){
-      var myPipeline = {};
+      var myPipeline = { useLogger: function() {} };
       var consumer = configurator.createConsumer(broker, function(cfg){
         cfg.usePipeline(myPipeline);
       });
@@ -145,7 +145,7 @@ describe('Configurator', function(){
     });
 
     it('should allow caller to override the middleware pipeline', function(){
-      var myPipeline = {};
+      var myPipeline = { useLogger: function() {} };
       var subscriber = configurator.createSubscriber(broker, function(cfg){
         cfg.usePipeline(myPipeline);
       });

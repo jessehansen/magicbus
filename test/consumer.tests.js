@@ -22,6 +22,7 @@ describe('Consumer', function() {
 
   var eventName;
   var fakeMessage;
+  var fakePipeline;
 
   beforeEach(function() {
     logEvents = new EventEmitter();
@@ -40,6 +41,8 @@ describe('Consumer', function() {
       },
       content: new Buffer(JSON.stringify('the payload'))
     };
+
+    fakePipeline = { useLogger: function() {} };
 
     mockBroker = {
       registerRoute: function(/* name, pattern */) {},
@@ -97,28 +100,28 @@ describe('Consumer', function() {
     });
     it('should throw an assertion error given no routeName', function() {
       var fn = function() {
-        Consumer(mockBroker, {}, {});
+        Consumer(mockBroker, {}, fakePipeline);
       };
 
       expect(fn).to.throw('AssertionError: routeName (string) is required');
     });
     it('should throw an assertion error given no routePattern', function() {
       var fn = function() {
-        Consumer(mockBroker, {}, {}, 'route');
+        Consumer(mockBroker, {}, fakePipeline, 'route');
       };
 
       expect(fn).to.throw('AssertionError: routePattern (object) is required');
     });
     it('should throw an assertion error given no logger', function() {
       var fn = function() {
-        Consumer(mockBroker, {}, {}, 'route', {});
+        Consumer(mockBroker, {}, fakePipeline, 'route', {});
       };
 
       expect(fn).to.throw('AssertionError: logger (object) is required');
     });
     it('should throw an assertion error given no events', function() {
       var fn = function() {
-        Consumer(mockBroker, {}, {}, 'route', {}, {});
+        Consumer(mockBroker, {}, fakePipeline, 'route', {}, {});
       };
 
       expect(fn).to.throw('AssertionError: events (object) is required');
@@ -128,7 +131,7 @@ describe('Consumer', function() {
       sinon.spy(mockBroker, 'registerRoute');
 
       pattern = {};
-      Consumer(mockBroker, {}, {}, 'route', pattern, logger, logEvents);
+      Consumer(mockBroker, {}, fakePipeline, 'route', pattern, logger, logEvents);
       expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern);
     });
 

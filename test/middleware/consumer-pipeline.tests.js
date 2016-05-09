@@ -1,11 +1,12 @@
 'use strict';
 
-var ConsumerPipeline = require('../../lib/middleware').ConsumerPipeline;
+const ConsumerPipeline = require('../../lib/middleware').ConsumerPipeline;
 
-var chai = require('chai');
-var chaiAsPromised = require('chai-as-promised');
-var expect = chai.expect;
-var assert = chai.assert;
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const expect = chai.expect;
+const assert = chai.assert;
+const sinon = require('sinon');
 
 chai.use(chaiAsPromised);
 
@@ -15,8 +16,8 @@ function simpleMiddleware(message, actions){
 }
 
 describe('ConsumerPipeline', function() {
-  var consumerPipeline;
-  var message;
+  let consumerPipeline;
+  let message;
 
   beforeEach(function() {
     consumerPipeline = new ConsumerPipeline();
@@ -26,6 +27,23 @@ describe('ConsumerPipeline', function() {
       },
       payload:'data'
     };
+  });
+
+  describe('#useLogger', function(){
+    it('should pass the logger on to middleware', function(){
+      let sampleLogger = {};
+      let middleware = sinon.spy((m, a) => {
+        a.next();
+      });
+
+      consumerPipeline.use(middleware);
+      consumerPipeline.useLogger(sampleLogger);
+      return consumerPipeline.prepare()(message)
+        .then(() => {
+          expect(middleware).to.have.been.called;
+          expect(middleware).to.have.been.calledWith(message, sinon.match.object, sampleLogger);
+        });
+    });
   });
 
   describe('#execute', function(){

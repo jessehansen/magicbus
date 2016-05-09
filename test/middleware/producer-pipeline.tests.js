@@ -1,11 +1,12 @@
 'use strict';
 
-var ProducerPipeline = require('../../lib/middleware').ProducerPipeline;
+const sinon = require('sinon');
+const ProducerPipeline = require('../../lib/middleware').ProducerPipeline;
 
-var chai = require('chai');
-var expect = chai.expect;
-var assert = chai.assert;
-var chaiAsPromised = require('chai-as-promised');
+const chai = require('chai');
+const expect = chai.expect;
+const assert = chai.assert;
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 
@@ -22,8 +23,8 @@ function errorMiddleware(message, actions) {
 }
 
 describe('ProducerPipeline', function() {
-  var producerPipeline;
-  var message;
+  let producerPipeline;
+  let message;
 
   beforeEach(function() {
     producerPipeline = new ProducerPipeline();
@@ -37,7 +38,7 @@ describe('ProducerPipeline', function() {
 
   describe('#clone', function(){
     it('should return equivalent (but separate) pipeline', function(){
-      var clone;
+      let clone;
       producerPipeline.use(simpleMiddleware);
       clone = producerPipeline.clone();
       clone.use(secondMiddleware);
@@ -52,6 +53,23 @@ describe('ProducerPipeline', function() {
   describe('#use', function(){
     it('should return pipeline for chaining', function(){
       expect(producerPipeline.use(simpleMiddleware)).to.equal(producerPipeline);
+    });
+  });
+
+  describe('#useLogger', function(){
+    it('should pass the logger on to middleware', function(){
+      let sampleLogger = {};
+      let middleware = sinon.spy((m, a) => {
+        a.next();
+      });
+
+      producerPipeline.use(middleware);
+      producerPipeline.useLogger(sampleLogger);
+      return producerPipeline.prepare()(message)
+        .then(() => {
+          expect(middleware).to.have.been.called;
+          expect(middleware).to.have.been.calledWith(message, sinon.match.object, sampleLogger);
+        });
     });
   });
 
