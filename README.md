@@ -192,11 +192,12 @@ Creates a new instance of `Consumer`.
 * `broker` is an instance of the `Broker` class, configured for connection to your desired endpoint
 * `configurator` is a function that will be called and allow you to override default implementations of internal components
 
-### #startConsuming(handler)
+### #startConsuming(handler, options)
 
 Register a handler for messages returned from a queue.
 
 * `handler` is a required function with the signature described below
+* `options` is an optional collection of consumption options, overriding the options from the constructor
 
 ### Handler Signature
 
@@ -247,9 +248,13 @@ function handleFooCreated(eventName, data, rawMessage) {
 
 Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, only the first handler (by order of registration) is executed.
 
-### #startSubscription()
+### #startSubscription(options)
 
-Starts consuming from the queue. Don't call this until you've finished registering your handlers or you may end up with unhandled messages that you would have handled if your handler registration were complete.
+Starts consuming from the queue.
+
+* `options` is an optional collection of consumption options, overriding the options from the constructor
+
+Don't call this until you've finished registering your handlers or you may end up with unhandled messages that you would have handled if your handler registration were complete.
 
 This method is asynchronous and returns a promise.
 
