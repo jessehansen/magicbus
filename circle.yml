@@ -12,8 +12,6 @@ dependencies:
   pre:
     - rm -rf node_modules/
     - npm install mocha-junit-reporter
-  post:
-    - rm -r ~/.gradle
 deployment:
   release:
     tag: /v.*/

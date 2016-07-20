@@ -5,6 +5,7 @@ var environment = require('./_test-env');
 
 var chai = require('chai');
 var expect = chai.expect;
+let Promise = require('bluebird');
 
 describe('Pub/Sub integration', function() {
   var serviceDomainName = 'magicbus';
@@ -45,6 +46,17 @@ describe('Pub/Sub integration', function() {
     subscriber.on('something-done', handler);
     subscriber.startSubscription().then(function() {
       publisher.publish(eventName, data);
+    });
+  });
+
+  xit('should handle a heavy load without rejecting because of a full write buffer', function() {
+    this.timeout(30000); //eslint-disable-line
+    let load = [];
+    for (let i = 0; i < 100000; ++i) {
+      load.push('message ' + i);
+    }
+    return Promise.map(load, function(message){
+      return publisher.publish('load-test', { message: message });
     });
   });
 });
