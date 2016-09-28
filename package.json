@@ -1,6 +1,6 @@
 {
   "name": "magicbus",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "A message bus framework using RabbitMQ.",
   "main": "lib/index.js",
   "scripts": {
