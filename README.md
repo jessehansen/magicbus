@@ -2,56 +2,36 @@
 
 Helps messages [get on the bus that takes me to you](https://www.youtube.com/watch?v=bl9bvuAV-Ao).
 
-A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node).
-
-## Important Note for version 2.0!
-
-There are breaking changes in the way you connect for version 2.0. If you are using a connection string, then you should be ok. Otherwise, the connectionInfo options are as below:
-
-```js
-let broker = magicbus.createBroker('service.domain', 'app', {
-  name: 'default',      // connection name
-  server: 'docker.dev', // server hostname (can be a list, separated by ,)
-  port: 5672,           // server port (can be a list, separated by , with the same # of entries as s erver)
-  heartbeat: 30,        // heartbeat timer, 30 seconds if omitted
-  protocol: 'amqp://',  // protocol, usually ok to default
-  user: 'guest',        // user name
-  pass: 'guest',        // password
-  vhost: '%2f',         //vhost to connect to, defaults to '%2f' which is '/'
-  timeout: 0,           // connection timeout, defaults to never timeout
-  // used for TLS connections
-  certPath: null,       // certificate file path
-  keyPath: null,        // key file path
-  caPath: null,         // certificate authority file path(s), separated by ','
-  passphrase: null,     // certificate passphrase
-  pfxPath: null         // pfx file path
-});
-```
+A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node). Much of the connection code was initially lifed from [wascally](https://github.com/LeanKit-Labs/wascally)
 
 ## What Does This Add to amqplib?
 
 * A simple [interface](#user-content-interfaces-exposed-to-domain-services) for application code to use (you'll never have to work directly with a channel)
-* Setup local topology following the LeisureLink [Event Bus Architecture](https://vacationroost.atlassian.net/wiki/display/EN/Event+Bus+Architecture) (cross-app topology/bindings out of scope)
+* Setup local topology following a default messaging pattern
 * Pluggable "envelope" formats to be interoperable with other opinionated frameworks
 * Middleware pipelines for producers and consumers
 * Content serialization/deserialization
 * Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue
 * Connection management (single connection, re-establishing a lost connection)
 
+## Why would I use this over wascally or rabbot?
+
+While magicbus has opinions baked in for message serialization/envelope generation and exchange/queue topology, they can be easily replaced with your own opinions. This makes it possible, for example, to interoperate with other event bus frameworks on RabbitMQ, for example: (MassTransit)[http://masstransit-project.com/].
+
 # Installation
 
 ```bash
-$ npm install @leisurelink/magicbus
+$ npm install magicbus
 ```
 
 # Usage
 
-Usage is a broad topic due to the number of potential scenarios. A bare-bones pub-sub scenario is described below. For more examples, including best practices for usage in LeisureLink's "Blue" system, see the [messaging-examples](https://github.com/LeisureLink/messaging-examples) repo.
+Usage is a broad topic due to the number of potential scenarios. A bare-bones pub-sub scenario is described below.
 
 ## Publishing App
 
 ```javascript
-var magicbus = require('@leisurelink/magicbus');
+var magicbus = require('magicbus');
 var broker = magicbus.createBroker('domain-one', 'my-api', 'amqp://guest:guest@docker.dev/');
 
 var publisher = magicbus.createPublisher(broker);
@@ -64,7 +44,7 @@ publisher.publish('publisher-executed', {
 ## Subscribing App
 
 ```javascript
-var magicbus = require('@leisurelink/magicbus');
+var magicbus = require('magicbus');
 
 var broker = magicbus.createBroker('domain-two', 'my-worker', 'amqp://guest:guest@docker.dev/');
 
@@ -260,7 +240,7 @@ This method is asynchronous and returns a promise.
 
 ## Binder
 
-Link a publishing route to a consuming route by binding an exchange to a queue. Typically useful in configuration apps and integration tests.
+Link a publishing route to a consuming route by binding an exchange to a queue. Typically useful in configuration apps, integration tests, and application self-messaging.
 
 ### createBinder(connectionInfo, configurator)
 
@@ -322,17 +302,17 @@ subscriber.use(YetAnotherMiddleware);
 
 The message parameter will always be a "complete" message, either created by an envelope, or provided to the amqplib consume callback. The actions available are different for producer and consumer middleware.
 
-There is no default middleware. The [messaging-examples](https://github.com/LeisureLink/messaging-examples) repo demonstrates some of the middleware available from other repos.
+There is currently no default middleware.
 
 ### Producer Middleware
 
-The actions available to producer middleware (both publisher and sender) are:
+The actions available to producer middleware are:
 * `actions.next()` - proceed to the next step.
 * `actions.error(err)` - abort publishing with the associated error.
 
 ### Consumer Middleware
 
-The actions available to consumer middleware (both subscriber and receiver) ar:
+The actions available to consumer middleware (both subscriber and consumer) are:
 * `actions.next()` - proceed to the next step.
 * `actions.error(err)` - abort consumption of this message with the associated error.
 * `actions.ack()` - acknowledge the message (removing it from the queue) and stop processing.
@@ -342,6 +322,14 @@ The actions available to consumer middleware (both subscriber and receiver) ar:
 ## Customizing the Message Pipeline
 
 The main methods of all messaging parties are implemented as template methods so you can override an individual piece of the message pipeline if needed.
+
+## Route Pattern
+
+A route pattern defines the topology pattern for a publisher or consumer. The pattern defines the name of the exchange or queue, along with the types and options associated with it. `magicbus` contains  3 route pattern implementations:
+
+* ListenerRoutePattern - creates a durable fanout exchange bound to one exclusive queue per consuming app (queue name is randomized).
+* PublisherRoutePattern (default for publisher) - creates a durable exchange (optionally, exchange type can be specified) with no bindings
+* WorkerRoutePattern (default for consumer/subscriber) - creates a consumption queue with a dead-letter-exchange for failed messages along with an associated failure queue.
 
 # Contributing
 
