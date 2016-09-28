@@ -82,7 +82,7 @@ subscriber.startSubscription();
 
 The magicbus library will emit the following events (subscribed to via the `on` function).
 
-### log (compatible with @leisurelink/skinny-loggins consumeFrom function)
+### log
 
 Example event data:
 ```js
