@@ -3,7 +3,7 @@
 var Subscriber = require('../lib/subscriber');
 
 var EventDispatcher = require('../lib/event-dispatcher');
-var Logger = require('@leisurelink/skinny-event-loggins');
+var Logger = require('../lib/logger');
 var EventEmitter = require('events').EventEmitter;
 
 var chai = require('chai');

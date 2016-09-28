@@ -1,5 +1,5 @@
 {
-  "name": "@leisurelink/magicbus",
+  "name": "magicbus",
   "version": "2.3.2",
   "description": "A message bus framework using RabbitMQ.",
   "main": "lib/index.js",
@@ -26,16 +26,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LeisureLink/magicbus.git"
+    "url": "git+https://github.com/twindagger/magicbus.git"
   },
-  "author": "LeisureLink Tech <techteam@leisurelink.com>",
+  "author": "Jesse Hansen <twindagger@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/LeisureLink/magicbus/issues"
+    "url": "https://github.com/twindagger/magicbus/issues"
   },
-  "homepage": "https://github.com/LeisureLink/magicbus#readme",
+  "homepage": "https://github.com/twindagger/magicbus#readme",
   "devDependencies": {
-    "@leisurelink/skinny-loggins": "^1.1.0",
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
     "chalk": "^1.1.1",
@@ -47,10 +46,10 @@
     "mocha": "^2.3.3",
     "onchange": "^2.0.0",
     "sinon": "^1.17.1",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "winston": "^2.2.0"
   },
   "dependencies": {
-    "@leisurelink/skinny-event-loggins": "^1.0.0",
     "amqplib": "^0.4.0",
     "assert-plus": "^1.0.0",
     "bluebird": "^3.3.4",

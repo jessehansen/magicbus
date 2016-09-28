@@ -1,7 +1,7 @@
 'use strict';
 
 const Configurator = require('../../lib/config');
-const Logger = require('@leisurelink/skinny-event-loggins');
+const Logger = require('../../lib/logger');
 const EventEmitter = require('events').EventEmitter;
 
 const chai = require('chai');
