@@ -37,6 +37,7 @@ describe('Configurator', function(){
 
       expect(broker).to.be.ok;
       expect(broker.shutdown).to.be.ok;
+      return broker.shutdown();
     });
   });
 
@@ -194,6 +195,7 @@ describe('Configurator', function(){
 
       expect(binder).to.be.ok;
       expect(binder.bind).to.be.ok;
+      return binder.shutdown();
     });
   });
 

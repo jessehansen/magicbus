@@ -16,6 +16,10 @@ describe('Binder really using RabbitMQ', function() {
     binder = magicbus.createBinder(connectionInfo);
   });
 
+  afterEach(function() {
+    return binder.shutdown();
+  });
+
   it('should be able to bind an exchange to a queue', function(){
     return binder.bind({
       serviceDomainName: serviceDomainName,

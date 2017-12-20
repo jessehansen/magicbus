@@ -26,7 +26,7 @@ describe('Send/Receive integration', function() {
   });
 
   after(function() {
-    broker.shutdown();
+    return broker.shutdown();
   });
 
   it('should be able to send a message and receive that message', function(done) {

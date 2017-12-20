@@ -27,7 +27,7 @@ describe('Pub/Sub integration', function() {
   });
 
   after(function() {
-    broker.shutdown();
+    return broker.shutdown();
   });
 
   it('should be able to publish a message and consume that message', function(done) {
