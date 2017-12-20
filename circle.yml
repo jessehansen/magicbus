@@ -15,7 +15,7 @@ dependencies:
 deployment:
   release:
     tag: /v.*/
-    owner: LeisureLink
+    owner: twindagger
     commands:
       - npm publish
 test:

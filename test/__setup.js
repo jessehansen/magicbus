@@ -3,7 +3,7 @@ if (process.env.LOG_TESTS) {
   const magicbus = require('../');
   const winston = require('winston');
 
-  var logger = new (winston.Logger)({
+  const logger = new (winston.Logger)({
     level: 'silly',
     transports: [
       new (winston.transports.Console)()
