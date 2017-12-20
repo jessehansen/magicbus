@@ -1,3 +1,4 @@
+version: 2
 machine:
   timezone:
     America/Denver
@@ -11,7 +12,6 @@ general:
 dependencies:
   pre:
     - rm -rf node_modules/
-    - npm install mocha-junit-reporter
 deployment:
   release:
     tag: /v.*/
@@ -20,5 +20,4 @@ deployment:
       - npm publish
 test:
   override:
-    - mkdir -p $CIRCLE_TEST_REPORTS
-    - MOCHA_FILE=$CIRCLE_TEST_REPORTS/mocha-results.xml MOCHA_REPORTER=mocha-junit-reporter npm run ci
+    - npm run ci
