@@ -82,49 +82,49 @@ describe('Consumer', function() {
         Consumer();
       };
 
-      expect(fn).to.throw('AssertionError: broker (object) is required');
+      expect(fn).to.throw('broker (object) is required');
     });
     it('should throw an assertion error given no envelope', function() {
       var fn = function() {
         Consumer(mockBroker);
       };
 
-      expect(fn).to.throw('AssertionError: envelope (object) is required');
+      expect(fn).to.throw('envelope (object) is required');
     });
     it('should throw an assertion error given no pipeline', function() {
       var fn = function() {
         Consumer(mockBroker, {});
       };
 
-      expect(fn).to.throw('AssertionError: pipeline (object) is required');
+      expect(fn).to.throw('pipeline (object) is required');
     });
     it('should throw an assertion error given no routeName', function() {
       var fn = function() {
         Consumer(mockBroker, {}, fakePipeline);
       };
 
-      expect(fn).to.throw('AssertionError: routeName (string) is required');
+      expect(fn).to.throw('routeName (string) is required');
     });
     it('should throw an assertion error given no routePattern', function() {
       var fn = function() {
         Consumer(mockBroker, {}, fakePipeline, 'route');
       };
 
-      expect(fn).to.throw('AssertionError: routePattern (object) is required');
+      expect(fn).to.throw('routePattern (object) is required');
     });
     it('should throw an assertion error given no logger', function() {
       var fn = function() {
         Consumer(mockBroker, {}, fakePipeline, 'route', {});
       };
 
-      expect(fn).to.throw('AssertionError: logger (object) is required');
+      expect(fn).to.throw('logger (object) is required');
     });
     it('should throw an assertion error given no events', function() {
       var fn = function() {
         Consumer(mockBroker, {}, fakePipeline, 'route', {}, {});
       };
 
-      expect(fn).to.throw('AssertionError: events (object) is required');
+      expect(fn).to.throw('events (object) is required');
     });
     it('should register a route with the broker', function() {
       var pattern;
@@ -141,7 +141,7 @@ describe('Consumer', function() {
           Consumer();
         };
 
-        expect(fn).to.throw('AssertionError: broker (object) is required');
+        expect(fn).to.throw('broker (object) is required');
       });
     });
   });

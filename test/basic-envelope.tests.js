@@ -105,7 +105,7 @@ describe('BasicEnvelope', function() {
         envelope.getData();
       };
 
-      expect(fn).to.throw('AssertionError: message (object) is required');
+      expect(fn).to.throw('message (object) is required');
     });
   });
 
@@ -135,7 +135,7 @@ describe('BasicEnvelope', function() {
         envelope.getMessageTypes();
       };
 
-      expect(fn).to.throw('AssertionError: message (object) is required');
+      expect(fn).to.throw('message (object) is required');
     });
   });
 });
