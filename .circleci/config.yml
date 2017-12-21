@@ -8,16 +8,18 @@ jobs:
     steps:
       - checkout
       - run:
-          name: install-npm-wee
-          command: npm install
+        name: install-npm-wee
+        command: npm install
       - run:
-          name: install-mocha-junit-reporter
-          command: npm install mocha-junit-reporter
+        name: install-mocha-junit-reporter
+        command: npm install mocha-junit-reporter
       - run:
-          name: test
-          command: npm run ci
-          environment:
-            MOCHA_REPORTER: mocha-junit-reporter
-            MOCHA_FILE: test-results.xml
+        name: test
+        command: npm run ci
+        environment:
+          MOCHA_REPORTER: mocha-junit-reporter
+          MOCHA_FILE: test-results.xml
       - store_test_results:
-          path: test-results.xml
+        path: test-results.xml
+      - store_artifacts:
+        path: test-results.xml
