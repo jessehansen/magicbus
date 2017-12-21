@@ -15,6 +15,9 @@ jobs:
       - run:
           name: install-npm-wee
           command: npm install
+      - run:
+          name: install-mocha-junit-reporter
+          command: npm install mocha-junit-reporter
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
@@ -22,6 +25,9 @@ jobs:
       - run:
           name: test
           command: npm run ci
+          environment:
+            REPORTER: mocha-junit-reporter
+            MOCHA_FILE: tests/test-results.xml
       - store_test_results:
           path: test-results.xml
           prefix: tests
