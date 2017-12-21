@@ -1,5 +1,7 @@
 # magicbus
 
+[![CircleCI](https://circleci.com/gh/twindagger/magicbus.svg?style=svg)](https://circleci.com/gh/twindagger/magicbus) [![Coverage Status](https://coveralls.io/repos/github/twindagger/magicbus/badge.svg?branch=master)](https://coveralls.io/github/twindagger/magicbus?branch=master)
+
 Helps messages [get on the bus that takes me to you](https://www.youtube.com/watch?v=bl9bvuAV-Ao).
 
 A message bus framework implementing configurable pipelines to prepare messages to be published to and consumed from [RabbitMQ](https://www.rabbitmq.com/). Internally, the primary library for interacting with RabbitMQ is [amqplib](https://github.com/squaremo/amqp.node). Much of the connection code was initially lifed from [wascally](https://github.com/LeanKit-Labs/wascally)
