@@ -18,8 +18,8 @@ jobs:
           command: npm run ci
           environment:
             MOCHA_REPORTER: mocha-junit-reporter
-            MOCHA_FILE: test-results.xml
+            MOCHA_FILE: /tmp/tests/junit/test-results.xml
       - store_test_results:
-          path: test-results.xml
+          path: /tmp/tests
       - store_artifacts:
           path: test-results.xml
