@@ -14,7 +14,7 @@
     "test:unit:coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R ${MOCHA_REPORTER:-spec} --recursive test/*.tests.js test/**/*.tests.js",
     "lint": "esw --quiet",
     "docs": "node_modules/.bin/jsdoc -c ./jsdoc.conf.json",
-    "prepublish": "npm run docs",
+    "prepublishOnly": "npm run docs",
     "preversion": "./scripts/check_branch.sh",
     "postversion": "git push origin master --tags"
   },
