@@ -8,10 +8,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: install-npm-wee
+          name: dependencies
           command: npm install
       - run:
-          name: install-mocha-junit-reporter
+          name: install-junit-reporter
           command: npm install mocha-junit-reporter
       - run:
           name: test
