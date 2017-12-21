@@ -18,7 +18,7 @@ A message bus framework implementing configurable pipelines to prepare messages 
 
 ## Why would I use this over wascally or rabbot?
 
-While magicbus has opinions baked in for message serialization/envelope generation and exchange/queue topology, they can be easily replaced with your own opinions. This makes it possible, for example, to interoperate with other event bus frameworks on RabbitMQ, for example: (MassTransit)[http://masstransit-project.com/].
+While magicbus has opinions baked in for message serialization/envelope generation and exchange/queue topology, they can be easily replaced with your own opinions. This makes it possible, for example, to interoperate with other event bus frameworks on RabbitMQ, for example: [MassTransit](http://masstransit-project.com/).
 
 # Installation
 
