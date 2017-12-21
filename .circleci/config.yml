@@ -10,24 +10,17 @@ jobs:
       - run:
           name: update-npm
           command: 'npm install -g npm@latest'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: install-npm-wee
           command: npm install
       - run:
           name: install-mocha-junit-reporter
           command: npm install mocha-junit-reporter
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
       - run:
           name: test
           command: npm run ci
           environment:
             MOCHA_REPORTER: mocha-junit-reporter
-            MOCHA_FILE: tests/test-results.xml
+            MOCHA_FILE: test-results.xml
       - store_test_results:
           path: test-results.xml
-          prefix: tests
