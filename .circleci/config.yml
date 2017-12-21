@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run:
           name: update-npm
-          command: 'sudo npm install -g npm@latest'
+          command: 'npm install -g npm@latest'
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
@@ -26,7 +26,7 @@ jobs:
           name: test
           command: npm run ci
           environment:
-            REPORTER: mocha-junit-reporter
+            MOCHA_REPORTER: mocha-junit-reporter
             MOCHA_FILE: tests/test-results.xml
       - store_test_results:
           path: test-results.xml
