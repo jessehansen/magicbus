@@ -18,7 +18,6 @@ jobs:
           command: npm run ci
           environment:
             MOCHA_REPORTER: mocha-junit-reporter
-            MOCHA_FILE: $CIRCLE_TEST_REPORTS/junit/test-results.xml
+            MOCHA_FILE: test-results.xml
       - store_test_results:
           path: test-results.xml
-          prefix: junit
