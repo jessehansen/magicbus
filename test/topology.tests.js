@@ -25,7 +25,8 @@ describe('Topology', function() {
     mockConnection = {
       createChannel: () => mockChannel,
       addQueue: () => Promise.resolve(),
-      on: (event, handler) => emitter.on(event, handler)
+      on: (event, handler) => emitter.on(event, handler),
+      reset: () => 0
     };
     mockChannel = {
       bindQueue: function(/* target, source, key */) {
@@ -34,6 +35,8 @@ describe('Topology', function() {
       bindExchange: function(/* target, source, key */) {
         return Promise.resolve();
       },
+      check: () => Promise.resolve(),
+      destroy: () => Promise.resolve(),
       assertQueue: () => Promise.resolve(),
       assertExchange: () => Promise.resolve(),
       once: () => 0,
@@ -52,6 +55,39 @@ describe('Topology', function() {
       emitter.emit('reconnected');
 
       expect(topology.onReconnect).to.have.been.calledWith();
+    });
+    it('should call check supporting channels', async function() {
+      let topology = constructTopology();
+      topology.getChannel('control');
+      sinon.spy(mockChannel, 'check');
+
+      emitter.emit('reconnected');
+      await Promise.delay(1);
+
+      expect(mockChannel.check).to.have.been.calledWith();
+    });
+    it('should be ok when channel does not support check', function() {
+      let topology = constructTopology();
+      delete mockChannel.check;
+      topology.getChannel('control');
+
+      emitter.emit('reconnected');
+    });
+    it('should configure bindings upon reconnect', async function(){
+      let topology = constructTopology();
+      sinon.spy(topology, 'configureBindings');
+
+      await topology.createBinding({
+        queue: true,
+        source: 'some-exchange',
+        target: 'some-queue',
+        keys: 'some-key'
+      });
+
+      emitter.emit('reconnected');
+      await Promise.delay(1);
+
+      expect(topology.configureBindings).to.have.been.calledWith(topology.definitions.bindings);
     });
   });
 
@@ -182,6 +218,64 @@ describe('Topology', function() {
 
       expect(mockChannel.bindQueue).to.have.been.calledWith('some-queue', 'some-exchange', 'some-key');
       expect(mockChannel.bindQueue).to.have.been.calledWith('some-queue', 'some-exchange', 'some-other-key');
+    });
+  });
+
+  describe('#getChannel', function() {
+    let topology;
+
+    beforeEach(function() {
+      topology = constructTopology();
+    });
+
+    it('should create a channel', async function() {
+      let channel = await topology.getChannel('control');
+
+      expect(channel).to.equal(mockChannel);
+    });
+
+    it('should not create a second channel for the same name', async function() {
+      sinon.spy(mockConnection, 'createChannel');
+
+      await topology.getChannel('control');
+      await topology.getChannel('control');
+
+      expect(mockConnection.createChannel).to.have.been.calledOnce;
+    });
+  });
+
+  describe('#reset', function() {
+    let topology;
+
+    beforeEach(function() {
+      topology = constructTopology();
+    });
+
+    it('should destroy all channels', async function() {
+      await topology.getChannel('control');
+      sinon.spy(mockChannel, 'destroy');
+
+      topology.reset();
+
+      expect(mockChannel.destroy).to.have.been.calledWith();
+      expect(topology.channels).to.be.empty;
+    });
+
+    it('should forget all existing definitions', async function() {
+      await topology.createQueue({ name:'some-queue' });
+      await topology.createExchange({ name:'some-exchange' });
+
+      await topology.createBinding({
+        queue: true,
+        source: 'some-exchange',
+        target: 'some-queue'
+      });
+
+      topology.reset();
+
+      expect(topology.definitions.queues).to.be.empty;
+      expect(topology.definitions.exchanges).to.be.empty;
+      expect(topology.definitions.bindings).to.be.empty;
     });
   });
 });
