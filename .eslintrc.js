@@ -1,7 +1,10 @@
 module.exports = {
   'env':{
     'node': true,
-    "es6": true
+    'es6': true
+  },
+  'parserOptions':{
+    'ecmaVersion': 8
   },
   'rules':{
     'block-scoped-var': 2,
@@ -48,7 +51,6 @@ module.exports = {
     'radix': [2, 'always'],
     'semi': [2, 'always'],
     'space-in-parens': [2, 'never'],
-    'strict': [2, 'global'],
     'vars-on-top': 2
   }
 }
