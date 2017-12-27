@@ -128,9 +128,9 @@ exchange for messages to reach the subscriber. Typically this is done by a confi
 * Maintains a single connection to a single RabbitMQ server/vhost
 * Maintains channels for each producer/consumer in the app
 * Creates local (as opposed to cross-app) exchanges/queues/bindings for producers/consumers
-* Provides delayed retry support for consumers (planned, not implemented yet)
+* TODO: Provides delayed retry support for consumers
 
-You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is thought to be a RabbitMQ best practice.
+You should have a single Broker for your entire deployable. That way the same connection is used between all your publishing and consuming routes, which is a RabbitMQ best practice.
 
 ## Publisher
 
@@ -184,9 +184,9 @@ Register a handler for messages returned from a queue.
 ### Handler Signature
 
 ```javascript
-function handleMessage(message, messageTypes, rawMessage) {
+consumer.startConsuming((message, messageTypes, rawMessage) => {
   //Do work
-}
+});
 ```
 
 Messages will be acked as long as the handler doesn't throw. If the handler does throw, the message will either be:
@@ -194,7 +194,7 @@ Messages will be acked as long as the handler doesn't throw. If the handler does
 * failed and discarded or placed on a failure queue depending on subscriber configuration
 * re-queued and retried later
 
-The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable" and will not be retried.
+TODO: The type of error determines how the message is treated. Programmer errors will be treated as "unrecoverable" and will not be retried.
 Operational errors will be retried. See [this article](https://www.joyent.com/developers/node/design/errors) for a description of the difference.
 Need to define our best guess at differentiating the two.
 
@@ -223,9 +223,9 @@ Register a handler for an event.
 **NOTE** The order of arguments on a subscriber handler is different from the order of arguments on a consumer handler.
 
 ```javascript
-function handleFooCreated(eventName, data, rawMessage) {
-  //Do work
-}
+subscriber.on('created', (event, data, rawMessage) => {
+  //Do Work
+});
 ```
 
 Message acknowledgement is the same as with a Consumer handler. Asynchronous handlers should return a Promise. If multiple handlers are matched for a given event, only the first handler (by order of registration) is executed.
@@ -263,7 +263,7 @@ An "envelope" is responsible for producing an initial message at the beginning o
 The initial message must have a payload property which will be serialized into a Buffer to pass as the `content` parameter to the [amqplib publish method](http://www.squaremobius.net/amqp.node/channel_api.html#channel_publish). The `properties` property of the initial message will be used as the `options`
 parameter of the publish method so documentation of those options applies.
 
-The default envelope creates messages with the following shape:
+The default envelope creates messages with the following shape, serialized as JSON:
 
 ```javascript
 {
@@ -327,11 +327,11 @@ The main methods of all messaging parties are implemented as template methods so
 
 ## Route Pattern
 
-A route pattern defines the topology pattern for a publisher or consumer. The pattern defines the name of the exchange or queue, along with the types and options associated with it. `magicbus` contains  3 route pattern implementations:
+A route pattern defines the topology pattern for a publisher or consumer. The pattern defines the name of the exchange or queue, along with the types and options associated with it. `magicbus` contains 3 route pattern implementations:
 
-* ListenerRoutePattern - creates a durable fanout exchange bound to one exclusive queue per consuming app (queue name is randomized).
-* PublisherRoutePattern (default for publisher) - creates a durable exchange (optionally, exchange type can be specified) with no bindings
-* WorkerRoutePattern (default for consumer/subscriber) - creates a consumption queue with a dead-letter-exchange for failed messages along with an associated failure queue.
+* `ListenerRoutePattern` - creates a durable fanout exchange bound to one exclusive queue per consuming app (queue name is randomized).
+* `PublisherRoutePattern` (default for publisher) - creates a durable exchange (optionally, exchange type can be specified) with no bindings
+* `WorkerRoutePattern` (default for consumer/subscriber) - creates a consumption queue with a dead-letter-exchange for failed messages, along with an associated failure queue.
 
 # Contributing
 
@@ -361,9 +361,10 @@ You'll need access to a running RabbitMQ server. The easiest way to get rabbit r
 ```bash
 $ docker create --name rabbitmq -p 5672:5672 -p 15672:15672 \
   rabbitmq:management
+$ docker start rabbitmq
 ```
 
-You can also [download](http://www.rabbitmq.com/download.html) and install it locally for free.
+You can also [download](http://www.rabbitmq.com/download.html) and install it locally.
 
 The integration tests will automatically create the necessary exchanges, queues, and bindings.
 
