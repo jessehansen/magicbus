@@ -29,8 +29,8 @@ jobs:
     steps:
       - checkout
       - run:
-        name: store-token
-        command: echo //registry.npmjs.org/:_authtoken=$NPM_AUTH_TOKEN > ./.npmrc
+          name: store-token
+          command: echo //registry.npmjs.org/:_authtoken=$NPM_AUTH_TOKEN > ./.npmrc
       - run:
           name: dependencies
           command: npm install
