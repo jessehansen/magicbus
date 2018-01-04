@@ -1,81 +1,80 @@
-'use strict';
 
-var JsonSerializer = require('../lib/json-serializer.js');
+let JsonSerializer = require('../lib/json-serializer.js')
 
-var chai = require('chai');
-var expect = chai.expect;
+let chai = require('chai')
+let expect = chai.expect
 
-describe('JsonSerializer', function() {
-  var serializer;
+describe('JsonSerializer', function () {
+  let serializer
 
-  beforeEach(function() {
-    serializer = new JsonSerializer();
-  });
+  beforeEach(function () {
+    serializer = new JsonSerializer()
+  })
 
-  describe('contentTypeSuffix', function() {
-    it('should return a hardcoded value in all cases', function() {
-      expect(serializer.contentTypeSuffix).to.eq('+json');
-    });
-  });
+  describe('contentTypeSuffix', function () {
+    it('should return a hardcoded value in all cases', function () {
+      expect(serializer.contentTypeSuffix).to.eq('+json')
+    })
+  })
 
-  describe('serialize', function() {
-    it('should return a buffer containing the stringified payload', function() {
-      var payload = {
+  describe('serialize', function () {
+    it('should return a buffer containing the stringified payload', function () {
+      let payload = {
         my: 'data'
-      };
+      }
 
-      var actual = serializer.serialize(payload);
+      let actual = serializer.serialize(payload)
 
-      expect(Buffer.isBuffer(actual)).to.eq(true);
-      expect(actual.toString()).to.eq(JSON.stringify(payload));
-    });
+      expect(Buffer.isBuffer(actual)).to.eq(true)
+      expect(actual.toString()).to.eq(JSON.stringify(payload))
+    })
 
-    it('should return null given no payload', function() {
-      var actual = serializer.serialize(null);
+    it('should return null given no payload', function () {
+      let actual = serializer.serialize(null)
 
-      expect(actual).to.eq(null);
-    });
-  });
+      expect(actual).to.eq(null)
+    })
+  })
 
-  describe('deserialize', function() {
-    it('should return an object given a buffer containing a stringified object', function() {
-      var payload = {
+  describe('deserialize', function () {
+    it('should return an object given a buffer containing a stringified object', function () {
+      let payload = {
         my: 'data'
-      };
+      }
 
-      var content = new Buffer(JSON.stringify(payload));
+      let content = Buffer.from(JSON.stringify(payload))
 
-      var result = serializer.deserialize(content);
+      let result = serializer.deserialize(content)
 
-      expect(result).to.eql(payload);
-    });
+      expect(result).to.eql(payload)
+    })
 
-    it('should return a string given a buffer containing a string that is not a stringified object', function() {
-      var payload = 'ok';
+    it('should return a string given a buffer containing a string that is not a stringified object', function () {
+      let payload = 'ok'
 
-      var content = new Buffer(JSON.stringify(payload));
+      let content = Buffer.from(JSON.stringify(payload))
 
-      var result = serializer.deserialize(content);
+      let result = serializer.deserialize(content)
 
-      expect(result).to.eq('ok');
-    });
+      expect(result).to.eq('ok')
+    })
 
-    it('should return an integer given a buffer containing an integer', function() {
-      var payload = 123;
+    it('should return an integer given a buffer containing an integer', function () {
+      let payload = 123
 
-      var content = new Buffer(JSON.stringify(payload));
+      let content = Buffer.from(JSON.stringify(payload))
 
-      var result = serializer.deserialize(content);
+      let result = serializer.deserialize(content)
 
-      expect(result).to.eq(123);
-    });
+      expect(result).to.eq(123)
+    })
 
-    it('should throw an assertion error given it is not passed a buffer', function() {
-      var fn = function() {
-        serializer.deserialize();
-      };
+    it('should throw an assertion error given it is not passed a buffer', function () {
+      let fn = function () {
+        serializer.deserialize()
+      }
 
-      expect(fn).to.throw('content (buffer) is required');
-    });
-  });
-});
+      expect(fn).to.throw('content (buffer) is required')
+    })
+  })
+})

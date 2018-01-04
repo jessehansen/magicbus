@@ -1,202 +1,200 @@
-'use strict';
 
-const Configurator = require('../../lib/config');
-const Logger = require('../../lib/logger');
-const EventEmitter = require('events').EventEmitter;
+const Configurator = require('../../lib/config')
+const Logger = require('../../lib/logger')
+const EventEmitter = require('events').EventEmitter
 
-const chai = require('chai');
-const expect = chai.expect;
+const chai = require('chai')
+const expect = chai.expect
 
-describe('Configurator', function(){
-  var configurator;
-  var broker;
-  var events;
-  var logger;
+describe('Configurator', function () {
+  let configurator
+  let broker
+  let events
+  let logger
 
-  beforeEach(function(){
+  beforeEach(function () {
     broker = {
-      registerRoute: function(){}
-    };
-    events = new EventEmitter();
-    logger = Logger('magicbus.tests', events);
-    configurator = new Configurator(logger, events);
-  });
+      registerRoute: function () {}
+    }
+    events = new EventEmitter()
+    logger = Logger('magicbus.tests', events)
+    configurator = new Configurator(logger, events)
+  })
 
-  describe('#createBroker', function(){
-    var serviceDomainName = 'my-domain';
-    var appName = 'my-app';
-    var connectionInfo = {
+  describe('#createBroker', function () {
+    let serviceDomainName = 'my-domain'
+    let appName = 'my-app'
+    let connectionInfo = {
       server: 'localhost',
       vhost: '/',
       user: 'guest',
       pass: 'guest'
-    };
+    }
 
-    it('should create a broker with the default params', function(){
-      var broker = configurator.createBroker(serviceDomainName, appName, connectionInfo);
+    it('should create a broker with the default params', function () {
+      let broker = configurator.createBroker(serviceDomainName, appName, connectionInfo)
 
-      expect(broker).to.be.ok;
-      expect(broker.shutdown).to.be.ok;
-      return broker.shutdown();
-    });
-  });
+      expect(broker).to.be.ok
+      expect(broker.shutdown).to.be.ok
+      return broker.shutdown()
+    })
+  })
 
-  describe('#createPublisher', function(){
-    it('should create a publisher with the default params', function(){
-      var publisher = configurator.createPublisher(broker);
+  describe('#createPublisher', function () {
+    it('should create a publisher with the default params', function () {
+      let publisher = configurator.createPublisher(broker)
 
-      expect(publisher).to.be.ok;
-    });
+      expect(publisher).to.be.ok
+    })
 
-    it('should allow caller to override the envelope', function(){
-      var myEnvelope = {};
-      var publisher = configurator.createPublisher(broker, function(cfg){
-        cfg.useEnvelope(myEnvelope);
-      });
+    it('should allow caller to override the envelope', function () {
+      let myEnvelope = {}
+      let publisher = configurator.createPublisher(broker, function (cfg) {
+        cfg.useEnvelope(myEnvelope)
+      })
 
-      expect(publisher).to.be.ok;
-    });
+      expect(publisher).to.be.ok
+    })
 
-    it('should allow caller to override the middleware pipeline', function(){
-      var myPipeline = { useLogger: function() {} };
-      var publisher = configurator.createPublisher(broker, function(cfg){
-        cfg.usePipeline(myPipeline);
-      });
+    it('should allow caller to override the middleware pipeline', function () {
+      let myPipeline = { useLogger: function () {} }
+      let publisher = configurator.createPublisher(broker, function (cfg) {
+        cfg.usePipeline(myPipeline)
+      })
 
-      expect(publisher).to.be.ok;
-    });
+      expect(publisher).to.be.ok
+    })
 
-    it('should allow caller to override the route name', function(){
-      var myRouteName = 'publish2';
-      var publisher = configurator.createPublisher(broker, function(cfg){
-        cfg.useRouteName(myRouteName);
-      });
+    it('should allow caller to override the route name', function () {
+      let myRouteName = 'publish2'
+      let publisher = configurator.createPublisher(broker, function (cfg) {
+        cfg.useRouteName(myRouteName)
+      })
 
-      expect(publisher).to.be.ok;
-    });
+      expect(publisher).to.be.ok
+    })
 
-    it('should allow caller to override the route pattern', function(){
-      var myRoutePattern = {};
-      var publisher = configurator.createPublisher(broker, function(cfg){
-        cfg.useRoutePattern(myRoutePattern);
-      });
+    it('should allow caller to override the route pattern', function () {
+      let myRoutePattern = {}
+      let publisher = configurator.createPublisher(broker, function (cfg) {
+        cfg.useRoutePattern(myRoutePattern)
+      })
 
-      expect(publisher).to.be.ok;
-    });
-  });
+      expect(publisher).to.be.ok
+    })
+  })
 
-  describe('#createConsumer', function(){
-    it('should create a consumer with the default params', function(){
-      var consumer = configurator.createConsumer(broker);
+  describe('#createConsumer', function () {
+    it('should create a consumer with the default params', function () {
+      let consumer = configurator.createConsumer(broker)
 
-      expect(consumer).to.be.ok;
-    });
+      expect(consumer).to.be.ok
+    })
 
-    it('should allow caller to override the envelope', function(){
-      var myEnvelope = {};
-      var consumer = configurator.createConsumer(broker, function(cfg){
-        cfg.useEnvelope(myEnvelope);
-      });
+    it('should allow caller to override the envelope', function () {
+      let myEnvelope = {}
+      let consumer = configurator.createConsumer(broker, function (cfg) {
+        cfg.useEnvelope(myEnvelope)
+      })
 
-      expect(consumer).to.be.ok;
-    });
+      expect(consumer).to.be.ok
+    })
 
-    it('should allow caller to override the middleware pipeline', function(){
-      var myPipeline = { useLogger: function() {} };
-      var consumer = configurator.createConsumer(broker, function(cfg){
-        cfg.usePipeline(myPipeline);
-      });
+    it('should allow caller to override the middleware pipeline', function () {
+      let myPipeline = { useLogger: function () {} }
+      let consumer = configurator.createConsumer(broker, function (cfg) {
+        cfg.usePipeline(myPipeline)
+      })
 
-      expect(consumer).to.be.ok;
-    });
+      expect(consumer).to.be.ok
+    })
 
-    it('should allow caller to override the route name', function(){
-      var myRouteName = 'publish2';
-      var consumer = configurator.createConsumer(broker, function(cfg){
-        cfg.useRouteName(myRouteName);
-      });
+    it('should allow caller to override the route name', function () {
+      let myRouteName = 'publish2'
+      let consumer = configurator.createConsumer(broker, function (cfg) {
+        cfg.useRouteName(myRouteName)
+      })
 
-      expect(consumer).to.be.ok;
-    });
+      expect(consumer).to.be.ok
+    })
 
-    it('should allow caller to override the route pattern', function(){
-      var myRoutePattern = {};
-      var consumer = configurator.createConsumer(broker, function(cfg){
-        cfg.useRoutePattern(myRoutePattern);
-      });
+    it('should allow caller to override the route pattern', function () {
+      let myRoutePattern = {}
+      let consumer = configurator.createConsumer(broker, function (cfg) {
+        cfg.useRoutePattern(myRoutePattern)
+      })
 
-      expect(consumer).to.be.ok;
-    });
-  });
+      expect(consumer).to.be.ok
+    })
+  })
 
-  describe('#createSubscriber', function(){
-    it('should create a subscriber with the default params', function(){
-      var subscriber = configurator.createSubscriber(broker);
+  describe('#createSubscriber', function () {
+    it('should create a subscriber with the default params', function () {
+      let subscriber = configurator.createSubscriber(broker)
 
-      expect(subscriber).to.be.ok;
-    });
+      expect(subscriber).to.be.ok
+    })
 
-    it('should allow caller to override the envelope', function(){
-      var myEnvelope = {};
-      var subscriber = configurator.createSubscriber(broker, function(cfg){
-        cfg.useEnvelope(myEnvelope);
-      });
+    it('should allow caller to override the envelope', function () {
+      let myEnvelope = {}
+      let subscriber = configurator.createSubscriber(broker, function (cfg) {
+        cfg.useEnvelope(myEnvelope)
+      })
 
-      expect(subscriber).to.be.ok;
-    });
+      expect(subscriber).to.be.ok
+    })
 
-    it('should allow caller to override the middleware pipeline', function(){
-      var myPipeline = { useLogger: function() {} };
-      var subscriber = configurator.createSubscriber(broker, function(cfg){
-        cfg.usePipeline(myPipeline);
-      });
+    it('should allow caller to override the middleware pipeline', function () {
+      let myPipeline = { useLogger: function () {} }
+      let subscriber = configurator.createSubscriber(broker, function (cfg) {
+        cfg.usePipeline(myPipeline)
+      })
 
-      expect(subscriber).to.be.ok;
-    });
+      expect(subscriber).to.be.ok
+    })
 
-    it('should allow caller to override the route name', function(){
-      var myRouteName = 'publish2';
-      var subscriber = configurator.createSubscriber(broker, function(cfg){
-        cfg.useRouteName(myRouteName);
-      });
+    it('should allow caller to override the route name', function () {
+      let myRouteName = 'publish2'
+      let subscriber = configurator.createSubscriber(broker, function (cfg) {
+        cfg.useRouteName(myRouteName)
+      })
 
-      expect(subscriber).to.be.ok;
-    });
+      expect(subscriber).to.be.ok
+    })
 
-    it('should allow caller to override the route pattern', function(){
-      var myRoutePattern = {};
-      var subscriber = configurator.createSubscriber(broker, function(cfg){
-        cfg.useRoutePattern(myRoutePattern);
-      });
+    it('should allow caller to override the route pattern', function () {
+      let myRoutePattern = {}
+      let subscriber = configurator.createSubscriber(broker, function (cfg) {
+        cfg.useRoutePattern(myRoutePattern)
+      })
 
-      expect(subscriber).to.be.ok;
-    });
+      expect(subscriber).to.be.ok
+    })
 
-    it('should allow caller to override the consumer', function(){
-      var myConsumer = {};
-      var subscriber = configurator.createSubscriber(function(cfg){
-        cfg.useConsumer(myConsumer);
-      });
+    it('should allow caller to override the consumer', function () {
+      let myConsumer = {}
+      let subscriber = configurator.createSubscriber(function (cfg) {
+        cfg.useConsumer(myConsumer)
+      })
 
-      expect(subscriber).to.be.ok;
-    });
-  });
+      expect(subscriber).to.be.ok
+    })
+  })
 
-  describe('#createBinder', function(){
-    var connectionInfo = {
+  describe('#createBinder', function () {
+    let connectionInfo = {
       server: 'localhost',
       vhost: '/',
       user: 'guest',
       pass: 'guest'
-    };
+    }
 
-    it('should create a binder with the default params', function(){
-      var binder = configurator.createBinder(connectionInfo);
+    it('should create a binder with the default params', function () {
+      let binder = configurator.createBinder(connectionInfo)
 
-      expect(binder).to.be.ok;
-      expect(binder.bind).to.be.ok;
-      return binder.shutdown();
-    });
-  });
-
-});
+      expect(binder).to.be.ok
+      expect(binder.bind).to.be.ok
+      return binder.shutdown()
+    })
+  })
+})

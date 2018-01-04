@@ -1,62 +1,60 @@
-'use strict';
+let magicbus = require('../lib')
+let environment = require('./_test-env')
 
-var magicbus = require('../lib');
-var environment = require('./_test-env');
+let chai = require('chai')
+let expect = chai.expect
+let Promise = require('bluebird')
 
-var chai = require('chai');
-var expect = chai.expect;
-let Promise = require('bluebird');
+describe('Pub/Sub integration', function () {
+  let serviceDomainName = 'magicbus'
+  let appName = 'tests'
+  let connectionInfo = environment.rabbitString
+  let broker
+  let publisher
+  let subscriber
 
-describe('Pub/Sub integration', function() {
-  var serviceDomainName = 'magicbus';
-  var appName = 'tests';
-  var connectionInfo = environment.rabbitString;
-  var broker;
-  var publisher;
-  var subscriber;
-
-  before(function() {
-    broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo);
-    publisher = magicbus.createPublisher(broker);
-    subscriber = magicbus.createSubscriber(broker);
+  before(function () {
+    broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
+    publisher = magicbus.createPublisher(broker)
+    subscriber = magicbus.createSubscriber(broker)
 
     return broker.bind(publisher.getRoute().name, subscriber.getRoute().name, { pattern: '#' })
-      .then(function(){
-        return subscriber.purgeQueue();
-      });
-  });
+      .then(function () {
+        return subscriber.purgeQueue()
+      })
+  })
 
-  after(function() {
-    return broker.shutdown();
-  });
+  after(function () {
+    return broker.shutdown()
+  })
 
-  it('should be able to publish a message and consume that message', function(done) {
-    var eventName = 'something-done';
-    var data = {
+  it('should be able to publish a message and consume that message', function (done) {
+    let eventName = 'something-done'
+    let data = {
       it: 'was awesome'
-    };
-
-    var handler = function(handlerEventName, handlerData) {
-      expect(handlerEventName).to.eq(eventName);
-      expect(handlerData).to.eql(data);
-
-      done();
-    };
-
-    subscriber.on('something-done', handler);
-    subscriber.startSubscription().then(function() {
-      publisher.publish(eventName, data);
-    });
-  });
-
-  xit('should handle a heavy load without rejecting because of a full write buffer', function() {
-    this.timeout(30000); //eslint-disable-line
-    let load = [];
-    for (let i = 0; i < 100000; ++i) {
-      load.push('message ' + i);
     }
-    return Promise.map(load, function(message){
-      return publisher.publish('load-test', { message: message });
-    });
-  });
-});
+
+    let handler = function (handlerEventName, handlerData) {
+      expect(handlerEventName).to.eq(eventName)
+      expect(handlerData).to.eql(data)
+
+      done()
+    }
+
+    subscriber.on('something-done', handler)
+    subscriber.startSubscription().then(function () {
+      publisher.publish(eventName, data)
+    })
+  })
+
+  xit('should handle a heavy load without rejecting because of a full write buffer', function () {
+    this.timeout(30000)
+    let load = []
+    for (let i = 0; i < 100000; ++i) {
+      load.push('message ' + i)
+    }
+    return Promise.map(load, function (message) {
+      return publisher.publish('load-test', { message: message })
+    })
+  })
+})

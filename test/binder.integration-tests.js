@@ -1,26 +1,25 @@
-'use strict';
 
-const magicbus = require('../lib');
-const environment = require('./_test-env');
+const magicbus = require('../lib')
+const environment = require('./_test-env')
 
-const PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern');
-const WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern');
+const PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
+const WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern')
 
-describe('Binder really using RabbitMQ', function() {
-  let serviceDomainName = 'magicbus';
-  let appName = 'tests';
-  let connectionInfo = environment.rabbit;
-  let binder;
+describe('Binder really using RabbitMQ', function () {
+  let serviceDomainName = 'magicbus'
+  let appName = 'tests'
+  let connectionInfo = environment.rabbit
+  let binder
 
-  beforeEach(function() {
-    binder = magicbus.createBinder(connectionInfo);
-  });
+  beforeEach(function () {
+    binder = magicbus.createBinder(connectionInfo)
+  })
 
-  afterEach(function() {
-    return binder.shutdown();
-  });
+  afterEach(function () {
+    return binder.shutdown()
+  })
 
-  it('should be able to bind an exchange to a queue', function(){
+  it('should be able to bind an exchange to a queue', function () {
     return binder.bind({
       serviceDomainName: serviceDomainName,
       appName: appName,
@@ -31,6 +30,6 @@ describe('Binder really using RabbitMQ', function() {
       appName: appName,
       name: 'binder-subscribe',
       pattern: new WorkerRoutePattern()
-    }, { pattern: '#' });
-  });
-});
+    }, { pattern: '#' })
+  })
+})

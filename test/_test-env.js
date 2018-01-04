@@ -1,4 +1,3 @@
-'use strict';
 
 module.exports = {
   rabbit: {
@@ -7,4 +6,4 @@ module.exports = {
     pass: 'guest'
   },
   rabbitString: `amqp://guest:guest@${process.env.RABBITMQ_HOST || 'localhost'}/`
-};
+}
