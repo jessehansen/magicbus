@@ -118,10 +118,8 @@ describe('Publisher', function () {
     })
 
     it('should be rejected given the broker.publish call is rejected', function () {
-      let brokerPromise = Promise.reject(new Error('Aw, snap!'))
-
       mockBroker.publish = function () {
-        return brokerPromise
+        return Promise.reject(new Error('Aw, snap!'))
       }
 
       return expect(publisher.publish('something-happened')).to.be.rejectedWith('Aw, snap!')

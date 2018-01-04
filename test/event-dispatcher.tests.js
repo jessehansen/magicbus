@@ -1,4 +1,3 @@
-
 let EventDispatcher = require('../lib/event-dispatcher')
 
 let eventName = 'myCoolEventName'
