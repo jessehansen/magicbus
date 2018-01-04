@@ -16,14 +16,14 @@ A message bus framework implementing configurable pipelines to prepare messages 
 * Dispatch of messages to handlers based on message type when consuming multiple message types from a single queue
 * Connection management (single connection, re-establishing a lost connection)
 
-## Why would I use this over wascally or rabbot?
+## Totally Customizable
 
-While magicbus has opinions baked in for message serialization/envelope generation and exchange/queue topology, they can be easily replaced with your own opinions. This makes it possible, for example, to interoperate with other event bus frameworks on RabbitMQ, for example: [MassTransit](http://masstransit-project.com/).
+While magicbus has opinions baked in for message serialization/envelope generation and exchange/queue topology, they can be easily replaced. This makes it possible, for example, to interoperate with other event bus frameworks on RabbitMQ, for example: [MassTransit](http://masstransit-project.com/).
 
 # Installation
 
 ```bash
-$ npm install magicbus
+$ npm install --save magicbus
 ```
 
 # Usage
