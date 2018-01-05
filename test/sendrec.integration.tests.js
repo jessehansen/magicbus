@@ -1,9 +1,5 @@
-
-let magicbus = require('../lib')
-let environment = require('./_test-env')
-
-let chai = require('chai')
-let expect = chai.expect
+const magicbus = require('../lib')
+const environment = require('./_test-env')
 
 describe('Send/Receive integration', function () {
   let serviceDomainName = 'magicbus'
@@ -13,7 +9,7 @@ describe('Send/Receive integration', function () {
   let sender
   let receiver
 
-  before(function () {
+  beforeAll(function () {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
     sender = magicbus.createPublisher(broker, function (cfg) {
       cfg.useRouteName('publish')
@@ -28,7 +24,7 @@ describe('Send/Receive integration', function () {
       })
   })
 
-  after(function () {
+  afterAll(function () {
     return broker.shutdown()
   })
 

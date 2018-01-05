@@ -1,9 +1,6 @@
-let magicbus = require('../lib')
-let environment = require('./_test-env')
-
-let chai = require('chai')
-let expect = chai.expect
-let Promise = require('bluebird')
+const magicbus = require('../lib')
+const environment = require('./_test-env')
+const Promise = require('bluebird')
 
 describe('Pub/Sub integration', function () {
   let serviceDomainName = 'magicbus'
@@ -13,7 +10,7 @@ describe('Pub/Sub integration', function () {
   let publisher
   let subscriber
 
-  before(function () {
+  beforeAll(function () {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
     publisher = magicbus.createPublisher(broker)
     subscriber = magicbus.createSubscriber(broker)
@@ -24,7 +21,7 @@ describe('Pub/Sub integration', function () {
       })
   })
 
-  after(function () {
+  afterAll(function () {
     return broker.shutdown()
   })
 
