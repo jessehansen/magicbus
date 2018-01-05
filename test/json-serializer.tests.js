@@ -1,20 +1,20 @@
-const JsonSerializer = require('../lib/json-serializer.js')
+const jsonSerializer = require('../lib/json-serializer.js')
 
-describe('JsonSerializer', function () {
+describe('JsonSerializer', () => {
   let serializer
 
-  beforeEach(function () {
-    serializer = new JsonSerializer()
+  beforeEach(() => {
+    serializer = jsonSerializer()
   })
 
-  describe('contentTypeSuffix', function () {
-    it('should return a hardcoded value in all cases', function () {
+  describe('contentTypeSuffix', () => {
+    it('should return a hardcoded value in all cases', () => {
       expect(serializer.contentTypeSuffix).toEqual('+json')
     })
   })
 
-  describe('serialize', function () {
-    it('should return a buffer containing the stringified payload', function () {
+  describe('serialize', () => {
+    it('should return a buffer containing the stringified payload', () => {
       let payload = {
         my: 'data'
       }
@@ -25,15 +25,15 @@ describe('JsonSerializer', function () {
       expect(actual.toString()).toEqual(JSON.stringify(payload))
     })
 
-    it('should return null given no payload', function () {
+    it('should return null given no payload', () => {
       let actual = serializer.serialize(null)
 
       expect(actual).toEqual(null)
     })
   })
 
-  describe('deserialize', function () {
-    it('should return an object given a buffer containing a stringified object', function () {
+  describe('deserialize', () => {
+    it('should return an object given a buffer containing a stringified object', () => {
       let payload = {
         my: 'data'
       }
@@ -45,7 +45,7 @@ describe('JsonSerializer', function () {
       expect(result).toEqual(payload)
     })
 
-    it('should return a string given a buffer containing a string that is not a stringified object', function () {
+    it('should return a string given a buffer containing a string that is not a stringified object', () => {
       let payload = 'ok'
 
       let content = Buffer.from(JSON.stringify(payload))
@@ -55,7 +55,7 @@ describe('JsonSerializer', function () {
       expect(result).toEqual('ok')
     })
 
-    it('should return an integer given a buffer containing an integer', function () {
+    it('should return an integer given a buffer containing an integer', () => {
       let payload = 123
 
       let content = Buffer.from(JSON.stringify(payload))
@@ -65,8 +65,8 @@ describe('JsonSerializer', function () {
       expect(result).toEqual(123)
     })
 
-    it('should throw an assertion error given it is not passed a buffer', function () {
-      let fn = function () {
+    it('should throw an assertion error given it is not passed a buffer', () => {
+      let fn = () => {
         serializer.deserialize()
       }
 
