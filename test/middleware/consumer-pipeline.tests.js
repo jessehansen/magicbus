@@ -1,16 +1,16 @@
-const ConsumerPipeline = require('../../lib/middleware').ConsumerPipeline
+const consumerPipelineFactory = require('../../lib/middleware').ConsumerPipeline
 
-function simpleMiddleware (message, actions) {
+const simpleMiddleware = (message, actions) => {
   message.properties.headers.push('first: true')
   actions.next()
 }
 
-describe('ConsumerPipeline', function () {
+describe('ConsumerPipeline', () => {
   let consumerPipeline
   let message
 
-  beforeEach(function () {
-    consumerPipeline = new ConsumerPipeline()
+  beforeEach(() => {
+    consumerPipeline = consumerPipelineFactory()
     message = {
       properties: {
         headers: []
@@ -19,8 +19,8 @@ describe('ConsumerPipeline', function () {
     }
   })
 
-  describe('#useLogger', function () {
-    it('should pass the logger on to middleware', function () {
+  describe('#useLogger', () => {
+    it('should pass the logger on to middleware', () => {
       let sampleLogger = {}
       let middleware = jest.fn((m, a) => {
         a.next()
@@ -37,11 +37,11 @@ describe('ConsumerPipeline', function () {
     })
   })
 
-  describe('#execute', function () {
+  describe('#execute', () => {
     const successiveFunctionTestFactory =
-      (fn) => async function () {
-        const consumerPipeline = new ConsumerPipeline()
-        consumerPipeline.use(function (msg, actions) {
+      (fn) => async () => {
+        const consumerPipeline = consumerPipelineFactory()
+        consumerPipeline.use((msg, actions) => {
           actions[fn]({})
         })
         consumerPipeline.use(simpleMiddleware)
@@ -51,15 +51,15 @@ describe('ConsumerPipeline', function () {
         expect(message.properties.headers).toHaveLength(0)
       }
     const emitTestFactory =
-      (fn) => async function () {
+      (fn) => async () => {
         let emitted = 0
-        const consumerPipeline = new ConsumerPipeline()
-        consumerPipeline.use(function (msg, actions) {
+        const consumerPipeline = consumerPipelineFactory()
+        consumerPipeline.use((msg, actions) => {
           actions[fn]({})
         })
 
-        await expect(consumerPipeline.prepare(function (eventSink) {
-          eventSink.on(fn, function () {
+        await expect(consumerPipeline.prepare((eventSink) => {
+          eventSink.on(fn, () => {
             emitted++
           })
         })(message)).rejects.toBeUndefined()

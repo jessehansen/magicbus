@@ -8,6 +8,7 @@ describe('Publisher', function () {
   let mockBroker
   let logger
   let fakePipeline
+  let fakePattern
 
   beforeEach(function () {
     mockBroker = {
@@ -18,6 +19,7 @@ describe('Publisher', function () {
     }
     logger = Logger()
     fakePipeline = { useLogger: function () { } }
+    fakePattern = () => Promise.resolve({ exchangeName: 'my-exchange' })
   })
 
   describe('constructor', function () {
@@ -54,20 +56,18 @@ describe('Publisher', function () {
         Publisher(mockBroker, {}, fakePipeline, 'route')
       }
 
-      expect(fn).toThrow('routePattern (object) is required')
+      expect(fn).toThrow('routePattern (func) is required')
     })
     it('should throw an assertion error given no logger', function () {
       let fn = function () {
-        Publisher(mockBroker, {}, fakePipeline, 'route', {})
+        Publisher(mockBroker, {}, fakePipeline, 'route', fakePattern)
       }
 
       expect(fn).toThrow('logger (object) is required')
     })
     it('should register a route with the broker', function () {
-      let pattern = {}
-
-      Publisher(mockBroker, {}, fakePipeline, 'route', pattern, logger)
-      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', pattern)
+      Publisher(mockBroker, {}, fakePipeline, 'route', fakePattern, logger)
+      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', fakePattern)
     })
   })
 
@@ -76,17 +76,6 @@ describe('Publisher', function () {
 
     beforeEach(function () {
       publisher = magicbus.createPublisher(mockBroker)
-    })
-
-    it('should register a route with the broker', function () {
-      let pattern = {}
-
-      publisher = magicbus.createPublisher(mockBroker, function (cfg) {
-        cfg.useRouteName('publish')
-        cfg.useRoutePattern(pattern)
-      })
-
-      expect(mockBroker.registerRoute).toHaveBeenCalledWith('publish', pattern)
     })
 
     it('should be rejected with an assertion error given no event name', function () {

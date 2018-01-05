@@ -1,4 +1,7 @@
 module.exports = {
   extends: ['plugin:jest/recommended'],
-  plugins: ['jest']
+  plugins: ['jest'],
+  rules: {
+    'arrow-body-style': 0
+  }
 }

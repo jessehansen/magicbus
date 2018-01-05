@@ -14,6 +14,7 @@ describe('Consumer', function () {
   let eventName
   let fakeMessage
   let fakePipeline
+  let fakePattern
 
   beforeEach(function () {
     logEvents = new EventEmitter()
@@ -34,6 +35,7 @@ describe('Consumer', function () {
     }
 
     fakePipeline = { useLogger: function () {} }
+    fakePattern = () => Promise.resolve({ queueName: 'my-queue' })
 
     mockBroker = {
       registerRoute: jest.fn((/* name, pattern */) => {}),
@@ -101,28 +103,25 @@ describe('Consumer', function () {
         Consumer(mockBroker, {}, fakePipeline, 'route')
       }
 
-      expect(fn).toThrow('routePattern (object) is required')
+      expect(fn).toThrow('routePattern (func) is required')
     })
     it('should throw an assertion error given no logger', function () {
       let fn = function () {
-        Consumer(mockBroker, {}, fakePipeline, 'route', {})
+        Consumer(mockBroker, {}, fakePipeline, 'route', fakePattern)
       }
 
       expect(fn).toThrow('logger (object) is required')
     })
     it('should throw an assertion error given no events', function () {
       let fn = function () {
-        Consumer(mockBroker, {}, fakePipeline, 'route', {}, {})
+        Consumer(mockBroker, {}, fakePipeline, 'route', fakePattern, {})
       }
 
       expect(fn).toThrow('events (object) is required')
     })
     it('should register a route with the broker', function () {
-      let pattern
-
-      pattern = {}
-      Consumer(mockBroker, {}, fakePipeline, 'route', pattern, logger, logEvents)
-      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', pattern)
+      Consumer(mockBroker, {}, fakePipeline, 'route', fakePattern, logger, logEvents)
+      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', fakePattern)
     })
 
     describe('constructor argument checking', function () {

@@ -17,8 +17,8 @@ describe('Broker really using RabbitMQ', function () {
     let p
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
 
-    broker.registerRoute('publish', new PublisherRoutePattern())
-    broker.registerRoute('subscribe', new WorkerRoutePattern())
+    broker.registerRoute('publish', PublisherRoutePattern())
+    broker.registerRoute('subscribe', WorkerRoutePattern())
 
     p = Promise.resolve()
     if (!bound) {

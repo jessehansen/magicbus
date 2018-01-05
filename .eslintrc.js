@@ -16,6 +16,7 @@ module.exports = {
     'block-spacing': [ 'error', 'always' ],
     'brace-style': [ 'error', '1tbs' ],
     camelcase: [ 'error', { properties: 'always' } ],
+    'class-methods-use-this': 'error',
     'comma-dangle': [ 'error', 'never' ],
     'comma-spacing': [ 'error', { before: false, after: true } ],
     'comma-style': [ 'error', 'last' ],
@@ -157,6 +158,7 @@ module.exports = {
       }
     }],
     'padded-blocks': [ 'error', 'never' ],
+    'prefer-arrow-callback': 'error',
     quotes: [ 'error', 'single', { avoidEscape: true } ],
     'quote-props': [ 'error', 'as-needed' ],
     radix: 'error',

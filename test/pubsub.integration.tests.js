@@ -25,7 +25,7 @@ describe('Pub/Sub integration', function () {
     return broker.shutdown()
   })
 
-  it('should be able to publish a message and consume that message', function (done) {
+  it.only('should be able to publish a message and consume that message', function (done) {
     let eventName = 'something-done'
     let data = {
       it: 'was awesome'

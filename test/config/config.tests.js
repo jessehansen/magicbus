@@ -71,7 +71,7 @@ describe('Configurator', function () {
     })
 
     it('should allow caller to override the route pattern', function () {
-      let myRoutePattern = {}
+      let myRoutePattern = () => () => ({ exchangeName: 'my exchange name' })
       let publisher = configurator.createPublisher(broker, function (cfg) {
         cfg.useRoutePattern(myRoutePattern)
       })
@@ -115,7 +115,7 @@ describe('Configurator', function () {
     })
 
     it('should allow caller to override the route pattern', function () {
-      let myRoutePattern = {}
+      let myRoutePattern = () => () => ({ queueName: 'my queue name' })
       let consumer = configurator.createConsumer(broker, function (cfg) {
         cfg.useRoutePattern(myRoutePattern)
       })
@@ -159,7 +159,7 @@ describe('Configurator', function () {
     })
 
     it('should allow caller to override the route pattern', function () {
-      let myRoutePattern = {}
+      let myRoutePattern = () => () => ({ queueName: 'my queue name' })
       let subscriber = configurator.createSubscriber(broker, function (cfg) {
         cfg.useRoutePattern(myRoutePattern)
       })

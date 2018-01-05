@@ -1,8 +1,8 @@
 const magicbus = require('../lib')
 const environment = require('./_test-env')
 
-const PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
-const WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern')
+const publisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
+const workerRoutePattern = require('../lib/route-patterns/worker-route-pattern')
 
 describe('Binder really using RabbitMQ', function () {
   let serviceDomainName = 'magicbus'
@@ -23,12 +23,12 @@ describe('Binder really using RabbitMQ', function () {
       serviceDomainName: serviceDomainName,
       appName: appName,
       name: 'binder-publish',
-      pattern: new PublisherRoutePattern()
+      pattern: publisherRoutePattern()
     }, {
       serviceDomainName: serviceDomainName,
       appName: appName,
       name: 'binder-subscribe',
-      pattern: new WorkerRoutePattern()
+      pattern: workerRoutePattern()
     }, { pattern: '#' })
   })
 })
