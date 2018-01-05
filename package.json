@@ -1,6 +1,6 @@
 {
   "name": "magicbus",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "A message bus framework using RabbitMQ.",
   "main": "lib/index.js",
   "scripts": {
@@ -47,8 +47,14 @@
   "jest": {
     "collectCoverage": true,
     "globalSetup": "./test/__setup",
-    "testMatch": [ "**/__tests__/**/*.js?(x)", "**/?(*.)(spec|test|tests).js?(x)" ],
-    "coveragePathIgnorePatterns": ["/node_modules/", "/test/"]
+    "testMatch": [
+      "**/__tests__/**/*.js?(x)",
+      "**/?(*.)(spec|test|tests).js?(x)"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ]
   },
   "jest-junit": {
     "suiteName": "magicpipes jest",
