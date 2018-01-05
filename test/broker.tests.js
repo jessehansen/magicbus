@@ -1,12 +1,8 @@
+const magicbus = require('../lib')
+const environment = require('./_test-env')
 
-let magicbus = require('../lib')
-let environment = require('./_test-env')
-
-let chai = require('chai')
-let expect = chai.expect
-
-let PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
-let WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern')
+const PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
+const WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern')
 
 function noOp () { }
 
@@ -56,7 +52,7 @@ describe('Broker really using RabbitMQ', function () {
           caught = true
         })
         .then(() => {
-          expect(caught).to.equal(true)
+          expect(caught).toEqual(true)
         })
     })
     it('should not allow consume after shutdown', function () {
@@ -67,7 +63,7 @@ describe('Broker really using RabbitMQ', function () {
           caught = true
         })
         .then(() => {
-          expect(caught).to.equal(true)
+          expect(caught).toEqual(true)
         })
     })
   })
@@ -78,7 +74,7 @@ describe('Broker really using RabbitMQ', function () {
 
       let handler = function (msg, ops) {
         let messageContent = Buffer.from(msg.content).toString()
-        expect(messageContent).to.eq(theMessage)
+        expect(messageContent).toEqual(theMessage)
 
         ops.ack()
         done()
@@ -152,7 +148,7 @@ describe('Broker really using RabbitMQ', function () {
 
       let handler = function (msg, ops) {
         let messageContent = Buffer.from(msg.content).toString()
-        expect(messageContent).to.eq(theMessage)
+        expect(messageContent).toEqual(theMessage)
 
         ops.ack()
         done()
@@ -199,7 +195,7 @@ describe('Broker really using RabbitMQ', function () {
 
       let handler = function (msg, ops) {
         let messageContent = Buffer.from(msg.content).toString()
-        expect(messageContent).to.eq(theMessage)
+        expect(messageContent).toEqual(theMessage)
 
         ops.ack()
         done()
@@ -243,7 +239,7 @@ describe('Broker really using RabbitMQ', function () {
 
       let handler = function (msg) {
         let messageContent = Buffer.from(msg.content).toString()
-        expect(messageContent).to.eq(theMessage)
+        expect(messageContent).toEqual(theMessage)
 
         done()
       }

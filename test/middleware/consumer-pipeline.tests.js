@@ -1,13 +1,4 @@
-
 const ConsumerPipeline = require('../../lib/middleware').ConsumerPipeline
-
-const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
-const expect = chai.expect
-const assert = chai.assert
-const sinon = require('sinon')
-
-chai.use(chaiAsPromised)
 
 function simpleMiddleware (message, actions) {
   message.properties.headers.push('first: true')
@@ -31,7 +22,7 @@ describe('ConsumerPipeline', function () {
   describe('#useLogger', function () {
     it('should pass the logger on to middleware', function () {
       let sampleLogger = {}
-      let middleware = sinon.spy((m, a) => {
+      let middleware = jest.fn((m, a) => {
         a.next()
       })
 
@@ -39,50 +30,48 @@ describe('ConsumerPipeline', function () {
       consumerPipeline.useLogger(sampleLogger)
       return consumerPipeline.prepare()(message)
         .then(() => {
-          expect(middleware).to.have.been.called
-          expect(middleware).to.have.been.calledWith(message, sinon.match.object, sampleLogger)
+          expect(middleware).toHaveBeenCalled()
+          expect(middleware.mock.calls[0][0]).toBe(message)
+          expect(middleware.mock.calls[0][2]).toBe(sampleLogger)
         })
     })
   })
 
   describe('#execute', function () {
-    let funcs = ['ack', 'nack', 'reject']
-    let i, fn
-    for (i = 0; i < funcs.length; i++) {
-      fn = funcs[i]
-      /* eslint no-loop-func: 1 */
-      it('should not call successive functions when middleware calls ' + fn, function () {
-        consumerPipeline = new ConsumerPipeline()
+    const successiveFunctionTestFactory =
+      (fn) => async function () {
+        const consumerPipeline = new ConsumerPipeline()
         consumerPipeline.use(function (msg, actions) {
           actions[fn]({})
         })
         consumerPipeline.use(simpleMiddleware)
 
-        return consumerPipeline.prepare()(message).then(function () {
-          assert.fail('expected promise to fail, but it succeeded')
-        }).catch(function () {
-          expect(message.properties.headers.length).to.equal(0)
-        })
-      })
-      it('should emit event when middleware calls ' + fn, function () {
-        let emitted
-        consumerPipeline = new ConsumerPipeline()
+        let pipe = consumerPipeline.prepare()
+        await expect(pipe(message)).rejects.toBeUndefined()
+        expect(message.properties.headers).toHaveLength(0)
+      }
+    const emitTestFactory =
+      (fn) => async function () {
+        let emitted = 0
+        const consumerPipeline = new ConsumerPipeline()
         consumerPipeline.use(function (msg, actions) {
           actions[fn]({})
         })
 
-        emitted = 0
-
-        return consumerPipeline.prepare(function (eventSink) {
+        await expect(consumerPipeline.prepare(function (eventSink) {
           eventSink.on(fn, function () {
             emitted++
           })
-        })(message).then(function () {
-          assert.fail('expected promise to fail, but it succeeded')
-        }).catch(function () {
-          expect(emitted).to.equal(1)
-        })
-      })
+        })(message)).rejects.toBeUndefined()
+        expect(emitted).toEqual(1)
+      }
+
+    let funcs = ['ack', 'nack', 'reject']
+    let i, fn
+    for (i = 0; i < funcs.length; i++) {
+      fn = funcs[i]
+      it('should not call successive functions when middleware calls ' + fn, successiveFunctionTestFactory(fn))
+      it('should emit event when middleware calls ' + fn, emitTestFactory(fn))
     }
   })
 })

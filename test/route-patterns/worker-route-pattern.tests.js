@@ -1,16 +1,6 @@
+const WorkerRoutePattern = require('../../lib/route-patterns/worker-route-pattern.js')
 
-let WorkerRoutePattern = require('../../lib/route-patterns/worker-route-pattern.js')
-
-let Promise = require('bluebird')
-
-let chai = require('chai')
-let expect = chai.expect
-
-let sinon = require('sinon')
-let sinonChai = require('sinon-chai')
-chai.use(sinonChai)
-
-chai.use(require('chai-as-promised'))
+const Promise = require('bluebird')
 
 describe('WorkerRoutePattern', function () {
   describe('createTopology', function () {
@@ -19,25 +9,23 @@ describe('WorkerRoutePattern', function () {
 
     beforeEach(function () {
       mockTopology = {
-        createExchange: function () {
+        createExchange: jest.fn(function () {
           return Promise.resolve()
-        },
-        createQueue: function () {
+        }),
+        createQueue: jest.fn(function () {
           return Promise.resolve()
-        },
-        createBinding: function () {
+        }),
+        createBinding: jest.fn(function () {
           return Promise.resolve()
-        }
+        })
       }
 
       routePattern = new WorkerRoutePattern()
     })
 
     it('should assert a dead letter exchange', function () {
-      sinon.spy(mockTopology, 'createExchange')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createExchange).to.have.been.calledWith({
+        expect(mockTopology.createExchange).toHaveBeenCalledWith({
           name: 'my-domain.my-app.my-route.failed',
           type: 'fanout',
           durable: true
@@ -46,20 +34,16 @@ describe('WorkerRoutePattern', function () {
     })
 
     it('should assert a queue to hold failed messages', function () {
-      sinon.spy(mockTopology, 'createQueue')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createQueue).to.have.been.calledWith({
+        expect(mockTopology.createQueue).toHaveBeenCalledWith({
           name: 'my-domain.my-app.my-route.failed'
         })
       })
     })
 
     it('should bind the failed message queue to the dead letter exchange', function () {
-      sinon.spy(mockTopology, 'createBinding')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createBinding).to.have.been.calledWith({
+        expect(mockTopology.createBinding).toHaveBeenCalledWith({
           source: 'my-domain.my-app.my-route.failed',
           target: 'my-domain.my-app.my-route.failed'
         })
@@ -67,20 +51,18 @@ describe('WorkerRoutePattern', function () {
     })
 
     it('should assert the queue to consume from and connect it to the dead letter exchange', function () {
-      sinon.spy(mockTopology, 'createQueue')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createQueue).to.have.been.calledWith(sinon.match({
+        expect(mockTopology.createQueue).toHaveBeenCalledWith({
           name: 'my-domain.my-app.my-route',
           deadLetter: 'my-domain.my-app.my-route.failed'
-        }))
+        })
       })
     })
 
     it('should return the name of the queue to consume from', function () {
       let p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')
 
-      return expect(p).to.eventually.eql({ queueName: 'my-domain.my-app.my-route' })
+      return expect(p).resolves.toEqual({ queueName: 'my-domain.my-app.my-route' })
     })
 
     it('should reject if any of the topology cannot be created', function () {
@@ -88,7 +70,7 @@ describe('WorkerRoutePattern', function () {
         return Promise.reject(new Error('Nuts!'))
       }
 
-      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).to.be.rejectedWith('Nuts!')
+      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).rejects.toThrow('Nuts!')
     })
   })
 })

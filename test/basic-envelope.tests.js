@@ -1,10 +1,5 @@
-
-let BasicEnvelope = require('../lib/basic-envelope.js')
-
-let chai = require('chai')
-let expect = chai.expect
-
-let JsonSerializer = require('../lib/json-serializer.js')
+const BasicEnvelope = require('../lib/basic-envelope')
+const JsonSerializer = require('../lib/json-serializer')
 
 describe('BasicEnvelope', function () {
   let envelope
@@ -15,7 +10,7 @@ describe('BasicEnvelope', function () {
 
   describe('default construction', function () {
     it('should use the json serializer', function () {
-      expect(envelope._serializer instanceof JsonSerializer).to.eq(true)
+      expect(envelope._serializer instanceof JsonSerializer).toEqual(true)
     })
   })
 
@@ -26,13 +21,13 @@ describe('BasicEnvelope', function () {
         serializer: serializer
       })
 
-      expect(envelope._serializer).to.eq(serializer)
+      expect(envelope._serializer).toEqual(serializer)
     })
   })
 
   describe('contentType', function () {
     it('should return a hardcoded value in all cases', function () {
-      expect(envelope.contentType).to.eq('application/prs.magicbus')
+      expect(envelope.contentType).toEqual('application/prs.magicbus')
     })
   })
 
@@ -42,7 +37,7 @@ describe('BasicEnvelope', function () {
         my: 'data'
       }, 'my-kind')
 
-      expect(msg.properties.contentType).to.eq('application/prs.magicbus+json')
+      expect(msg.properties.contentType).toEqual('application/prs.magicbus+json')
     })
 
     it('should put the kind of the message in the type property of the amqp properties', function () {
@@ -50,7 +45,7 @@ describe('BasicEnvelope', function () {
         my: 'data'
       }, 'my-kind')
 
-      expect(msg.properties.type).to.eq('my-kind')
+      expect(msg.properties.type).toEqual('my-kind')
     })
 
     it('should put the data of the message in the payload', function () {
@@ -61,7 +56,7 @@ describe('BasicEnvelope', function () {
       let expected = {
         my: 'data'
       }
-      expect(msg.payload).to.eql(expected)
+      expect(msg.payload).toEqual(expected)
     })
   })
 
@@ -71,7 +66,7 @@ describe('BasicEnvelope', function () {
         my: 'data'
       }, 'my-kind')
 
-      expect(routingKey).to.eq(routingKey)
+      expect(routingKey).toEqual(routingKey)
     })
   })
 
@@ -88,7 +83,7 @@ describe('BasicEnvelope', function () {
       let expected = {
         my: 'data'
       }
-      expect(data).to.eql(expected)
+      expect(data).toEqual(expected)
     })
 
     it('should return null given a message with no payload', function () {
@@ -96,7 +91,7 @@ describe('BasicEnvelope', function () {
 
       let data = envelope.getData(msg)
 
-      expect(data).to.eq(null)
+      expect(data).toEqual(null)
     })
 
     it('should throw an assertion error given no message', function () {
@@ -104,7 +99,7 @@ describe('BasicEnvelope', function () {
         envelope.getData()
       }
 
-      expect(fn).to.throw('message (object) is required')
+      expect(fn).toThrow('message (object) is required')
     })
   })
 
@@ -118,7 +113,7 @@ describe('BasicEnvelope', function () {
 
       let messageTypes = envelope.getMessageTypes(msg)
 
-      expect(messageTypes).to.eql(['my-kind'])
+      expect(messageTypes).toEqual(['my-kind'])
     })
 
     it('should return an empty array given a message with no type', function () {
@@ -126,7 +121,7 @@ describe('BasicEnvelope', function () {
 
       let messageTypes = envelope.getMessageTypes(msg)
 
-      expect(messageTypes).to.eql([])
+      expect(messageTypes).toEqual([])
     })
 
     it('should throw an assertion error given no message', function () {
@@ -134,7 +129,7 @@ describe('BasicEnvelope', function () {
         envelope.getMessageTypes()
       }
 
-      expect(fn).to.throw('message (object) is required')
+      expect(fn).toThrow('message (object) is required')
     })
   })
 })

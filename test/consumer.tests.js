@@ -1,17 +1,9 @@
+const magicbus = require('..')
+const Consumer = require('../lib/consumer.js')
+const EventEmitter = require('events').EventEmitter
 
-let magicbus = require('..')
-let Consumer = require('../lib/consumer.js')
-let EventEmitter = require('events').EventEmitter
-
-let Promise = require('bluebird')
-let Logger = require('../lib/logger')
-
-let chai = require('chai')
-let expect = chai.expect
-
-let sinon = require('sinon')
-let sinonChai = require('sinon-chai')
-chai.use(sinonChai)
+const Promise = require('bluebird')
+const Logger = require('../lib/logger')
 
 describe('Consumer', function () {
   let mockBroker
@@ -44,7 +36,7 @@ describe('Consumer', function () {
     fakePipeline = { useLogger: function () {} }
 
     mockBroker = {
-      registerRoute: function (/* name, pattern */) {},
+      registerRoute: jest.fn((/* name, pattern */) => {}),
       consume: function (routeName, callback /* , options */) {
         this._routeName = routeName
         this._consumer = callback
@@ -81,57 +73,56 @@ describe('Consumer', function () {
         Consumer()
       }
 
-      expect(fn).to.throw('broker (object) is required')
+      expect(fn).toThrow('broker (object) is required')
     })
     it('should throw an assertion error given no envelope', function () {
       let fn = function () {
         Consumer(mockBroker)
       }
 
-      expect(fn).to.throw('envelope (object) is required')
+      expect(fn).toThrow('envelope (object) is required')
     })
     it('should throw an assertion error given no pipeline', function () {
       let fn = function () {
         Consumer(mockBroker, {})
       }
 
-      expect(fn).to.throw('pipeline (object) is required')
+      expect(fn).toThrow('pipeline (object) is required')
     })
     it('should throw an assertion error given no routeName', function () {
       let fn = function () {
         Consumer(mockBroker, {}, fakePipeline)
       }
 
-      expect(fn).to.throw('routeName (string) is required')
+      expect(fn).toThrow('routeName (string) is required')
     })
     it('should throw an assertion error given no routePattern', function () {
       let fn = function () {
         Consumer(mockBroker, {}, fakePipeline, 'route')
       }
 
-      expect(fn).to.throw('routePattern (object) is required')
+      expect(fn).toThrow('routePattern (object) is required')
     })
     it('should throw an assertion error given no logger', function () {
       let fn = function () {
         Consumer(mockBroker, {}, fakePipeline, 'route', {})
       }
 
-      expect(fn).to.throw('logger (object) is required')
+      expect(fn).toThrow('logger (object) is required')
     })
     it('should throw an assertion error given no events', function () {
       let fn = function () {
         Consumer(mockBroker, {}, fakePipeline, 'route', {}, {})
       }
 
-      expect(fn).to.throw('events (object) is required')
+      expect(fn).toThrow('events (object) is required')
     })
     it('should register a route with the broker', function () {
       let pattern
-      sinon.spy(mockBroker, 'registerRoute')
 
       pattern = {}
       Consumer(mockBroker, {}, fakePipeline, 'route', pattern, logger, logEvents)
-      expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern)
+      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', pattern)
     })
 
     describe('constructor argument checking', function () {
@@ -140,7 +131,7 @@ describe('Consumer', function () {
           Consumer()
         }
 
-        expect(fn).to.throw('broker (object) is required')
+        expect(fn).toThrow('broker (object) is required')
       })
     })
   })
@@ -163,7 +154,7 @@ describe('Consumer', function () {
         consumer.startConsuming(handler)
         return mockBroker.emulateConsumption()
           .then(function () {
-            expect(fakeMessage.__resolution).to.equal('ack')
+            expect(fakeMessage.__resolution).toEqual('ack')
           })
       })
 
@@ -175,9 +166,9 @@ describe('Consumer', function () {
         consumer.startConsuming(handler)
         return mockBroker.emulateConsumption()
           .then(function () {
-            expect(logs.length).to.be.greaterThan(1)
-            expect(logs[logs.length - 2].err).to.be.ok
-            expect(fakeMessage.__resolution).to.equal('reject')
+            expect(logs.length).toBeGreaterThan(1)
+            expect(logs[logs.length - 2].err).toBeTruthy()
+            expect(fakeMessage.__resolution).toEqual('reject')
           })
       })
 
@@ -195,8 +186,8 @@ describe('Consumer', function () {
         consumer.startConsuming(handler)
         return mockBroker.emulateConsumption()
           .then(function () {
-            expect(fakeMessage.__resolution).to.equal('ack')
-            expect(handlerCompleted).to.equal(true)
+            expect(fakeMessage.__resolution).toEqual('ack')
+            expect(handlerCompleted).toEqual(true)
           })
       })
 
@@ -214,10 +205,10 @@ describe('Consumer', function () {
         consumer.startConsuming(handler)
         return mockBroker.emulateConsumption()
           .then(function () {
-            expect(logs.length).to.be.greaterThan(1)
-            expect(logs[logs.length - 2].err).to.be.ok
-            expect(fakeMessage.__resolution).to.equal('reject')
-            expect(handlerCompleted).to.equal(true)
+            expect(logs.length).toBeGreaterThan(1)
+            expect(logs[logs.length - 2].err).toBeTruthy()
+            expect(fakeMessage.__resolution).toEqual('reject')
+            expect(handlerCompleted).toEqual(true)
           })
       })
 
@@ -257,9 +248,9 @@ describe('Consumer', function () {
           consumer.startConsuming(handler)
           return mockBroker.emulateConsumption()
             .then(function () {
-              expect(fakeMessage.__resolution).to.equal('ack')
-              expect(handlerPayload).to.equal('the payload that is new')
-              expect(handlerCompleted).to.equal(true)
+              expect(fakeMessage.__resolution).toEqual('ack')
+              expect(handlerPayload).toEqual('the payload that is new')
+              expect(handlerCompleted).toEqual(true)
             })
         })
 
@@ -268,8 +259,8 @@ describe('Consumer', function () {
           consumer.startConsuming(handler)
           return mockBroker.emulateConsumption()
             .then(function () {
-              expect(fakeMessage.__resolution).to.equal('ack')
-              expect(handlerCompleted).to.equal(false)
+              expect(fakeMessage.__resolution).toEqual('ack')
+              expect(handlerCompleted).toEqual(false)
             })
         })
 
@@ -278,8 +269,8 @@ describe('Consumer', function () {
           consumer.startConsuming(handler)
           return mockBroker.emulateConsumption()
             .then(function () {
-              expect(fakeMessage.__resolution).to.equal('nack')
-              expect(handlerCompleted).to.equal(false)
+              expect(fakeMessage.__resolution).toEqual('nack')
+              expect(handlerCompleted).toEqual(false)
             })
         })
 
@@ -288,8 +279,8 @@ describe('Consumer', function () {
           consumer.startConsuming(handler)
           return mockBroker.emulateConsumption()
             .then(function () {
-              expect(fakeMessage.__resolution).to.equal('reject')
-              expect(handlerCompleted).to.equal(false)
+              expect(fakeMessage.__resolution).toEqual('reject')
+              expect(handlerCompleted).toEqual(false)
             })
         })
       })

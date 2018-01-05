@@ -1,4 +1,3 @@
-
 const magicbus = require('../lib')
 const environment = require('./_test-env')
 

@@ -1,18 +1,8 @@
+const Subscriber = require('../lib/subscriber')
 
-let Subscriber = require('../lib/subscriber')
-
-let EventDispatcher = require('../lib/event-dispatcher')
-let Logger = require('../lib/logger')
-let EventEmitter = require('events').EventEmitter
-
-let chai = require('chai')
-let expect = chai.expect
-
-let sinon = require('sinon')
-let sinonChai = require('sinon-chai')
-chai.use(sinonChai)
-
-chai.use(require('chai-as-promised'))
+const EventDispatcher = require('../lib/event-dispatcher')
+const Logger = require('../lib/logger')
+const EventEmitter = require('events').EventEmitter
 
 describe('Subscriber', function () {
   let mockReceiver
@@ -43,22 +33,22 @@ describe('Subscriber', function () {
     it('should pass through to the event dispatcher', function () {
       let eventName = 'myEvent',
         handler = function () {}
-      eventDispatcher.on = sinon.spy()
+      eventDispatcher.on = jest.fn()
 
       subscriber.on(eventName, handler)
 
-      expect(eventDispatcher.on).to.have.been.calledWith(eventName, handler)
+      expect(eventDispatcher.on).toHaveBeenCalledWith(eventName, handler)
     })
   })
 
   describe('#use', function () {
     it('should pass through to the reciever', function () {
       let middleware = function () {}
-      mockReceiver.use = sinon.spy()
+      mockReceiver.use = jest.fn()
 
       subscriber.use(middleware)
 
-      expect(mockReceiver.use).to.have.been.calledWith(middleware)
+      expect(mockReceiver.use).toHaveBeenCalledWith(middleware)
     })
   })
 
@@ -75,16 +65,16 @@ describe('Subscriber', function () {
     })
 
     it('should start the receiver', function () {
-      mockReceiver.startConsuming = sinon.spy()
+      mockReceiver.startConsuming = jest.fn()
 
       subscriber.startSubscription()
 
-      expect(mockReceiver.startConsuming).to.have.been.called
+      expect(mockReceiver.startConsuming).toHaveBeenCalled()
     })
 
     it('should pass consumed events to the dispatcher', function () {
-      let handler1 = sinon.spy()
-      let handler2 = sinon.spy()
+      let handler1 = jest.fn()
+      let handler2 = jest.fn()
 
       eventDispatcher.on(messageTypes[0], handler1)
       eventDispatcher.on(messageTypes[1], handler2)
@@ -92,8 +82,8 @@ describe('Subscriber', function () {
       subscriber.startSubscription()
 
       return mockReceiver._handler(payload, messageTypes, msg).then(function () {
-        expect(handler1).to.have.been.calledWith(messageTypes[0], payload, msg)
-        expect(handler2).to.have.been.calledWith(messageTypes[1], payload, msg)
+        expect(handler1).toHaveBeenCalledWith(messageTypes[0], payload, msg)
+        expect(handler2).toHaveBeenCalledWith(messageTypes[1], payload, msg)
       })
     })
 
@@ -103,15 +93,15 @@ describe('Subscriber', function () {
       })
 
       subscriber.startSubscription()
-      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened')
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).rejects.toThrow('Something happened')
         .then(function () {
-          expect(logs[logs.length - 1].err).to.be.ok
+          expect(logs[logs.length - 1].err).toBeTruthy()
         })
     })
 
     it('should fail given no handler is registered for the message type', function () {
       subscriber.startSubscription()
-      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('No handler registered')
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).rejects.toThrow('No handler registered')
     })
 
     it('should fail given async handler fails', function () {
@@ -120,9 +110,9 @@ describe('Subscriber', function () {
       })
 
       subscriber.startSubscription()
-      return expect(mockReceiver._handler(payload, messageTypes, msg)).to.eventually.be.rejectedWith('Something happened')
+      return expect(mockReceiver._handler(payload, messageTypes, msg)).rejects.toThrow('Something happened')
         .then(function () {
-          expect(logs[logs.length - 1].err).to.be.ok
+          expect(logs[logs.length - 1].err).toBeTruthy()
         })
     })
   })

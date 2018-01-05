@@ -11,18 +11,12 @@ jobs:
           name: dependencies
           command: npm install
       - run:
-          name: install-junit-reporter
-          command: npm install mocha-junit-reporter
-      - run:
           name: test
           command: npm run ci
           environment:
-            MOCHA_REPORTER: mocha-junit-reporter
-            MOCHA_FILE: /tmp/tests/junit/test-results.xml
+            JEST_JUNIT_OUTPUT: /tmp/tests/junit/test-results.xml
       - store_test_results:
           path: /tmp/tests
-      - store_artifacts:
-          path: test-results.xml
   deploy:
     docker:
       - image: node:8

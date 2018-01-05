@@ -1,45 +1,36 @@
-let EventDispatcher = require('../lib/event-dispatcher')
+const EventDispatcher = require('../lib/event-dispatcher')
 
-let eventName = 'myCoolEventName'
-let reallyBadEventName = '/\\^$*+?.()|[]{}'
-
-let chai = require('chai')
-let expect = chai.expect
-
-let sinon = require('sinon')
-let sinonChai = require('sinon-chai')
-chai.use(sinonChai)
-
-chai.use(require('chai-as-promised'))
+const eventName = 'myCoolEventName'
+const reallyBadEventName = '/\\^$*+?.()|[]{}'
 
 describe('EventDispatcher', function () {
-  let doNothing = function () {}
+  const doNothing = function () {}
+  let handlerFn
   let eventDispatcher
-  let handlerSpy
   let arg1 = {}
   let arg2 = []
   let arg3 = 'primitive'
 
   beforeEach(function () {
     eventDispatcher = EventDispatcher()
-    handlerSpy = sinon.spy()
+    handlerFn = jest.fn()
   })
 
   describe('#on', function () {
     it('should not allow empty eventNames paramter', function () {
       expect(function () {
         eventDispatcher.on(null, doNothing)
-      }).to.throw()
+      }).toThrow()
     })
     it('should not allow empty handler', function () {
       expect(function () {
         eventDispatcher.on('something', null)
-      }).to.throw()
+      }).toThrow()
     })
     it('should not have trouble with strings containing regex special characters', function () {
       expect(function () {
         eventDispatcher.on(reallyBadEventName, doNothing)
-      }).to.not.throw()
+      }).not.toThrow()
     })
   })
 
@@ -47,17 +38,17 @@ describe('EventDispatcher', function () {
     it('should not allow empty eventNames paramter', function () {
       expect(function () {
         eventDispatcher.once(null, doNothing)
-      }).to.throw()
+      }).toThrow()
     })
     it('should not allow empty handler', function () {
       expect(function () {
         eventDispatcher.once('something', null)
-      }).to.throw()
+      }).toThrow()
     })
     it('should not have trouble with strings containing regex special characters', function () {
       expect(function () {
         eventDispatcher.once(reallyBadEventName, doNothing)
-      }).to.not.throw()
+      }).not.toThrow()
     })
   })
 
@@ -65,88 +56,88 @@ describe('EventDispatcher', function () {
     it('should not allow no event name', function () {
       expect(function () {
         eventDispatcher.dispatch(null)
-      }).to.throw()
+      }).toThrow()
       expect(function () {
         eventDispatcher.dispatch([])
-      }).to.throw()
+      }).toThrow()
       expect(function () {
         eventDispatcher.dispatch('')
-      }).to.throw()
+      }).toThrow()
     })
     it('should call handler when string event name matches event name exactly', function () {
-      eventDispatcher.on(eventName, handlerSpy)
+      eventDispatcher.on(eventName, handlerFn)
       return eventDispatcher.dispatch(eventName).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledWith(eventName)
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledWith(eventName)
       })
     })
     it('should not call handler when event name is a mismatch', function () {
-      eventDispatcher.on(eventName, handlerSpy)
-      expect(eventDispatcher.dispatch('myColdEventName', arg1, arg2, arg3)).to.eventually.equal(false)
+      eventDispatcher.on(eventName, handlerFn)
+      return expect(eventDispatcher.dispatch('myColdEventName', arg1, arg2, arg3)).resolves.toEqual(false)
     })
     it('should call regex handlers whenever they match', function () {
-      eventDispatcher.on(/my.*EventName/, handlerSpy)
+      eventDispatcher.on(/my.*EventName/, handlerFn)
 
       return eventDispatcher.dispatch(eventName).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledWith(eventName)
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledWith(eventName)
       })
     })
     it('should not call regex handlers they do not match', function () {
-      eventDispatcher.on(/your.*EventName/, handlerSpy)
+      eventDispatcher.on(/your.*EventName/, handlerFn)
 
-      expect(eventDispatcher.dispatch(eventName)).to.eventually.equal(false)
+      return expect(eventDispatcher.dispatch(eventName)).resolves.toEqual(false)
     })
     it('should call handler registered with an array', function () {
-      eventDispatcher.on([eventName, 'someOtherEventName'], handlerSpy)
+      eventDispatcher.on([eventName, 'someOtherEventName'], handlerFn)
 
       return eventDispatcher.dispatch(eventName).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledWith(eventName)
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledWith(eventName)
       })
     })
     it('should only call the first handler when multiple handlers match', function () {
-      let secondSpy = sinon.spy()
-      eventDispatcher.on(eventName, handlerSpy)
-      eventDispatcher.on(/my.*EventName/, secondSpy)
+      let secondHandler = jest.fn()
+      eventDispatcher.on(eventName, handlerFn)
+      eventDispatcher.on(/my.*EventName/, secondHandler)
 
       return eventDispatcher.dispatch(eventName).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledWith(eventName)
-        expect(secondSpy).to.have.not.been.called
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledWith(eventName)
+        expect(secondHandler).not.toHaveBeenCalled()
       })
     })
     it('should call handlers with arguments', function () {
-      eventDispatcher.on(eventName, handlerSpy)
+      eventDispatcher.on(eventName, handlerFn)
 
       return eventDispatcher.dispatch(eventName, arg1, arg2, arg3).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledWith(eventName, arg1, arg2, arg3)
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledWith(eventName, arg1, arg2, arg3)
       })
     })
     it('should call handlers when multiple event types are passed', function () {
-      eventDispatcher.on(eventName, handlerSpy)
+      eventDispatcher.on(eventName, handlerFn)
 
       return eventDispatcher.dispatch([eventName, 'myColdEventName'], arg1, arg2, arg3).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledWith(eventName, arg1, arg2, arg3)
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledWith(eventName, arg1, arg2, arg3)
       })
     })
     it('should call handler only once when it is registered using once', function () {
-      eventDispatcher.once(eventName, handlerSpy)
+      eventDispatcher.once(eventName, handlerFn)
       return eventDispatcher.dispatch(eventName).then(function (result) {
-        expect(result).to.equal(true)
-        expect(handlerSpy).to.have.been.calledOnce
+        expect(result).toEqual(true)
+        expect(handlerFn).toHaveBeenCalledTimes(1)
         return eventDispatcher.dispatch(eventName)
       }).then(function (result) {
-        expect(result).to.equal(false)
-        expect(handlerSpy).to.have.been.calledOnce
+        expect(result).toEqual(false)
+        expect(handlerFn).toHaveBeenCalledTimes(1)
       })
     })
     it('should resolve promise when handler is dispatched', function () {
-      let promise = eventDispatcher.once(eventName, handlerSpy)
+      let promise = eventDispatcher.once(eventName, handlerFn)
       return eventDispatcher.dispatch(eventName).then(function () {
-        expect(promise.then).to.be.ok
+        expect(promise.then).toBeTruthy()
         return promise
       })
     })
@@ -157,14 +148,14 @@ describe('EventDispatcher', function () {
           throw new Error('my bad')
         })
 
-        return expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad')
+        return expect(eventDispatcher.dispatch(eventName)).rejects.toThrow('my bad')
       })
       it('should return an error after a failing asynchronous handler', function () {
         eventDispatcher.on(eventName, function () {
           return Promise.reject(new Error('my bad'))
         })
 
-        return expect(eventDispatcher.dispatch(eventName)).to.eventually.be.rejectedWith('my bad')
+        return expect(eventDispatcher.dispatch(eventName)).rejects.toThrow('my bad')
       })
     })
   })

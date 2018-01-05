@@ -1,10 +1,6 @@
-
 const Configurator = require('../../lib/config')
 const Logger = require('../../lib/logger')
 const EventEmitter = require('events').EventEmitter
-
-const chai = require('chai')
-const expect = chai.expect
 
 describe('Configurator', function () {
   let configurator
@@ -34,8 +30,8 @@ describe('Configurator', function () {
     it('should create a broker with the default params', function () {
       let broker = configurator.createBroker(serviceDomainName, appName, connectionInfo)
 
-      expect(broker).to.be.ok
-      expect(broker.shutdown).to.be.ok
+      expect(broker).toBeTruthy()
+      expect(broker.shutdown).toBeTruthy()
       return broker.shutdown()
     })
   })
@@ -44,7 +40,7 @@ describe('Configurator', function () {
     it('should create a publisher with the default params', function () {
       let publisher = configurator.createPublisher(broker)
 
-      expect(publisher).to.be.ok
+      expect(publisher).toBeTruthy()
     })
 
     it('should allow caller to override the envelope', function () {
@@ -53,7 +49,7 @@ describe('Configurator', function () {
         cfg.useEnvelope(myEnvelope)
       })
 
-      expect(publisher).to.be.ok
+      expect(publisher).toBeTruthy()
     })
 
     it('should allow caller to override the middleware pipeline', function () {
@@ -62,7 +58,7 @@ describe('Configurator', function () {
         cfg.usePipeline(myPipeline)
       })
 
-      expect(publisher).to.be.ok
+      expect(publisher).toBeTruthy()
     })
 
     it('should allow caller to override the route name', function () {
@@ -71,7 +67,7 @@ describe('Configurator', function () {
         cfg.useRouteName(myRouteName)
       })
 
-      expect(publisher).to.be.ok
+      expect(publisher).toBeTruthy()
     })
 
     it('should allow caller to override the route pattern', function () {
@@ -80,7 +76,7 @@ describe('Configurator', function () {
         cfg.useRoutePattern(myRoutePattern)
       })
 
-      expect(publisher).to.be.ok
+      expect(publisher).toBeTruthy()
     })
   })
 
@@ -88,7 +84,7 @@ describe('Configurator', function () {
     it('should create a consumer with the default params', function () {
       let consumer = configurator.createConsumer(broker)
 
-      expect(consumer).to.be.ok
+      expect(consumer).toBeTruthy()
     })
 
     it('should allow caller to override the envelope', function () {
@@ -97,7 +93,7 @@ describe('Configurator', function () {
         cfg.useEnvelope(myEnvelope)
       })
 
-      expect(consumer).to.be.ok
+      expect(consumer).toBeTruthy()
     })
 
     it('should allow caller to override the middleware pipeline', function () {
@@ -106,7 +102,7 @@ describe('Configurator', function () {
         cfg.usePipeline(myPipeline)
       })
 
-      expect(consumer).to.be.ok
+      expect(consumer).toBeTruthy()
     })
 
     it('should allow caller to override the route name', function () {
@@ -115,7 +111,7 @@ describe('Configurator', function () {
         cfg.useRouteName(myRouteName)
       })
 
-      expect(consumer).to.be.ok
+      expect(consumer).toBeTruthy()
     })
 
     it('should allow caller to override the route pattern', function () {
@@ -124,7 +120,7 @@ describe('Configurator', function () {
         cfg.useRoutePattern(myRoutePattern)
       })
 
-      expect(consumer).to.be.ok
+      expect(consumer).toBeTruthy()
     })
   })
 
@@ -132,7 +128,7 @@ describe('Configurator', function () {
     it('should create a subscriber with the default params', function () {
       let subscriber = configurator.createSubscriber(broker)
 
-      expect(subscriber).to.be.ok
+      expect(subscriber).toBeTruthy()
     })
 
     it('should allow caller to override the envelope', function () {
@@ -141,7 +137,7 @@ describe('Configurator', function () {
         cfg.useEnvelope(myEnvelope)
       })
 
-      expect(subscriber).to.be.ok
+      expect(subscriber).toBeTruthy()
     })
 
     it('should allow caller to override the middleware pipeline', function () {
@@ -150,7 +146,7 @@ describe('Configurator', function () {
         cfg.usePipeline(myPipeline)
       })
 
-      expect(subscriber).to.be.ok
+      expect(subscriber).toBeTruthy()
     })
 
     it('should allow caller to override the route name', function () {
@@ -159,7 +155,7 @@ describe('Configurator', function () {
         cfg.useRouteName(myRouteName)
       })
 
-      expect(subscriber).to.be.ok
+      expect(subscriber).toBeTruthy()
     })
 
     it('should allow caller to override the route pattern', function () {
@@ -168,7 +164,7 @@ describe('Configurator', function () {
         cfg.useRoutePattern(myRoutePattern)
       })
 
-      expect(subscriber).to.be.ok
+      expect(subscriber).toBeTruthy()
     })
 
     it('should allow caller to override the consumer', function () {
@@ -177,7 +173,7 @@ describe('Configurator', function () {
         cfg.useConsumer(myConsumer)
       })
 
-      expect(subscriber).to.be.ok
+      expect(subscriber).toBeTruthy()
     })
   })
 
@@ -192,8 +188,8 @@ describe('Configurator', function () {
     it('should create a binder with the default params', function () {
       let binder = configurator.createBinder(connectionInfo)
 
-      expect(binder).to.be.ok
-      expect(binder.bind).to.be.ok
+      expect(binder).toBeTruthy()
+      expect(binder.bind).toBeTruthy()
       return binder.shutdown()
     })
   })

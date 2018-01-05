@@ -35,8 +35,8 @@ describe('Pub/Sub integration', function () {
     }
 
     let handler = function (handlerEventName, handlerData) {
-      expect(handlerEventName).to.eq(eventName)
-      expect(handlerData).to.eql(data)
+      expect(handlerEventName).toEqual(eventName)
+      expect(handlerData).toEqual(data)
 
       done()
     }

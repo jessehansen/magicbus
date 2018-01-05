@@ -39,8 +39,8 @@ describe('Send/Receive integration', function () {
     let messageType = 'deactivateFooCommand'
 
     let handler = function (handlerMessage, handlerMessageTypes) {
-      expect(handlerMessage).to.eql(message)
-      expect(handlerMessageTypes).to.eql([messageType])
+      expect(handlerMessage).toEqual(message)
+      expect(handlerMessageTypes).toEqual([messageType])
 
       done()
     }

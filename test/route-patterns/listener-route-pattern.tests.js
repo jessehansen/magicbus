@@ -1,15 +1,5 @@
-
-let ListenerRoutePattern = require('../../lib/route-patterns/listener-route-pattern.js')
-let Promise = require('bluebird')
-
-let chai = require('chai')
-let expect = chai.expect
-
-let sinon = require('sinon')
-let sinonChai = require('sinon-chai')
-chai.use(sinonChai)
-
-chai.use(require('chai-as-promised'))
+const ListenerRoutePattern = require('../../lib/route-patterns/listener-route-pattern.js')
+const Promise = require('bluebird')
 
 describe('ListenerRoutePattern', function () {
   describe('createTopology', function () {
@@ -18,25 +8,23 @@ describe('ListenerRoutePattern', function () {
 
     beforeEach(function () {
       mockTopology = {
-        createQueue: function () {
+        createQueue: jest.fn(function () {
           return Promise.resolve()
-        },
-        createExchange: function () {
+        }),
+        createExchange: jest.fn(function () {
           return Promise.resolve()
-        },
-        createBinding: function () {
+        }),
+        createBinding: jest.fn(function () {
           return Promise.resolve()
-        }
+        })
       }
 
       routePattern = new ListenerRoutePattern()
     })
 
     it('should createTopology a fanout exchange with a conventional name', function () {
-      sinon.spy(mockTopology, 'createExchange')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createExchange).to.have.been.calledWith({
+        expect(mockTopology.createExchange).toHaveBeenCalledWith({
           name: 'my-domain.my-app.my-route',
           type: 'fanout',
           durable: true
@@ -45,11 +33,9 @@ describe('ListenerRoutePattern', function () {
     })
 
     it('should createTopology an exclusive temporary queue with a random name', function () {
-      sinon.spy(mockTopology, 'createQueue')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createQueue).to.have.been.calledWith(sinon.match({
-          name: sinon.match(/my-domain.my-app.my-route.listener-\.*/),
+        expect(mockTopology.createQueue).toHaveBeenCalledWith(expect.objectContaining({
+          name: expect.stringMatching(/my-domain.my-app.my-route.listener-\.*/),
           exclusive: true,
           durable: false
         }))
@@ -57,11 +43,9 @@ describe('ListenerRoutePattern', function () {
     })
 
     it('should bind the temporary queue to the fanout exchange', function () {
-      sinon.spy(mockTopology, 'createBinding')
-
       return routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route').then(function () {
-        expect(mockTopology.createBinding).to.have.been.calledWith(sinon.match({
-          target: sinon.match(/my-domain.my-app.my-route.listener-\.*/),
+        expect(mockTopology.createBinding).toHaveBeenCalledWith(expect.objectContaining({
+          target: expect.stringMatching(/my-domain.my-app.my-route.listener-\.*/),
           source: 'my-domain.my-app.my-route'
         }))
       })
@@ -70,9 +54,9 @@ describe('ListenerRoutePattern', function () {
     it('should return the name of the queue to consume from', function () {
       let p = routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')
 
-      return expect(p).to.eventually.satisfy(function (result) {
-        return /my-domain.my-app.my-route.listener-\.*/.test(result.queueName)
-      })
+      return expect(p).resolves.toEqual(expect.objectContaining({
+        queueName: expect.stringMatching(/my-domain.my-app.my-route.listener-\.*/)
+      }))
     })
 
     it('should reject if any of the topology cannot be created', function () {
@@ -80,7 +64,7 @@ describe('ListenerRoutePattern', function () {
         return Promise.reject(new Error('Nuts!'))
       }
 
-      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).to.be.rejectedWith('Nuts!')
+      return expect(routePattern.createTopology(mockTopology, 'my-domain', 'my-app', 'my-route')).rejects.toThrow('Nuts!')
     })
   })
 })

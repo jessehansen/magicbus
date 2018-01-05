@@ -1,18 +1,8 @@
+const magicbus = require('../lib')
+const Publisher = require('../lib/publisher')
 
-let magicbus = require('../lib')
-let Publisher = require('../lib/publisher')
-
-let Promise = require('bluebird')
-let Logger = require('../lib/logger')
-
-let chai = require('chai')
-let expect = chai.expect
-
-let sinon = require('sinon')
-let sinonChai = require('sinon-chai')
-chai.use(sinonChai)
-
-chai.use(require('chai-as-promised'))
+const Promise = require('bluebird')
+const Logger = require('../lib/logger')
 
 describe('Publisher', function () {
   let mockBroker
@@ -21,10 +11,10 @@ describe('Publisher', function () {
 
   beforeEach(function () {
     mockBroker = {
-      registerRoute: function (/* name, pattern */) {},
-      publish: function (/* routeName, routingKey, content, options */) {
+      registerRoute: jest.fn(function (/* name, pattern */) {}),
+      publish: jest.fn(function (/* routeName, routingKey, content, options */) {
         return Promise.resolve()
-      }
+      })
     }
     logger = Logger()
     fakePipeline = { useLogger: function () { } }
@@ -36,49 +26,48 @@ describe('Publisher', function () {
         Publisher()
       }
 
-      expect(fn).to.throw('broker (object) is required')
+      expect(fn).toThrow('broker (object) is required')
     })
     it('should throw an assertion error given no envelope', function () {
       let fn = function () {
         Publisher(mockBroker)
       }
 
-      expect(fn).to.throw('envelope (object) is required')
+      expect(fn).toThrow('envelope (object) is required')
     })
     it('should throw an assertion error given no pipeline', function () {
       let fn = function () {
         Publisher(mockBroker, {})
       }
 
-      expect(fn).to.throw('pipeline (object) is required')
+      expect(fn).toThrow('pipeline (object) is required')
     })
     it('should throw an assertion error given no routeName', function () {
       let fn = function () {
         Publisher(mockBroker, {}, fakePipeline)
       }
 
-      expect(fn).to.throw('routeName (string) is required')
+      expect(fn).toThrow('routeName (string) is required')
     })
     it('should throw an assertion error given no routePattern', function () {
       let fn = function () {
         Publisher(mockBroker, {}, fakePipeline, 'route')
       }
 
-      expect(fn).to.throw('routePattern (object) is required')
+      expect(fn).toThrow('routePattern (object) is required')
     })
     it('should throw an assertion error given no logger', function () {
       let fn = function () {
         Publisher(mockBroker, {}, fakePipeline, 'route', {})
       }
 
-      expect(fn).to.throw('logger (object) is required')
+      expect(fn).toThrow('logger (object) is required')
     })
     it('should register a route with the broker', function () {
       let pattern = {}
-      sinon.spy(mockBroker, 'registerRoute')
 
       Publisher(mockBroker, {}, fakePipeline, 'route', pattern, logger)
-      expect(mockBroker.registerRoute).to.have.been.calledWith('route', pattern)
+      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', pattern)
     })
   })
 
@@ -91,14 +80,13 @@ describe('Publisher', function () {
 
     it('should register a route with the broker', function () {
       let pattern = {}
-      sinon.spy(mockBroker, 'registerRoute')
 
       publisher = magicbus.createPublisher(mockBroker, function (cfg) {
         cfg.useRouteName('publish')
         cfg.useRoutePattern(pattern)
       })
 
-      expect(mockBroker.registerRoute).to.have.been.calledWith('publish', pattern)
+      expect(mockBroker.registerRoute).toHaveBeenCalledWith('publish', pattern)
     })
 
     it('should be rejected with an assertion error given no event name', function () {
@@ -106,7 +94,7 @@ describe('Publisher', function () {
         publisher.publish()
       }
 
-      expect(fn).to.throw('eventName (string) is required')
+      expect(fn).toThrow('eventName (string) is required')
     })
 
     it('should be fulfilled given the broker.publish calls are fulfilled', function () {
@@ -114,7 +102,7 @@ describe('Publisher', function () {
         return Promise.resolve()
       }
 
-      return expect(publisher.publish('something-happened')).to.be.fulfilled
+      return expect(publisher.publish('something-happened')).resolves.toBeUndefined()
     })
 
     it('should be rejected given the broker.publish call is rejected', function () {
@@ -122,7 +110,7 @@ describe('Publisher', function () {
         return Promise.reject(new Error('Aw, snap!'))
       }
 
-      return expect(publisher.publish('something-happened')).to.be.rejectedWith('Aw, snap!')
+      return expect(publisher.publish('something-happened')).rejects.toThrow('Aw, snap!')
     })
 
     it('should be rejected given the middleware rejects the message', function () {
@@ -130,7 +118,7 @@ describe('Publisher', function () {
         actions.error(new Error('Aw, snap!'))
       })
 
-      return expect(publisher.publish('something-happened')).to.be.rejectedWith('Aw, snap!')
+      return expect(publisher.publish('something-happened')).rejects.toThrow('Aw, snap!')
     })
 
     it('should call middleware with the message', function () {
@@ -141,23 +129,19 @@ describe('Publisher', function () {
       })
 
       return publisher.publish('something-happened').then(function () {
-        expect(middlewareCalled).to.equal(true)
+        expect(middlewareCalled).toEqual(true)
       })
     })
 
     it('should set persistent to true by default', function () {
-      sinon.spy(mockBroker, 'publish')
-
       return publisher.publish('something-happened').then(function () {
-        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, persistent: true }))
+        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, persistent: true }))
       })
     })
 
     it('should copy properties from the properties property of the message to the publish options', function () {
-      sinon.spy(mockBroker, 'publish')
-
       return publisher.publish('something-happened').then(function () {
-        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, type: 'something-happened' }))
+        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, type: 'something-happened' }))
       })
     })
 
@@ -168,10 +152,8 @@ describe('Publisher', function () {
         }
       }
 
-      sinon.spy(mockBroker, 'publish')
-
       return publisher.publish('something-happened', null, options).then(function () {
-        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, correlationId: '123' }))
+        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, correlationId: '123' }))
       })
     })
 
@@ -182,10 +164,8 @@ describe('Publisher', function () {
         }
       }
 
-      sinon.spy(mockBroker, 'publish')
-
       return publisher.publish('something-happened', null, options).then(function () {
-        expect(mockBroker.publish).to.have.been.calledWith('publish', sinon.match({ routingKey: 'something-happened', payload: null, persistent: false }))
+        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, persistent: false }))
       })
     })
   })
