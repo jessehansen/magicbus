@@ -1,7 +1,7 @@
 const magicbus = require('../lib')
 const environment = require('./_test-env')
 
-describe('Send/Receive integration', function () {
+describe('Send/Receive integration', () => {
   let serviceDomainName = 'magicbus'
   let appName = 'tests'
   let connectionInfo = environment.rabbit
@@ -9,26 +9,22 @@ describe('Send/Receive integration', function () {
   let sender
   let receiver
 
-  beforeAll(function () {
+  beforeAll(() => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
-    sender = magicbus.createPublisher(broker, function (cfg) {
-      cfg.useRouteName('publish')
-    })
-    receiver = magicbus.createConsumer(broker, function (cfg) {
-      cfg.useRouteName('subscribe')
-    })
+    sender = magicbus.createPublisher(broker, (cfg) => cfg.useRouteName('publish'))
+    receiver = magicbus.createConsumer(broker, (cfg) => cfg.useRouteName('subscribe'))
 
     return broker.bind(sender.getRoute().name, receiver.getRoute().name, { pattern: '#' })
-      .then(function () {
+      .then(() => {
         return receiver.purgeQueue()
       })
   })
 
-  afterAll(function () {
+  afterAll(() => {
     return broker.shutdown()
   })
 
-  it('should be able to send a message and receive that message', function (done) {
+  it('should be able to send a message and receive that message', (done) => {
     let message = {
       fooId: 123
     }
@@ -41,7 +37,7 @@ describe('Send/Receive integration', function () {
       done()
     }
 
-    receiver.startConsuming(handler).then(function () {
+    receiver.startConsuming(handler).then(() => {
       sender.send(message, messageType)
     })
   })

@@ -4,16 +4,16 @@ const environment = require('./_test-env')
 const PublisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
 const WorkerRoutePattern = require('../lib/route-patterns/worker-route-pattern')
 
-function noOp () { }
+const noOp = () => {}
 
-describe('Broker really using RabbitMQ', function () {
+describe('Broker really using RabbitMQ', () => {
   let serviceDomainName = 'magicbus'
   let appName = 'tests'
   let connectionInfo = environment.rabbit
   let broker
   let bound
 
-  beforeEach(function () {
+  beforeEach(() => {
     let p
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
 
@@ -22,29 +22,29 @@ describe('Broker really using RabbitMQ', function () {
 
     p = Promise.resolve()
     if (!bound) {
-      p = p.then(function () {
+      p = p.then(() => {
         broker.bind('publish', 'subscribe', { pattern: '#' })
         bound = true
       })
     }
-    return p.then(function () {
+    return p.then(() => {
       return broker.purgeRouteQueue('subscribe')
     })
   })
 
-  afterEach(function () {
+  afterEach(() => {
     return broker.shutdown()
-      .then(function () {
+      .then(() => {
         broker = null
       })
   })
 
-  describe('lifetime management', function () {
-    it('should be able to shutdown many times without problems', function () {
+  describe('lifetime management', () => {
+    it('should be able to shutdown many times without problems', () => {
       broker.shutdown()
       return broker.shutdown()
     })
-    it('should not allow publish after shutdown', function () {
+    it('should not allow publish after shutdown', () => {
       let caught = false
       return broker.shutdown()
         .then(() => broker.publish('publish', { routingKey: 'fail', payload: Buffer.from('dead') }))
@@ -55,7 +55,7 @@ describe('Broker really using RabbitMQ', function () {
           expect(caught).toEqual(true)
         })
     })
-    it('should not allow consume after shutdown', function () {
+    it('should not allow consume after shutdown', () => {
       let caught = false
       return broker.shutdown()
         .then(() => broker.consume('subscribe', noOp))
@@ -68,11 +68,11 @@ describe('Broker really using RabbitMQ', function () {
     })
   })
 
-  describe('with consumption defaults', function () {
-    it('should be able to publish and consume messages', function (done) {
+  describe('with consumption defaults', () => {
+    it('should be able to publish and consume messages', (done) => {
       let theMessage = 'Can I buy your magic bus?'
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         let messageContent = Buffer.from(msg.content).toString()
         expect(messageContent).toEqual(theMessage)
 
@@ -80,29 +80,29 @@ describe('Broker really using RabbitMQ', function () {
         done()
       }
 
-      broker.consume('subscribe', handler).then(function () {
+      broker.consume('subscribe', handler).then(() => {
         broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
-    it('should be able to reject messages and have them end up in a failed queue', function (done) {
+    it('should be able to reject messages and have them end up in a failed queue', (done) => {
       let theMessage = 'Can I buy your magic bus?'
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         ops.reject()
         done()
       }
 
-      broker.consume('subscribe', handler).then(function () {
+      broker.consume('subscribe', handler).then(() => {
         broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(theMessage) })
       })
     })
 
-    it('should be able to nack messages and have them redelivered', function (done) {
+    it('should be able to nack messages and have them redelivered', (done) => {
       let theMessage = 'Can I buy your magic bus?'
       let count = 0
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         if (count++ === 1) {
           ops.nack()
         } else {
@@ -111,15 +111,15 @@ describe('Broker really using RabbitMQ', function () {
         }
       }
 
-      broker.consume('subscribe', handler).then(function () {
+      broker.consume('subscribe', handler).then(() => {
         broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(theMessage) })
       })
     })
 
-    it('should be able to ack and nack multiple messages and have them be batched', function (done) {
+    it('should be able to ack and nack multiple messages and have them be batched', (done) => {
       let messageCount = 0, targetCount = 10
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         let messageContent = parseInt(Buffer.from(msg.content).toString(), 10)
         messageCount++
         if (messageContent > 3 && messageContent < 7) {
@@ -133,7 +133,7 @@ describe('Broker really using RabbitMQ', function () {
         }
       }
 
-      broker.consume('subscribe', handler).then(function () {
+      broker.consume('subscribe', handler).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
           broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
@@ -142,11 +142,11 @@ describe('Broker really using RabbitMQ', function () {
     })
   })
 
-  describe('with noBatch specified', function () {
-    it('should be able to publish and consume messages', function (done) {
+  describe('with noBatch specified', () => {
+    it('should be able to publish and consume messages', (done) => {
       let theMessage = 'Can I buy your magic bus?'
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         let messageContent = Buffer.from(msg.content).toString()
         expect(messageContent).toEqual(theMessage)
 
@@ -154,15 +154,15 @@ describe('Broker really using RabbitMQ', function () {
         done()
       }
 
-      broker.consume('subscribe', handler, { noBatch: true, limit: 10 }).then(function () {
+      broker.consume('subscribe', handler, { noBatch: true, limit: 10 }).then(() => {
         broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
-    it('should be able to ack, reject, and nack messages', function (done) {
+    it('should be able to ack, reject, and nack messages', (done) => {
       let messageCount = 0, targetCount = 10
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         let messageContent = parseInt(Buffer.from(msg.content).toString(), 10)
         messageCount++
         if (messageContent > 3 && messageContent < 7) {
@@ -180,7 +180,7 @@ describe('Broker really using RabbitMQ', function () {
         }
       }
 
-      broker.consume('subscribe', handler, { noBatch: true, limit: 10 }).then(function () {
+      broker.consume('subscribe', handler, { noBatch: true, limit: 10 }).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
           broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
@@ -189,11 +189,11 @@ describe('Broker really using RabbitMQ', function () {
     })
   })
 
-  describe('with noAck specified', function () {
-    it('should be able to publish and consume messages', function (done) {
+  describe('with noAck specified', () => {
+    it('should be able to publish and consume messages', (done) => {
       let theMessage = 'Can I buy your magic bus?'
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         let messageContent = Buffer.from(msg.content).toString()
         expect(messageContent).toEqual(theMessage)
 
@@ -201,15 +201,15 @@ describe('Broker really using RabbitMQ', function () {
         done()
       }
 
-      broker.consume('subscribe', handler, { noAck: true }).then(function () {
+      broker.consume('subscribe', handler, { noAck: true }).then(() => {
         broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
-    it('should be able to ack, reject, and nack messages', function (done) {
+    it('should be able to ack, reject, and nack messages', (done) => {
       let messageCount = 0, targetCount = 10
 
-      let handler = function (msg, ops) {
+      let handler = (msg, ops) => {
         let messageContent = parseInt(Buffer.from(msg.content).toString(), 10)
         messageCount++
         if (messageContent > 3 && messageContent < 7) {
@@ -224,7 +224,7 @@ describe('Broker really using RabbitMQ', function () {
         }
       }
 
-      broker.consume('subscribe', handler, { noAck: true }).then(function () {
+      broker.consume('subscribe', handler, { noAck: true }).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
           broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
@@ -233,8 +233,8 @@ describe('Broker really using RabbitMQ', function () {
     })
   })
 
-  describe('with noAck and noBatch specified', function () {
-    it('should be able to publish and consume messages', function (done) {
+  describe('with noAck and noBatch specified', () => {
+    it('should be able to publish and consume messages', (done) => {
       let theMessage = 'Can I buy your magic bus?'
 
       let handler = function (msg) {
@@ -244,22 +244,22 @@ describe('Broker really using RabbitMQ', function () {
         done()
       }
 
-      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(function () {
+      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(() => {
         broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
-    it('should be able to receive multiple messages', function (done) {
+    it('should be able to receive multiple messages', (done) => {
       let messageCount = 0, targetCount = 10
 
-      let handler = function () {
+      let handler = () => {
         messageCount++
         if (messageCount === targetCount) {
           done()
         }
       }
 
-      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(function () {
+      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
           broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
