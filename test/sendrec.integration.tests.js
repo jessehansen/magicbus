@@ -11,8 +11,14 @@ describe('Send/Receive integration', () => {
 
   beforeEach(() => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
-    sender = magicbus.createPublisher(broker, (cfg) => cfg.useRouteName('send'))
-    receiver = magicbus.createConsumer(broker, (cfg) => cfg.useRouteName('receive'))
+    sender = magicbus.createPublisher(broker, (cfg) => {
+      cfg.useRoutePattern(magicbus.routePatterns.publisher({ autoDelete: true, durable: false }))
+      cfg.useRouteName('send')
+    })
+    receiver = magicbus.createConsumer(broker, (cfg) => {
+      cfg.useRoutePattern(magicbus.routePatterns.worker({ autoDelete: true, durable: false, exclusive: true }))
+      cfg.useRouteName('receive')
+    })
 
     return broker.bind(sender.getRoute().name, receiver.getRoute().name, { pattern: '#' })
       .then(() => {

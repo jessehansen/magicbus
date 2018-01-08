@@ -21,15 +21,43 @@ describe('WorkerRoutePattern', () => {
       expect(mockTopology.createExchange).toHaveBeenCalledWith({
         name: 'my-domain.my-app.my-route.failed',
         type: 'fanout',
-        durable: true
+        durable: true,
+        autoDelete: false
+      })
+    })
+  })
+
+  it('should create the dead letter exchange with passed options', () => {
+    routePattern = workerRoutePattern({ durable: false, autoDelete: true })
+    return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
+      expect(mockTopology.createExchange).toHaveBeenCalledWith({
+        name: 'my-domain.my-app.my-route.failed',
+        type: 'fanout',
+        durable: false,
+        autoDelete: true
       })
     })
   })
 
   it('should assert a queue to hold failed messages', () => {
+    routePattern = workerRoutePattern({ durable: false, autoDelete: true, exclusive: true, noAck: true })
     return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
       expect(mockTopology.createQueue).toHaveBeenCalledWith({
-        name: 'my-domain.my-app.my-route.failed'
+        name: 'my-domain.my-app.my-route.failed',
+        durable: false,
+        autoDelete: true,
+        exclusive: true
+      })
+    })
+  })
+
+  it('should create the failed message queue with passed options', () => {
+    return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
+      expect(mockTopology.createQueue).toHaveBeenCalledWith({
+        name: 'my-domain.my-app.my-route.failed',
+        durable: true,
+        autoDelete: false,
+        exclusive: false
       })
     })
   })
@@ -49,6 +77,9 @@ describe('WorkerRoutePattern', () => {
       expect(mockTopology.createQueue).toHaveBeenCalledWith({
         name: 'my-domain.my-app.my-route',
         deadLetter: 'my-domain.my-app.my-route.failed',
+        durable: true,
+        autoDelete: false,
+        exclusive: false,
         noAck: false
       })
     })
@@ -67,15 +98,17 @@ describe('WorkerRoutePattern', () => {
 
     return expect(routePattern(mockTopology, 'my-domain', 'my-app', 'my-route')).rejects.toThrow('Nuts!')
   })
-  describe('given options with noAck true', () => {
-    it('should assert a queue with noAck', () => {
-      routePattern = workerRoutePattern({ noAck: true })
-      return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
-        expect(mockTopology.createQueue).toHaveBeenCalledWith({
-          name: 'my-domain.my-app.my-route',
-          deadLetter: 'my-domain.my-app.my-route.failed',
-          noAck: true
-        })
+
+  it('should create queue with passed options', () => {
+    routePattern = workerRoutePattern({ durable: false, autoDelete: true, exclusive: true, noAck: true })
+    return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
+      expect(mockTopology.createQueue).toHaveBeenCalledWith({
+        name: 'my-domain.my-app.my-route',
+        deadLetter: 'my-domain.my-app.my-route.failed',
+        durable: false,
+        autoDelete: true,
+        exclusive: true,
+        noAck: true
       })
     })
   })

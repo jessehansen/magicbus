@@ -13,15 +13,16 @@ describe('Pub/Sub integration', () => {
 
   beforeEach(async () => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
-    publisher = magicbus.createPublisher(broker)
-    subscriber = magicbus.createSubscriber(broker)
+    publisher = magicbus.createPublisher(broker, (cfg) =>
+      cfg.useRoutePattern(magicbus.routePatterns.publisher({ autoDelete: true, durable: false })))
+    subscriber = magicbus.createSubscriber(broker, (cfg) =>
+      cfg.useRoutePattern(magicbus.routePatterns.worker({ autoDelete: true, durable: false, exclusive: true })))
     failedQueueSubscriber = magicbus.createSubscriber(broker,
       (cfg) => {
         // TODO: it's really confusing why this doesn't work unless you set a different route name
-        cfg.useRoutePattern(
-          magicbus.routePatterns.existingTopology({
-            queueName: `${serviceDomainName}.${appName}.subscribe.failed`
-          }))
+        cfg.useRoutePattern(magicbus.routePatterns.existingTopology({
+          queueName: `${serviceDomainName}.${appName}.subscribe.failed`
+        }))
         cfg.useRouteName('subscribe-failed')
       })
 

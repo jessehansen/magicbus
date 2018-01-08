@@ -16,12 +16,28 @@ describe('PublisherRoutePattern', () => {
     routePattern = publisherRoutePattern()
   })
 
-  it('should assert an exchange with a conventional name and the specified type', async () => {
+  it('should assert an exchange', async () => {
     await routePattern(mockTopology, 'my-domain', 'my-app', 'my-route')
     expect(mockTopology.createExchange).toHaveBeenCalledWith({
       name: 'my-domain.my-app.my-route',
       type: 'topic',
-      durable: true
+      durable: true,
+      autoDelete: false
+    })
+  })
+
+  it('should pass options to the createExchange call', async () => {
+    routePattern = publisherRoutePattern({
+      exchangeType: 'headers',
+      durable: false,
+      autoDelete: true
+    })
+    await routePattern(mockTopology, 'my-domain', 'my-app', 'my-route')
+    expect(mockTopology.createExchange).toHaveBeenCalledWith({
+      name: 'my-domain.my-app.my-route',
+      type: 'headers',
+      durable: false,
+      autoDelete: true
     })
   })
 
@@ -35,17 +51,5 @@ describe('PublisherRoutePattern', () => {
     }
 
     return expect(routePattern(mockTopology, 'my-domain', 'my-app', 'my-route')).rejects.toThrow('Shoot!')
-  })
-
-  describe('given an exchangeType', () => {
-    it('should use the exchange type passed in the options', async () => {
-      let routePattern = publisherRoutePattern({ exchangeType: 'headers' })
-      await routePattern(mockTopology, 'my-domain', 'my-app', 'my-route')
-      expect(mockTopology.createExchange).toHaveBeenCalledWith({
-        name: 'my-domain.my-app.my-route',
-        type: 'headers',
-        durable: true
-      })
-    })
   })
 })

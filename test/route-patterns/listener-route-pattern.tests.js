@@ -26,8 +26,35 @@ describe('listenerRoutePattern', () => {
       expect(mockTopology.createExchange).toHaveBeenCalledWith({
         name: 'my-domain.my-app.my-route',
         type: 'fanout',
-        durable: true
+        durable: true,
+        autoDelete: false
       })
+    })
+  })
+
+  it('should use passed options for exchange', () => {
+    routePattern = listenerRoutePattern({ durable: false, autoDelete: true })
+
+    return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
+      expect(mockTopology.createExchange).toHaveBeenCalledWith({
+        name: 'my-domain.my-app.my-route',
+        type: 'fanout',
+        durable: false,
+        autoDelete: true
+      })
+    })
+  })
+
+  it('should use passed options for queue', () => {
+    routePattern = listenerRoutePattern({ noAck: true })
+
+    return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
+      expect(mockTopology.createQueue).toHaveBeenCalledWith(expect.objectContaining({
+        name: expect.stringMatching(/my-domain.my-app.my-route.listener-\.*/),
+        exclusive: true,
+        durable: false,
+        noAck: true
+      }))
     })
   })
 

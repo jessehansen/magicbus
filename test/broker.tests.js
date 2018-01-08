@@ -15,8 +15,8 @@ describe('Broker really using RabbitMQ', () => {
   beforeEach(async () => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
 
-    broker.registerRoute('broker-publish', PublisherRoutePattern())
-    broker.registerRoute('broker-subscribe', WorkerRoutePattern())
+    broker.registerRoute('broker-publish', PublisherRoutePattern({ autoDelete: true, durable: false }))
+    broker.registerRoute('broker-subscribe', WorkerRoutePattern({ autoDelete: true, durable: false, exclusive: true }))
 
     await broker.bind('broker-publish', 'broker-subscribe', { pattern: '#' })
     await broker.purgeRouteQueue('broker-subscribe')

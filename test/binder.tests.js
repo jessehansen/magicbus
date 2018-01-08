@@ -19,6 +19,7 @@ describe('Binder really using RabbitMQ', () => {
   })
 
   it('should be able to bind an exchange to a queue', () => {
+    // TODO: Make these temporary
     return binder.bind({
       serviceDomainName: serviceDomainName,
       appName: appName,
