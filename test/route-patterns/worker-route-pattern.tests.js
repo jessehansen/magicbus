@@ -38,7 +38,8 @@ describe('WorkerRoutePattern', () => {
     return routePattern(mockTopology, 'my-domain', 'my-app', 'my-route').then(() => {
       expect(mockTopology.createBinding).toHaveBeenCalledWith({
         source: 'my-domain.my-app.my-route.failed',
-        target: 'my-domain.my-app.my-route.failed'
+        target: 'my-domain.my-app.my-route.failed',
+        queue: true
       })
     })
   })

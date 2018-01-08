@@ -1,4 +1,4 @@
-const magicbus = require('../lib')
+const magicbus = require('..')
 const environment = require('./_test-env')
 const Promise = require('bluebird')
 
@@ -9,19 +9,28 @@ describe('Pub/Sub integration', () => {
   let broker
   let publisher
   let subscriber
+  let failedQueueSubscriber
 
-  beforeAll(() => {
+  beforeEach(async () => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
     publisher = magicbus.createPublisher(broker)
     subscriber = magicbus.createSubscriber(broker)
-
-    return broker.bind(publisher.getRoute().name, subscriber.getRoute().name, { pattern: '#' })
-      .then(() => {
-        return subscriber.purgeQueue()
+    failedQueueSubscriber = magicbus.createSubscriber(broker,
+      (cfg) => {
+        // TODO: it's really confusing why this doesn't work unless you set a different route name
+        cfg.useRoutePattern(
+          magicbus.routePatterns.existingTopology({
+            queueName: `${serviceDomainName}.${appName}.subscribe.failed`
+          }))
+        cfg.useRouteName('subscribe-failed')
       })
+
+    await broker.bind(publisher.getRoute().name, subscriber.getRoute().name, { pattern: '#' })
+    await subscriber.purgeQueue()
+    await failedQueueSubscriber.purgeQueue()
   })
 
-  afterAll(() => {
+  afterEach(() => {
     return broker.shutdown()
   })
 
@@ -44,7 +53,32 @@ describe('Pub/Sub integration', () => {
     })
   })
 
-  it('should handle a heavy load without rejecting because of a full write buffer', () => {
+  it('should reject message when consumption fails', (done) => {
+    let eventName = 'something-done'
+    let data = {
+      it: 'kind of sucked'
+    }
+
+    let handler = () => {
+      return Promise.reject('an error')
+    }
+
+    let failedQueueHandler = (handlerEventName, handlerData) => {
+      expect(handlerEventName).toEqual(eventName)
+      expect(handlerData).toEqual(data)
+      done()
+    }
+
+    subscriber.on('something-done', handler)
+    failedQueueSubscriber.on(/.*/, failedQueueHandler)
+    subscriber.startSubscription().then(() =>
+      failedQueueSubscriber.startSubscription()
+    ).then(() =>
+      publisher.publish(eventName, data)
+    )
+  })
+
+  xit('should handle a heavy load without rejecting because of a full write buffer', () => {
     jest.setTimeout(30000)
     let load = []
     for (let i = 0; i < 100000; ++i) {
