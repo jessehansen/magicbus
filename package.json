@@ -12,6 +12,10 @@
   "engines": {
     "node": ">=8"
   },
+  "files": [
+    "index.js",
+    "lib/"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/twindagger/magicbus.git"
