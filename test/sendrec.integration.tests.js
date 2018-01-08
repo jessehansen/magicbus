@@ -9,10 +9,10 @@ describe('Send/Receive integration', () => {
   let sender
   let receiver
 
-  beforeAll(() => {
+  beforeEach(() => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
-    sender = magicbus.createPublisher(broker, (cfg) => cfg.useRouteName('publish'))
-    receiver = magicbus.createConsumer(broker, (cfg) => cfg.useRouteName('subscribe'))
+    sender = magicbus.createPublisher(broker, (cfg) => cfg.useRouteName('send'))
+    receiver = magicbus.createConsumer(broker, (cfg) => cfg.useRouteName('receive'))
 
     return broker.bind(sender.getRoute().name, receiver.getRoute().name, { pattern: '#' })
       .then(() => {
@@ -20,7 +20,7 @@ describe('Send/Receive integration', () => {
       })
   })
 
-  afterAll(() => {
+  afterEach(() => {
     return broker.shutdown()
   })
 
@@ -31,6 +31,31 @@ describe('Send/Receive integration', () => {
     let messageType = 'deactivateFooCommand'
 
     let handler = function (handlerMessage, handlerMessageTypes) {
+      expect(handlerMessage).toEqual(message)
+      expect(handlerMessageTypes).toEqual([messageType])
+
+      done()
+    }
+
+    receiver.startConsuming(handler).then(() => {
+      sender.send(message, messageType)
+    })
+  })
+
+  it('should support nacking a message that cannot be consumed by this consumer', (done) => {
+    let message = {
+      fooId: 123
+    }
+    let messageType = 'deactivateFooCommand'
+
+    let first = true
+    let handler = function (handlerMessage, handlerMessageTypes, _, actions) {
+      if (first) {
+        actions.nack()
+        first = false
+        return
+      }
+      // should be processed again
       expect(handlerMessage).toEqual(message)
       expect(handlerMessageTypes).toEqual([messageType])
 

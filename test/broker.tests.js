@@ -11,25 +11,15 @@ describe('Broker really using RabbitMQ', () => {
   let appName = 'tests'
   let connectionInfo = environment.rabbit
   let broker
-  let bound
 
-  beforeEach(() => {
-    let p
+  beforeEach(async () => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
 
-    broker.registerRoute('publish', PublisherRoutePattern())
-    broker.registerRoute('subscribe', WorkerRoutePattern())
+    broker.registerRoute('broker-publish', PublisherRoutePattern())
+    broker.registerRoute('broker-subscribe', WorkerRoutePattern())
 
-    p = Promise.resolve()
-    if (!bound) {
-      p = p.then(() => {
-        broker.bind('publish', 'subscribe', { pattern: '#' })
-        bound = true
-      })
-    }
-    return p.then(() => {
-      return broker.purgeRouteQueue('subscribe')
-    })
+    await broker.bind('broker-publish', 'broker-subscribe', { pattern: '#' })
+    await broker.purgeRouteQueue('broker-subscribe')
   })
 
   afterEach(() => {
@@ -47,7 +37,7 @@ describe('Broker really using RabbitMQ', () => {
     it('should not allow publish after shutdown', () => {
       let caught = false
       return broker.shutdown()
-        .then(() => broker.publish('publish', { routingKey: 'fail', payload: Buffer.from('dead') }))
+        .then(() => broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from('dead') }))
         .catch(() => {
           caught = true
         })
@@ -58,7 +48,7 @@ describe('Broker really using RabbitMQ', () => {
     it('should not allow consume after shutdown', () => {
       let caught = false
       return broker.shutdown()
-        .then(() => broker.consume('subscribe', noOp))
+        .then(() => broker.consume('broker-subscribe', noOp))
         .catch(() => {
           caught = true
         })
@@ -80,8 +70,8 @@ describe('Broker really using RabbitMQ', () => {
         done()
       }
 
-      broker.consume('subscribe', handler).then(() => {
-        broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
+      broker.consume('broker-subscribe', handler).then(() => {
+        broker.publish('broker-publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
@@ -93,8 +83,8 @@ describe('Broker really using RabbitMQ', () => {
         done()
       }
 
-      broker.consume('subscribe', handler).then(() => {
-        broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(theMessage) })
+      broker.consume('broker-subscribe', handler).then(() => {
+        broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from(theMessage) })
       })
     })
 
@@ -111,8 +101,8 @@ describe('Broker really using RabbitMQ', () => {
         }
       }
 
-      broker.consume('subscribe', handler).then(() => {
-        broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(theMessage) })
+      broker.consume('broker-subscribe', handler).then(() => {
+        broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from(theMessage) })
       })
     })
 
@@ -133,10 +123,10 @@ describe('Broker really using RabbitMQ', () => {
         }
       }
 
-      broker.consume('subscribe', handler).then(() => {
+      broker.consume('broker-subscribe', handler).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
-          broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
+          broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
         }
       })
     })
@@ -154,8 +144,8 @@ describe('Broker really using RabbitMQ', () => {
         done()
       }
 
-      broker.consume('subscribe', handler, { noBatch: true, limit: 10 }).then(() => {
-        broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
+      broker.consume('broker-subscribe', handler, { noBatch: true, limit: 10 }).then(() => {
+        broker.publish('broker-publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
@@ -180,10 +170,10 @@ describe('Broker really using RabbitMQ', () => {
         }
       }
 
-      broker.consume('subscribe', handler, { noBatch: true, limit: 10 }).then(() => {
+      broker.consume('broker-subscribe', handler, { noBatch: true, limit: 10 }).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
-          broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
+          broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
         }
       })
     })
@@ -201,8 +191,8 @@ describe('Broker really using RabbitMQ', () => {
         done()
       }
 
-      broker.consume('subscribe', handler, { noAck: true }).then(() => {
-        broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
+      broker.consume('broker-subscribe', handler, { noAck: true }).then(() => {
+        broker.publish('broker-publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
@@ -224,10 +214,10 @@ describe('Broker really using RabbitMQ', () => {
         }
       }
 
-      broker.consume('subscribe', handler, { noAck: true }).then(() => {
+      broker.consume('broker-subscribe', handler, { noAck: true }).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
-          broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
+          broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
         }
       })
     })
@@ -244,8 +234,8 @@ describe('Broker really using RabbitMQ', () => {
         done()
       }
 
-      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(() => {
-        broker.publish('publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
+      broker.consume('broker-subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(() => {
+        broker.publish('broker-publish', { routingKey: 'succeed', payload: Buffer.from(theMessage) })
       })
     })
 
@@ -259,10 +249,10 @@ describe('Broker really using RabbitMQ', () => {
         }
       }
 
-      broker.consume('subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(() => {
+      broker.consume('broker-subscribe', handler, { noAck: true, noBatch: true, limit: 10 }).then(() => {
         let i
         for (i = 0; i < targetCount; i++) {
-          broker.publish('publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
+          broker.publish('broker-publish', { routingKey: 'fail', payload: Buffer.from(String(i)) })
         }
       })
     })
