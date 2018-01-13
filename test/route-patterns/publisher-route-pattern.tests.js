@@ -1,7 +1,5 @@
 const publisherRoutePattern = require('../../lib/route-patterns/publisher-route-pattern.js')
 
-const Promise = require('bluebird')
-
 describe('PublisherRoutePattern', () => {
   let mockTopology
   let routePattern

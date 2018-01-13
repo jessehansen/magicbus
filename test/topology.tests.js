@@ -2,8 +2,8 @@ const createTopology = require('../lib/topology')
 const FakeMachine = require('./_fake-machine')
 const Monologue = require('monologue.js')
 
-const Promise = require('bluebird')
 const Logger = require('../lib/logger')
+const { delay } = require('../lib/util')
 describe('Topology', () => {
   let mockConnection
   let mockChannel
@@ -47,7 +47,7 @@ describe('Topology', () => {
       topology.getChannel('control')
 
       emitter.emit('reconnected')
-      await Promise.delay(1)
+      await delay(1)
 
       expect(mockChannel.check).toHaveBeenCalledWith()
     })
@@ -70,7 +70,7 @@ describe('Topology', () => {
       })
 
       emitter.emit('reconnected')
-      await Promise.delay(1)
+      await delay(1)
 
       expect(topology.configureBindings).toHaveBeenCalledWith(topology.definitions.bindings, true)
     })

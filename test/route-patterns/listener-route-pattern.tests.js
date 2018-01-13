@@ -1,5 +1,4 @@
 const listenerRoutePattern = require('../../lib/route-patterns/listener-route-pattern.js')
-const Promise = require('bluebird')
 
 describe('listenerRoutePattern', () => {
   let mockTopology

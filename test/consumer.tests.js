@@ -2,7 +2,6 @@ const magicbus = require('..')
 const Consumer = require('../lib/consumer.js')
 const EventEmitter = require('events').EventEmitter
 
-const Promise = require('bluebird')
 const Logger = require('../lib/logger')
 
 describe('Consumer', () => {
@@ -171,7 +170,7 @@ describe('Consumer', () => {
         return mockBroker.emulateConsumption()
           .then(() => {
             expect(logs.length).toBeGreaterThan(1)
-            expect(logs[logs.length - 2].err).toBeTruthy()
+            expect(logs.some((l) => l.err !== undefined)).toBeTruthy()
             expect(fakeMessage.__resolution).toEqual('reject')
           })
       })

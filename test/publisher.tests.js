@@ -1,7 +1,6 @@
 const magicbus = require('../lib')
 const Publisher = require('../lib/publisher')
 
-const Promise = require('bluebird')
 const Logger = require('../lib/logger')
 
 describe('Publisher', () => {

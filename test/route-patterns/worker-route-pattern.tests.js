@@ -1,7 +1,5 @@
 const workerRoutePattern = require('../../lib/route-patterns/worker-route-pattern.js')
 
-const Promise = require('bluebird')
-
 describe('WorkerRoutePattern', () => {
   let mockTopology
   let routePattern

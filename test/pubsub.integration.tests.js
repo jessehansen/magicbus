@@ -1,6 +1,5 @@
 const magicbus = require('..')
 const environment = require('./_test-env')
-const Promise = require('bluebird')
 
 describe('Pub/Sub integration', () => {
   let serviceDomainName = 'magicbus'
@@ -85,6 +84,6 @@ describe('Pub/Sub integration', () => {
     for (let i = 0; i < 100000; ++i) {
       load.push('message ' + i)
     }
-    return Promise.map(load, (message) => publisher.publish('load-test', { message: message }))
+    return Promise.all(load.map((message) => publisher.publish('load-test', { message: message })))
   })
 })
