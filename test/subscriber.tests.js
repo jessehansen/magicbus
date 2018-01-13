@@ -10,6 +10,7 @@ describe('Subscriber', () => {
   let subscriber
   let logger
   let logs
+  let mockActions
 
   beforeEach(() => {
     let logEvents = new EventEmitter()
@@ -25,6 +26,13 @@ describe('Subscriber', () => {
       }
     }
     eventDispatcher = eventDispatcherFactory()
+    mockActions = {
+      ack: jest.fn(),
+      nack: jest.fn(),
+      reject: jest.fn(),
+      next: jest.fn(),
+      error: jest.fn()
+    }
 
     subscriber = Subscriber(mockConsumer, eventDispatcher, logger, logEvents)
   })
@@ -81,22 +89,22 @@ describe('Subscriber', () => {
 
       subscriber.startSubscription()
 
-      return mockConsumer._handler(payload, messageTypes, msg).then(() => {
-        expect(handler1).toHaveBeenCalledWith(messageTypes[0], payload, msg)
-        expect(handler2).toHaveBeenCalledWith(messageTypes[1], payload, msg)
+      return mockConsumer._handler(payload, messageTypes, msg, mockActions).then(() => {
+        expect(handler1).toHaveBeenCalledWith(messageTypes[0], payload, msg, mockActions)
+        expect(handler2).toHaveBeenCalledWith(messageTypes[1], payload, msg, mockActions)
       })
     })
 
-    it('should fail given synchronous handler fails', () => {
-      eventDispatcher.on(messageTypes[0], () => {
-        throw new Error('Something happened')
+    it('should allow nacking the message ' +
+      'by passing the actions from the consumer to the subscriber', () => {
+      eventDispatcher.on(messageTypes[0], (type, data, message, actions) => {
+        actions.nack()
       })
 
       subscriber.startSubscription()
-      return expect(mockConsumer._handler(payload, messageTypes, msg)).rejects.toThrow('Something happened')
-        .then(() => {
-          expect(logs[logs.length - 1].err).toBeTruthy()
-        })
+      return mockConsumer._handler(payload, messageTypes, msg, mockActions).then(() => {
+        expect(mockActions.nack).toHaveBeenCalled()
+      })
     })
 
     it('should fail given no handler is registered for the message type', () => {
