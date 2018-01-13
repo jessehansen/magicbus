@@ -213,6 +213,22 @@ describe('Consumer', () => {
           })
       })
 
+      it('should nack if the handler requests it', () => {
+        let handlerCalled = false
+        let handler = (handlerData, messageTypes, message, actions) => {
+          handlerCalled = true
+          actions.nack()
+          return Promise.resolve()
+        }
+
+        consumer.startConsuming(handler)
+        return mockBroker.emulateConsumption()
+          .then(() => {
+            expect(fakeMessage.__resolution).toEqual('nack')
+            expect(handlerCalled).toEqual(true)
+          })
+      })
+
       describe('using middleware', () => {
         let handlerCompleted
         let handlerPayload
