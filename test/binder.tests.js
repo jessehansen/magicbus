@@ -1,4 +1,5 @@
 const magicbus = require('../lib')
+const amqp = require('amqplib')
 const environment = require('./_test-env')
 
 const publisherRoutePattern = require('../lib/route-patterns/publisher-route-pattern')
@@ -14,8 +15,13 @@ describe('Binder really using RabbitMQ', () => {
     binder = magicbus.createBinder(connectionInfo)
   })
 
-  afterEach(() => {
-    return binder.shutdown()
+  afterEach(async () => {
+    await binder.shutdown()
+    let cxn = await amqp.connect(`amqp://${connectionInfo.user}:${connectionInfo.pass}@${connectionInfo.server}/`)
+    let chn = await cxn.createChannel()
+    await chn.deleteQueue(`${serviceDomainName}.${appName}.binder-subscribe`)
+    await chn.deleteQueue(`${serviceDomainName}.${appName}.binder-subscribe.failed`)
+    await chn.deleteExchange(`${serviceDomainName}.${appName}.binder-publish`)
   })
 
   it('should be able to bind an exchange to a queue', () => {
