@@ -85,72 +85,28 @@ describe('Configurator', () => {
       expect(publisher).toBeTruthy()
     })
 
-    it('should allow caller to override the envelope', () => {
-      let myEnvelope = {}
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useEnvelope(myEnvelope))
+    it('should allow caller to override implementations', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) =>
+          cfg.useEnvelope({})
+            .useSerializer({})
+            .usePipeline({ useLogger: () => {} })
+            .useRouteName('my-route')
+            .useRoutePattern(() => ({}))
+      )
 
       expect(publisher).toBeTruthy()
     })
 
-    it('should allow caller to override the envelope using a factory function', () => {
-      let myEnvelope = {}
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useEnvelopeFactory(() => myEnvelope))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the serializer', () => {
-      let mySerializer = {}
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useSerializer(mySerializer))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the serializerusing a factory function', () => {
-      let mySerializer = {}
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useSerializerFactory(() => mySerializer))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the middleware pipeline', () => {
-      let myPipeline = { useLogger: () => {} }
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.usePipeline(myPipeline))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the middleware pipeline using a factory funciton', () => {
-      let myPipeline = { useLogger: () => {} }
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.usePipelineFactory(() => myPipeline))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the route name', () => {
-      let myRouteName = 'publish2'
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useRouteName(myRouteName))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the route name using a factory function', () => {
-      let myRouteName = 'publish2'
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useRouteName(() => myRouteName))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the route pattern', () => {
-      let myRoutePattern = () => () => ({ exchangeName: 'my exchange name' })
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useRoutePattern(myRoutePattern))
-
-      expect(publisher).toBeTruthy()
-    })
-
-    it('should allow caller to override the route pattern using a factory function', () => {
-      let myRoutePattern = () => () => ({ exchangeName: 'my exchange name' })
-      let publisher = configurator.createPublisher(broker, (cfg) => cfg.useRoutePatternFactory(myRoutePattern))
+    it('should allow caller to override implementations using factories', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) =>
+          cfg.useEnvelopeFactory(() => ({}))
+            .useSerializerFactory(() => ({}))
+            .usePipelineFactory(() => ({ useLogger: () => {} }))
+            .useRouteName(() => 'my-route')
+            .useRoutePatternFactory(() => () => ({}))
+      )
 
       expect(publisher).toBeTruthy()
     })
@@ -163,72 +119,28 @@ describe('Configurator', () => {
       expect(consumer).toBeTruthy()
     })
 
-    it('should allow caller to override the envelope', () => {
-      let myEnvelope = {}
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useEnvelope(myEnvelope))
+    it('should allow caller to override implementations', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) =>
+          cfg.useEnvelope({})
+            .useSerializer({})
+            .usePipeline({ useLogger: () => {} })
+            .useRouteName('my-route')
+            .useRoutePattern(() => ({}))
+      )
 
       expect(consumer).toBeTruthy()
     })
 
-    it('should allow caller to override the envelope using a factory function', () => {
-      let myEnvelope = {}
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useEnvelopeFactory(() => myEnvelope))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the serializer', () => {
-      let mySerializer = {}
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useSerializer(mySerializer))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the serializer using a factory function', () => {
-      let mySerializer = {}
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useSerializerFactory(() => mySerializer))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the middleware pipeline', () => {
-      let myPipeline = { useLogger: () => {} }
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.usePipeline(myPipeline))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the middleware pipelineusing a factory function', () => {
-      let myPipeline = { useLogger: () => {} }
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.usePipelineFactory(() => myPipeline))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the route name', () => {
-      let myRouteName = 'publish2'
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useRouteName(myRouteName))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the route name using a factory function', () => {
-      let myRouteName = 'publish2'
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useRouteName(() => myRouteName))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the route pattern', () => {
-      let myRoutePattern = () => () => ({ queueName: 'my queue name' })
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useRoutePattern(myRoutePattern))
-
-      expect(consumer).toBeTruthy()
-    })
-
-    it('should allow caller to override the route pattern using a factory function', () => {
-      let myRoutePattern = () => () => ({ queueName: 'my queue name' })
-      let consumer = configurator.createConsumer(broker, (cfg) => cfg.useRoutePatternFactory(() => myRoutePattern))
+    it('should allow caller to override implementations using factories', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) =>
+          cfg.useEnvelopeFactory(() => ({}))
+            .useSerializerFactory(() => ({}))
+            .usePipelineFactory(() => ({ useLogger: () => {} }))
+            .useRouteName(() => 'my-route')
+            .useRoutePatternFactory(() => () => ({}))
+      )
 
       expect(consumer).toBeTruthy()
     })
@@ -241,72 +153,28 @@ describe('Configurator', () => {
       expect(subscriber).toBeTruthy()
     })
 
-    it('should allow caller to override the envelope', () => {
-      let myEnvelope = {}
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useEnvelope(myEnvelope))
+    it('should allow caller to override consumer implementations', () => {
+      let subscriber = configurator.createSubscriber(broker,
+        (cfg) =>
+          cfg.useEnvelope({})
+            .useSerializer({})
+            .usePipeline({ useLogger: () => {} })
+            .useRouteName('my-route')
+            .useRoutePattern(() => ({}))
+      )
 
       expect(subscriber).toBeTruthy()
     })
 
-    it('should allow caller to override the envelope using a factory function', () => {
-      let myEnvelope = {}
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useEnvelopeFactory(() => myEnvelope))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the serializer', () => {
-      let mySerializer = {}
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useSerializer(mySerializer))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the serializer using a factory function', () => {
-      let mySerializer = {}
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useSerializerFactory(() => mySerializer))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the middleware pipeline', () => {
-      let myPipeline = { useLogger: () => {} }
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.usePipeline(myPipeline))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the middleware pipeline using a factory function', () => {
-      let myPipeline = { useLogger: () => {} }
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.usePipelineFactory(() => myPipeline))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the route name', () => {
-      let myRouteName = 'publish2'
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useRouteName(myRouteName))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the route name using a factory function', () => {
-      let myRouteName = 'publish2'
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useRouteName(() => myRouteName))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the route pattern', () => {
-      let myRoutePattern = () => () => ({ queueName: 'my queue name' })
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useRoutePattern(myRoutePattern))
-
-      expect(subscriber).toBeTruthy()
-    })
-
-    it('should allow caller to override the route pattern using a factory function', () => {
-      let myRoutePattern = () => () => ({ queueName: 'my queue name' })
-      let subscriber = configurator.createSubscriber(broker, (cfg) => cfg.useRoutePatternFactory(() => myRoutePattern))
+    it('should allow caller to override consumer implementations using factories', () => {
+      let subscriber = configurator.createSubscriber(broker,
+        (cfg) =>
+          cfg.useEnvelopeFactory(() => ({}))
+            .useSerializerFactory(() => ({}))
+            .usePipelineFactory(() => ({ useLogger: () => {} }))
+            .useRouteName(() => 'my-route')
+            .useRoutePatternFactory(() => () => ({}))
+      )
 
       expect(subscriber).toBeTruthy()
     })
