@@ -20,55 +20,6 @@ describe('Publisher', () => {
   })
 
   describe('constructor', () => {
-    it('should throw an assertion error given no broker', () => {
-      let fn = () => {
-        Publisher()
-      }
-
-      expect(fn).toThrow('broker (object) is required')
-    })
-    it('should throw an assertion error given no envelope', () => {
-      let fn = () => {
-        Publisher(mockBroker)
-      }
-
-      expect(fn).toThrow('envelope (object) is required')
-    })
-    it('should throw an assertion error given no serializer', () => {
-      let fn = () => {
-        Publisher(mockBroker, {})
-      }
-
-      expect(fn).toThrow('serializer (object) is required')
-    })
-    it('should throw an assertion error given no pipeline', () => {
-      let fn = () => {
-        Publisher(mockBroker, {}, {})
-      }
-
-      expect(fn).toThrow('pipeline (object) is required')
-    })
-    it('should throw an assertion error given no routeName', () => {
-      let fn = () => {
-        Publisher(mockBroker, {}, {}, fakePipeline)
-      }
-
-      expect(fn).toThrow('routeName (string) is required')
-    })
-    it('should throw an assertion error given no routePattern', () => {
-      let fn = () => {
-        Publisher(mockBroker, {}, {}, fakePipeline, 'route')
-      }
-
-      expect(fn).toThrow('routePattern (func) is required')
-    })
-    it('should throw an assertion error given no logger', () => {
-      let fn = () => {
-        Publisher(mockBroker, {}, {}, fakePipeline, 'route', fakePattern)
-      }
-
-      expect(fn).toThrow('logger (object) is required')
-    })
     it('should register a route with the broker', () => {
       Publisher(mockBroker, {}, {}, fakePipeline, 'route', fakePattern, logger)
       expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', fakePattern)
@@ -87,7 +38,7 @@ describe('Publisher', () => {
         publisher.publish()
       }
 
-      expect(fn).toThrow('eventName (string) is required')
+      expect(fn).toThrow('eventName must be a string')
     })
 
     it('should be fulfilled given the broker.publish calls are fulfilled', () => {

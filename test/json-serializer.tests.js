@@ -64,13 +64,5 @@ describe('JsonSerializer', () => {
 
       expect(result).toEqual(123)
     })
-
-    it('should throw an assertion error given it is not passed a buffer', () => {
-      let fn = () => {
-        serializer.deserialize()
-      }
-
-      expect(fn).toThrow('content (buffer) is required')
-    })
   })
 })

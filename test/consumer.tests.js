@@ -67,75 +67,9 @@ describe('Consumer', () => {
   })
 
   describe('constructor', () => {
-    it('should throw an assertion error given no broker', () => {
-      let fn = () => {
-        Consumer()
-      }
-
-      expect(fn).toThrow('broker (object) is required')
-    })
-    it('should throw an assertion error given no envelope', () => {
-      let fn = () => {
-        Consumer(mockBroker)
-      }
-
-      expect(fn).toThrow('envelope (object) is required')
-    })
-    it('should throw an assertion error given no serializer', () => {
-      let fn = () => {
-        Consumer(mockBroker, {})
-      }
-
-      expect(fn).toThrow('serializer (object) is required')
-    })
-    it('should throw an assertion error given no pipeline', () => {
-      let fn = () => {
-        Consumer(mockBroker, {}, {})
-      }
-
-      expect(fn).toThrow('pipeline (object) is required')
-    })
-    it('should throw an assertion error given no routeName', () => {
-      let fn = () => {
-        Consumer(mockBroker, {}, {}, fakePipeline)
-      }
-
-      expect(fn).toThrow('routeName (string) is required')
-    })
-    it('should throw an assertion error given no routePattern', () => {
-      let fn = () => {
-        Consumer(mockBroker, {}, {}, fakePipeline, 'route')
-      }
-
-      expect(fn).toThrow('routePattern (func) is required')
-    })
-    it('should throw an assertion error given no logger', () => {
-      let fn = () => {
-        Consumer(mockBroker, {}, {}, fakePipeline, 'route', fakePattern)
-      }
-
-      expect(fn).toThrow('logger (object) is required')
-    })
-    it('should throw an assertion error given no events', () => {
-      let fn = () => {
-        Consumer(mockBroker, {}, {}, fakePipeline, 'route', fakePattern, {})
-      }
-
-      expect(fn).toThrow('events (object) is required')
-    })
     it('should register a route with the broker', () => {
       Consumer(mockBroker, {}, {}, fakePipeline, 'route', fakePattern, logger, logEvents)
       expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', fakePattern)
-    })
-
-    describe('constructor argument checking', () => {
-      it('should throw an assertion error given no broker', () => {
-        let fn = () => {
-          Consumer()
-        }
-
-        expect(fn).toThrow('broker (object) is required')
-      })
     })
   })
 

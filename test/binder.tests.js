@@ -22,6 +22,7 @@ describe('Binder really using RabbitMQ', () => {
     await chn.deleteQueue(`${serviceDomainName}.${appName}.binder-subscribe`)
     await chn.deleteQueue(`${serviceDomainName}.${appName}.binder-subscribe.failed`)
     await chn.deleteExchange(`${serviceDomainName}.${appName}.binder-publish`)
+    await cxn.close()
   })
 
   it('should be able to bind an exchange to a queue', () => {
