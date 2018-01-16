@@ -40,6 +40,7 @@
   "dependencies": {
     "amqplib": "^0.5.2",
     "machina": "^2.0.0",
+    "magicpipes": "^0.1.2",
     "monologue.js": "^0.3.5",
     "postal": "^2.0.5",
     "shortid": "^2.2.8"

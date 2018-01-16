@@ -4,7 +4,10 @@ module.exports = {
     es6: true
   },
   parserOptions:{
-    ecmaVersion: 8
+    ecmaVersion: 8,
+    ecmaFeatures: {
+      experimentalObjectRestSpread: true
+    }
   },
   plugins: ['unicorn'],
   extends: 'plugin:unicorn/recommended',
