@@ -14,7 +14,7 @@ describe('Send/Receive integration', () => {
     //   err
     //     ? console.log(namespace, kind, message, err)
     //     : console.log(namespace, kind, message))
-    magicbus.on('unhandled-error', ({ message, messageTypes, err }) => console.log(message, messageTypes, err))
+    // magicbus.on('unhandled-error', ({ message, messageTypes, err }) => console.log(message, messageTypes, err))
   })
 
   beforeEach(async () => {
