@@ -1,100 +1,72 @@
-const magicEnvelope = require('../lib/magic-envelope')
+const MagicEnvelope = require('../lib/magic-envelope')
 
 describe('MagicEnvelope', () => {
   let envelope
-  let fakeSerializer = { contentTypeSuffix: '+json' }
+  let context
+  const next = () => Promise.resolve()
 
   beforeEach(() => {
-    envelope = magicEnvelope()
+    envelope = MagicEnvelope()
   })
 
   describe('wrap', () => {
-    it('should set the content type', () => {
-      let msg = envelope.wrap(
-        { my: 'data' },
-        'my-kind',
-        fakeSerializer)
-
-      expect(msg.properties.contentType).toEqual('application/prs.magicbus+json')
+    beforeEach(() => {
+      context = { kind: 'my-kind' }
     })
 
-    it('should put the kind of the message in the type property of the amqp properties', () => {
-      let msg = envelope.wrap(
-        { my: 'data' },
-        'my-kind',
-        fakeSerializer)
+    it('should set the content type', async () => {
+      await envelope.wrap(context, next)
 
-      expect(msg.properties.type).toEqual('my-kind')
+      expect(context.publishOptions.contentType).toEqual('application/prs.magicbus')
     })
 
-    it('should put the data of the message in the payload', () => {
-      let msg = envelope.wrap(
-        { my: 'data' },
-        'my-kind',
-        fakeSerializer)
+    it('should support overriding the content type', async () => {
+      envelope = MagicEnvelope({ contentType: 'something' })
+      await envelope.wrap(context, next)
 
-      let expected = {
-        my: 'data'
-      }
-      expect(msg.payload).toEqual(expected)
+      expect(context.publishOptions.contentType).toEqual('something')
     })
-  })
 
-  describe('getPublishOptions', () => {
-    it('should return the kind of the message as the routing key', () => {
-      let publishOptions = envelope.getPublishOptions(
-        { my: 'data' },
-        'my-kind',
-        fakeSerializer)
+    it('should put the kind of the message in the type property of the amqp properties', async () => {
+      await envelope.wrap(context, next)
 
-      expect(publishOptions.routingKey).toEqual('my-kind')
+      expect(context.publishOptions.type).toEqual('my-kind')
+    })
+
+    it('should set the kind of the message as the routing key', async () => {
+      await envelope.wrap(context, next)
+
+      expect(context.routingKey).toEqual('my-kind')
+    })
+
+    it('should support inspect', async () => {
+      expect(envelope.wrap.inspect()).toEqual({ type: 'Magic Envelope Wrap', contentType: 'application/prs.magicbus' })
     })
   })
 
   describe('unwrap', () => {
-    it('should return the payload given a message with a payload', () => {
-      let msg = {
-        payload: {
-          my: 'data'
-        }
-      }
-
-      let data = envelope.unwrap(msg)
-
-      let expected = {
-        my: 'data'
-      }
-      expect(data).toEqual(expected)
-    })
-
-    it('should return null given a message with no payload', () => {
-      let msg = {}
-
-      let data = envelope.unwrap(msg)
-
-      expect(data).toEqual(null)
-    })
-  })
-
-  describe('getMessageTypes', () => {
-    it('should return the type property of the amqp properties as the only message type given a message with a type', () => {
-      let msg = {
+    it('should return the type property of the amqp properties as the only message type given a message with a type', async () => {
+      let context = {
         properties: {
           type: 'my-kind'
         }
       }
 
-      let messageTypes = envelope.getMessageTypes(msg)
+      await envelope.unwrap(context, next)
 
-      expect(messageTypes).toEqual(['my-kind'])
+      expect(context.messageTypes).toEqual(['my-kind'])
     })
 
-    it('should return an empty array given a message with no type', () => {
-      let msg = {}
+    it('should return an empty array given a message with no type', async () => {
+      let context = {}
 
-      let messageTypes = envelope.getMessageTypes(msg)
+      await envelope.unwrap(context, next)
 
-      expect(messageTypes).toEqual([])
+      expect(context.messageTypes).toEqual([])
+    })
+
+    it('should support inspect', async () => {
+      expect(envelope.unwrap.inspect()).toEqual({ type: 'Magic Envelope Unwrap' })
     })
   })
 })

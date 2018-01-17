@@ -1,6 +1,6 @@
-const Configurator = require('../../lib/config')
+const Configurator = require('../../lib/config/config')
 const Logger = require('../../lib/logger')
-const EventEmitter = require('events').EventEmitter
+const { EventEmitter } = require('events')
 
 describe('Configurator', () => {
   let configurator
@@ -10,7 +10,7 @@ describe('Configurator', () => {
 
   beforeEach(() => {
     broker = {
-      registerRoute: () => {}
+      getTopologyParams: () => ({})
     }
     events = new EventEmitter()
     logger = Logger('magicbus.tests', events)
@@ -88,11 +88,9 @@ describe('Configurator', () => {
     it('should allow caller to override implementations', () => {
       let publisher = configurator.createPublisher(broker,
         (cfg) =>
-          cfg.useEnvelope({})
-            .useSerializer({})
-            .usePipeline({ useLogger: () => {} })
+          cfg.useEnvelope({ wrap: () => {} })
+            .useSerializer(() => {})
             .useRouteName('my-route')
-            .useRoutePattern(() => ({}))
       )
 
       expect(publisher).toBeTruthy()
@@ -103,9 +101,7 @@ describe('Configurator', () => {
         (cfg) =>
           cfg.useEnvelopeFactory(() => ({}))
             .useSerializerFactory(() => ({}))
-            .usePipelineFactory(() => ({ useLogger: () => {} }))
             .useRouteName(() => 'my-route')
-            .useRoutePatternFactory(() => () => ({}))
       )
 
       expect(publisher).toBeTruthy()
@@ -123,10 +119,8 @@ describe('Configurator', () => {
       let consumer = configurator.createConsumer(broker,
         (cfg) =>
           cfg.useEnvelope({})
-            .useSerializer({})
-            .usePipeline({ useLogger: () => {} })
+            .useDeserializer({})
             .useRouteName('my-route')
-            .useRoutePattern(() => ({}))
       )
 
       expect(consumer).toBeTruthy()
@@ -136,10 +130,8 @@ describe('Configurator', () => {
       let consumer = configurator.createConsumer(broker,
         (cfg) =>
           cfg.useEnvelopeFactory(() => ({}))
-            .useSerializerFactory(() => ({}))
-            .usePipelineFactory(() => ({ useLogger: () => {} }))
+            .useDeserializerFactory(() => ({}))
             .useRouteName(() => 'my-route')
-            .useRoutePatternFactory(() => () => ({}))
       )
 
       expect(consumer).toBeTruthy()
@@ -157,10 +149,8 @@ describe('Configurator', () => {
       let subscriber = configurator.createSubscriber(broker,
         (cfg) =>
           cfg.useEnvelope({})
-            .useSerializer({})
-            .usePipeline({ useLogger: () => {} })
+            .useDeserializer({})
             .useRouteName('my-route')
-            .useRoutePattern(() => ({}))
       )
 
       expect(subscriber).toBeTruthy()
@@ -170,10 +160,8 @@ describe('Configurator', () => {
       let subscriber = configurator.createSubscriber(broker,
         (cfg) =>
           cfg.useEnvelopeFactory(() => ({}))
-            .useSerializerFactory(() => ({}))
-            .usePipelineFactory(() => ({ useLogger: () => {} }))
+            .useDeserializerFactory(() => ({}))
             .useRouteName(() => 'my-route')
-            .useRoutePatternFactory(() => () => ({}))
       )
 
       expect(subscriber).toBeTruthy()

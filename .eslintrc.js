@@ -50,6 +50,7 @@ module.exports = {
     'no-caller': 'error',
     'no-class-assign': 'error',
     'no-cond-assign': [ 'error', 'always' ],
+    'no-console': 'error',
     'no-const-assign': 'error',
     'no-constant-condition': [ 'error', { checkLoops: false } ],
     'no-control-regex': 'error',
