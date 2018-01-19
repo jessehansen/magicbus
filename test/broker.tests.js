@@ -1,7 +1,6 @@
 const magicbus = require('../lib')
 const environment = require('./_test-env')
-
-const noOp = () => {}
+const { noOp } = require('../lib/util')
 
 describe('Broker really using RabbitMQ', () => {
   const exchangeName = 'magicbus.tests.broker-publish'

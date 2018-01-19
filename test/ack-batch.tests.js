@@ -2,6 +2,7 @@ const AckBatch = require('../lib/ack-batch')
 const Logger = require('../lib/logger')
 const signal = require('postal').channel('rabbit.ack')
 const { tick } = require('../lib/util')
+const { EventEmitter } = require('events')
 
 describe('AckBatch', () => {
   const name = 'default'
@@ -18,7 +19,7 @@ describe('AckBatch', () => {
 
   beforeEach(() => {
     resolver = jest.fn(() => Promise.resolve())
-    logger = Logger()
+    logger = Logger('tests', new EventEmitter())
     batch = AckBatch(name, connectionName, resolver, logger)
     tag1 = 1
     tag2 = 2

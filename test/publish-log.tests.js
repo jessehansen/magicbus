@@ -15,6 +15,13 @@ describe('PublishLog', () => {
     expect(message1.sequenceNo).not.toBeUndefined()
   })
 
+  it('should ignore if same message is added twice', () => {
+    log.add(message1)
+    let originalSeq = message1.sequenceNo
+    log.add(message1)
+    expect(message1.sequenceNo).toBe(originalSeq)
+  })
+
   it('should keep sequenceNo unique when adding to log', () => {
     log.add(message1)
     log.add(message2)

@@ -1,9 +1,8 @@
 const magicbus = require('..')
 const EventEmitter = require('events').EventEmitter
-const { tick } = require('../lib/util')
+const { tick, noOp } = require('../lib/util')
 
 const Logger = require('../lib/logger')
-const noOp = () => {}
 
 describe('Consumer', () => {
   let mockBroker
@@ -167,6 +166,35 @@ describe('Consumer', () => {
 
         await consumer.startConsuming(noOp)
         expect(mockBroker.consume).toHaveBeenCalledWith(expect.objectContaining({ queue }), expect.any(Function))
+      })
+
+      it('should use topology from consume filter when retrieving binding target', async () => {
+        const queue = 'some-queue'
+        consumer = magicbus.createConsumer(mockBroker, (cfg) =>
+          cfg.useLogger(logger)
+            .overrideFilters({
+              consume: [(ctx, next) =>
+                next(Object.assign(ctx, { queue }))],
+              input: [],
+              output: []
+            }))
+
+        await expect(consumer.getBindingTarget()).resolves.toEqual({ name: queue, queue: true })
+      })
+
+      it('should prefer exchange to exchange binding if available', async () => {
+        const exchange = 'some-exchange'
+        const queue = 'some-queue'
+        consumer = magicbus.createConsumer(mockBroker, (cfg) =>
+          cfg.useLogger(logger)
+            .overrideFilters({
+              consume: [(ctx, next) =>
+                next(Object.assign(ctx, { exchange, queue }))],
+              input: [],
+              output: []
+            }))
+
+        await expect(consumer.getBindingTarget()).resolves.toEqual({ name: exchange, queue: false })
       })
 
       it('should call message middleware in correct order', async () => {

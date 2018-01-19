@@ -1,5 +1,6 @@
 const magicbus = require('..')
 const Pipe = require('magicpipes')
+const { EventEmitter } = require('events')
 
 const Logger = require('../lib/logger')
 
@@ -17,7 +18,7 @@ describe('Publisher', () => {
     mockBroker = {
       publish: jest.fn(() => Promise.resolve())
     }
-    logger = Logger()
+    logger = Logger('tests', new EventEmitter())
     mockFilter = jest.fn((ctx, next) =>
       next(Object.assign(ctx, { exchange, content, routingKey })))
     publisher = magicbus.createPublisher(mockBroker, (cfg) =>

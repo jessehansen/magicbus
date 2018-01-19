@@ -1,6 +1,7 @@
 const Topology = require('../lib/topology')
 const FakeMachine = require('./_fake-machine')
 const Monologue = require('monologue.js')
+const { EventEmitter } = require('events')
 
 const Logger = require('../lib/logger')
 const { delay } = require('../lib/util')
@@ -33,7 +34,7 @@ describe('Topology', () => {
       once: () => 0,
       on: () => 0
     }
-    logger = Logger()
+    logger = Logger('tests', new EventEmitter())
 
     ExchangeMachine = FakeMachine
     QueueMachine = FakeMachine
