@@ -1,5 +1,5 @@
-const Configurator = require('../../lib/config/config')
-const Logger = require('../../lib/logger')
+const Configurator = require('../lib/config/config')
+const Logger = require('../lib/logger')
 const { EventEmitter } = require('events')
 
 describe('Configurator', () => {
@@ -88,8 +88,11 @@ describe('Configurator', () => {
     it('should allow caller to override implementations', () => {
       let publisher = configurator.createPublisher(broker,
         (cfg) =>
-          cfg.useEnvelope({ wrap: () => {} })
+          cfg
+            .useTopology(() => {})
+            .useEnvelope({ wrap: () => {} })
             .useSerializer(() => {})
+            .useFilter(() => {})
             .useRouteName('my-route')
       )
 
@@ -99,9 +102,94 @@ describe('Configurator', () => {
     it('should allow caller to override implementations using factories', () => {
       let publisher = configurator.createPublisher(broker,
         (cfg) =>
-          cfg.useEnvelopeFactory(() => ({}))
+          cfg
+            .useTopologyFactory(() => ({}))
+            .useEnvelopeFactory(() => ({}))
             .useSerializerFactory(() => ({}))
             .useRouteName(() => 'my-route')
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use default topology with defaults', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.useDefaultTopology()
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use default topology with custom params', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.useDefaultTopology({ exchangeType: 'fanout', durable: false, autoDelete: true })
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use json serialization with defaults', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.useJson()
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use json serialization with custom params', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) =>
+          cfg.useJson({ encoding: 'ascii', contentTypeSuffix: '-json' })
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use magic envelope with defaults', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) =>
+          cfg.useMagicEnvelope()
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use magic envelope with custom params', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) =>
+          cfg.useMagicEnvelope({ contentType: 'application/json' })
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use a custom filter', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.useFilter(() => {})
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to use a custom filter with a factory', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.useFilterFactory(() => () => {})
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to completely override input filters', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.overrideFilters({ input: [() => {}] })
+      )
+
+      expect(publisher).toBeTruthy()
+    })
+
+    it('should allow caller to completely override output filters', () => {
+      let publisher = configurator.createPublisher(broker,
+        (cfg) => cfg.overrideFilters({ output: [() => {}] })
       )
 
       expect(publisher).toBeTruthy()
@@ -118,7 +206,9 @@ describe('Configurator', () => {
     it('should allow caller to override implementations', () => {
       let consumer = configurator.createConsumer(broker,
         (cfg) =>
-          cfg.useEnvelope({})
+          cfg
+            .useTopology({})
+            .useEnvelope({})
             .useDeserializer({})
             .useRouteName('my-route')
       )
@@ -129,9 +219,102 @@ describe('Configurator', () => {
     it('should allow caller to override implementations using factories', () => {
       let consumer = configurator.createConsumer(broker,
         (cfg) =>
-          cfg.useEnvelopeFactory(() => ({}))
+          cfg
+            .useTopologyFactory(() => ({}))
+            .useEnvelopeFactory(() => ({}))
             .useDeserializerFactory(() => ({}))
             .useRouteName(() => 'my-route')
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use default topology with defaults', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useDefaultTopology()
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use default topology with custom params', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useDefaultTopology({ noAck: true, durable: false, autoDelete: true, exclusive: true })
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use json serialization with defaults', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useJson()
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use json serialization with custom params', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) =>
+          cfg.useJson({ encoding: 'ascii' })
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use magic envelope with defaults', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) =>
+          cfg.useMagicEnvelope()
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use magic envelope with custom params', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) =>
+          cfg.useMagicEnvelope({ contentType: 'application/json' })
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use a custom filter', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useFilter(() => {})
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use a custom filter with a factory', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useFilterFactory(() => () => {})
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to completely override consume filters', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.overrideFilters({ consume: [() => {}] })
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to completely override input filters', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.overrideFilters({ input: [() => {}] })
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to completely override output filters', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.overrideFilters({ output: [() => {}] })
       )
 
       expect(consumer).toBeTruthy()

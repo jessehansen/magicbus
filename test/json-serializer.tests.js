@@ -3,9 +3,11 @@ const JsonSerializer = require('../lib/serialization/json-serializer.js')
 describe('JsonSerializer', () => {
   let serializer, context
   const next = () => Promise.resolve()
+  const encoding = 'utf8'
+  const contentTypeSuffix = '+json'
 
   beforeEach(() => {
-    serializer = JsonSerializer()
+    serializer = JsonSerializer({ encoding, contentTypeSuffix })
     context = { message: { my: 'data' }, publishOptions: { contentType: 'application/prs.magicbus' } }
   })
 
@@ -18,7 +20,7 @@ describe('JsonSerializer', () => {
     })
 
     it('should support other encodings', async () => {
-      serializer = JsonSerializer({ encoding: 'ascii' })
+      serializer = JsonSerializer({ encoding: 'ascii', contentTypeSuffix })
       await serializer(context, next)
 
       expect(Buffer.isBuffer(context.content)).toEqual(true)
@@ -31,7 +33,7 @@ describe('JsonSerializer', () => {
     })
 
     it('should support other content type suffixes', async () => {
-      serializer = JsonSerializer({ contentTypeSuffix: '-json' })
+      serializer = JsonSerializer({ encoding, contentTypeSuffix: '-json' })
       await serializer(context, next)
 
       expect(context.publishOptions.contentType).toEqual('application/prs.magicbus-json')
@@ -54,7 +56,7 @@ describe('JsonSerializer', () => {
     })
 
     it('should support inspect', () => {
-      expect(serializer.inspect()).toEqual({ type: 'JSON Serializer', encoding: 'utf8', contentTypeSuffix: '+json' })
+      expect(serializer.inspect()).toEqual({ type: 'JSON Serializer', encoding, contentTypeSuffix })
     })
   })
 })

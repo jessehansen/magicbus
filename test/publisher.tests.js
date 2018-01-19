@@ -6,7 +6,6 @@ const Logger = require('../lib/logger')
 const exchange = 'my-exchange'
 const content = 'content'
 const routingKey = 'my-key'
-const publishOptions = { some: 'options' }
 
 describe('Publisher', () => {
   let mockBroker
@@ -16,11 +15,11 @@ describe('Publisher', () => {
 
   beforeEach(() => {
     mockBroker = {
-      publish: jest.fn((/* routeName, routingKey, content, options */) => Promise.resolve())
+      publish: jest.fn(() => Promise.resolve())
     }
     logger = Logger()
     mockFilter = jest.fn((ctx, next) =>
-      next(Object.assign(ctx, { exchange, content, routingKey, publishOptions })))
+      next(Object.assign(ctx, { exchange, content, routingKey })))
     publisher = magicbus.createPublisher(mockBroker, (cfg) =>
       cfg.useLogger(logger)
         .overrideFilters({ input: [mockFilter], output: [] }))
@@ -50,7 +49,7 @@ describe('Publisher', () => {
 
     it('should call broker publish with the correct options', async () => {
       await publisher.publish(event)
-      expect(mockBroker.publish).toHaveBeenCalledWith({ exchange, routingKey, content, options: publishOptions })
+      expect(mockBroker.publish).toHaveBeenCalledWith({ exchange, routingKey, content, options: {} })
     })
 
     it('should call middleware with the correct context', async () => {
@@ -59,10 +58,10 @@ describe('Publisher', () => {
         expect.objectContaining({ message: data, kind: event }), expect.any(Function))
     })
 
-    it('should call allow passing options', async () => {
+    it('should allow passing options', async () => {
       await publisher.publish(event, data, { some: 'options' })
       expect(mockFilter).toHaveBeenCalledWith(
-        expect.objectContaining({ message: data, kind: event, options: { some: 'options' } }), expect.any(Function))
+        expect.objectContaining({ message: data, kind: event, publishOptions: { some: 'options' } }), expect.any(Function))
     })
 
     it('should be rejected given the input pipe rejects the message', async () => {
@@ -118,6 +117,14 @@ describe('Publisher', () => {
       expect(fn).toThrow('message must be provided')
     })
 
+    it('should be rejected with an assertion error given non string type', () => {
+      let fn = () => {
+        publisher.send(message, { some: 'data' })
+      }
+
+      expect(fn).toThrow('messageType must be a string')
+    })
+
     it('should be fulfilled given the broker.publish calls are fulfilled', () => {
       return expect(publisher.send(message)).resolves.toBeUndefined()
     })
@@ -130,7 +137,7 @@ describe('Publisher', () => {
 
     it('should call broker publish with the correct options', async () => {
       await publisher.send(message)
-      expect(mockBroker.publish).toHaveBeenCalledWith({ exchange, routingKey, content, options: publishOptions })
+      expect(mockBroker.publish).toHaveBeenCalledWith({ exchange, routingKey, content, options: {} })
     })
 
     it('should call middleware with the correct context', async () => {
@@ -140,7 +147,7 @@ describe('Publisher', () => {
 
     it('should call allow passing options', async () => {
       await publisher.send(message, type, { some: 'options' })
-      expect(mockFilter).toHaveBeenCalledWith(expect.objectContaining({ message, kind: type, options: { some: 'options' } }), expect.any(Function))
+      expect(mockFilter).toHaveBeenCalledWith(expect.objectContaining({ message, kind: type, publishOptions: { some: 'options' } }), expect.any(Function))
     })
 
     it('should be rejected given the input pipe rejects the message', async () => {

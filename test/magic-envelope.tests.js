@@ -4,9 +4,10 @@ describe('MagicEnvelope', () => {
   let envelope
   let context
   const next = () => Promise.resolve()
+  const contentType = 'application/prs.magicbus'
 
   beforeEach(() => {
-    envelope = MagicEnvelope()
+    envelope = MagicEnvelope({ contentType })
   })
 
   describe('wrap', () => {
@@ -17,14 +18,7 @@ describe('MagicEnvelope', () => {
     it('should set the content type', async () => {
       await envelope.wrap(context, next)
 
-      expect(context.publishOptions.contentType).toEqual('application/prs.magicbus')
-    })
-
-    it('should support overriding the content type', async () => {
-      envelope = MagicEnvelope({ contentType: 'something' })
-      await envelope.wrap(context, next)
-
-      expect(context.publishOptions.contentType).toEqual('something')
+      expect(context.publishOptions.contentType).toEqual(contentType)
     })
 
     it('should put the kind of the message in the type property of the amqp properties', async () => {
@@ -40,7 +34,7 @@ describe('MagicEnvelope', () => {
     })
 
     it('should support inspect', async () => {
-      expect(envelope.wrap.inspect()).toEqual({ type: 'Magic Envelope Wrap', contentType: 'application/prs.magicbus' })
+      expect(envelope.wrap.inspect()).toEqual({ type: 'Magic Envelope Wrap', contentType })
     })
   })
 

@@ -4,9 +4,10 @@ describe('JsonDeserializer', () => {
   let deserializer, context
   const next = () => Promise.resolve()
   const payload = { my: 'data' }
+  const encoding = 'utf8'
 
   beforeEach(() => {
-    deserializer = JsonDeserializer()
+    deserializer = JsonDeserializer({ encoding })
     context = { content: Buffer.from(JSON.stringify(payload)) }
   })
 
