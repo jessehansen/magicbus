@@ -38,7 +38,7 @@ describe('AckBatch', () => {
   it('should allow adding messages', () => {
     batch.addMessage(ops1.message)
 
-    expect(batch.messages).toHaveLength(1)
+    expect(batch.messageCount()).toEqual(1)
   })
 
   it('should handle multiple listen calls', () => {
@@ -52,7 +52,7 @@ describe('AckBatch', () => {
   it('should keep count of added messages', () => {
     batch.addMessage(ops1.message)
 
-    expect(batch.receivedCount).toEqual(1)
+    expect(batch.receivedCount()).toEqual(1)
   })
 
   it('should not notify resolver when waiting', async () => {
