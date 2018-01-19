@@ -41,6 +41,14 @@ describe('AckBatch', () => {
     expect(batch.messages).toHaveLength(1)
   })
 
+  it('should handle multiple listen calls', () => {
+    batch.listenForSignal()
+  })
+
+  it('should be able to ignore the signal', () => {
+    batch.ignoreSignal()
+  })
+
   it('should keep count of added messages', () => {
     batch.addMessage(ops1.message)
 
