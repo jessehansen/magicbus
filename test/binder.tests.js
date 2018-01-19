@@ -38,7 +38,14 @@ describe('Binder really using RabbitMQ', () => {
     return binder.bind({
       source: exchangeName,
       target: queueName,
-      keys: ['#']
+      keys: ['some-routing-key']
+    })
+  })
+
+  it('should be able to bind an exchange to a queue using default keys', () => {
+    return binder.bind({
+      source: exchangeName,
+      target: queueName
     })
   })
 
@@ -49,5 +56,11 @@ describe('Binder really using RabbitMQ', () => {
       queue: false,
       keys: ['#']
     })
+  })
+
+  it('should be able shutdown more than once', async () => {
+    await binder.shutdown()
+    await binder.shutdown()
+    expect(binder.isConnected()).toBe(false)
   })
 })

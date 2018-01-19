@@ -37,9 +37,11 @@ describe('Broker really using RabbitMQ', () => {
   })
 
   describe('lifetime management', () => {
-    it('should be able to shutdown many times without problems', () => {
-      broker.shutdown()
-      return broker.shutdown()
+    it('should be able to shutdown many times without problems', async () => {
+      expect(broker.isConnected()).toBe(true)
+      await broker.shutdown()
+      await broker.shutdown()
+      expect(broker.isConnected()).toBe(false)
     })
     it('should not allow publish after shutdown', () => {
       let caught = false
@@ -78,7 +80,7 @@ describe('Broker really using RabbitMQ', () => {
       }
 
       broker.consume({ queue: queueName }, handler).then(() => {
-        broker.publish({ exchange: exchangeName, routingKey: 'succeed', content: Buffer.from(theMessage) })
+        broker.publish({ exchange: exchangeName, content: Buffer.from(theMessage) })
       })
     })
 
@@ -263,5 +265,19 @@ describe('Broker really using RabbitMQ', () => {
         }
       })
     })
+  })
+
+  it('supports exchange to exchange binding', async () => {
+    let topology = broker.getTopologyParams().topology
+    let otherExchangeName = exchangeName + '-bind-x2x'
+    await topology.createExchange({ name: otherExchangeName, type: 'topic', autoDelete: true, durable: false })
+    await broker.bind(exchangeName, otherExchangeName, { queue: false })
+  })
+
+  it('supports binding without options', async () => {
+    let topology = broker.getTopologyParams().topology
+    let otherQueueName = exchangeName + '-bind-noopts'
+    await topology.createQueue({ name: otherQueueName, autoDelete: true, durable: false, exclusive: true })
+    await broker.bind(exchangeName, otherQueueName)
   })
 })
