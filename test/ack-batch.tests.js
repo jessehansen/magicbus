@@ -150,5 +150,9 @@ describe('AckBatch', () => {
 
       expect(resolver).toHaveBeenCalledTimes(1)
     })
+
+    it('executing flush in parallel should not cause issues', async () => {
+      await Promise.all([batch.flush(), batch.flush()])
+    })
   })
 })
