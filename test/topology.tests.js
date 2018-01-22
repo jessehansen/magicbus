@@ -17,6 +17,7 @@ describe('Topology', () => {
     emitter = new Monologue()
     mockConnection = {
       createChannel: jest.fn(() => mockChannel),
+      addExchange: jest.fn(() => Promise.resolve()),
       addQueue: jest.fn(() => Promise.resolve()),
       on: (event, handler) => emitter.on(event, handler),
       reset: () => 0,
@@ -35,7 +36,6 @@ describe('Topology', () => {
       on: () => 0
     }
     logger = Logger('tests', new EventEmitter())
-
     ExchangeMachine = FakeMachine
     QueueMachine = FakeMachine
   })
@@ -43,15 +43,7 @@ describe('Topology', () => {
   const constructTopology = () => Topology(mockConnection, logger, ExchangeMachine, QueueMachine)
 
   describe('constructor', () => {
-    it('should call onReconnect when reconnected', () => {
-      let topology = constructTopology()
-      topology.onReconnect = jest.fn(topology.onReconnect)
-
-      emitter.emit('reconnected')
-
-      expect(topology.onReconnect).toHaveBeenCalledWith()
-    })
-    it('should call check supporting channels', async () => {
+    it('should call check supporting channels when reconnected', async () => {
       let topology = constructTopology()
       topology.getOrCreateChannel('control')
 
@@ -69,7 +61,6 @@ describe('Topology', () => {
     })
     it('should configure bindings upon reconnect', async () => {
       let topology = constructTopology()
-      topology.configureBindings = jest.fn(topology.configureBindings)
 
       await topology.createBinding({
         queue: true,
@@ -81,57 +72,7 @@ describe('Topology', () => {
       emitter.emit('reconnected')
       await delay(1)
 
-      expect(topology.configureBindings).toHaveBeenCalledWith(topology.definitions.bindings, true)
-    })
-  })
-
-  describe('configureBindings', () => {
-    let topology
-
-    beforeEach(() => {
-      topology = constructTopology()
-    })
-
-    it('can be called with no arguments', async () => {
-      await topology.configureBindings()
-    })
-
-    it('can be called with empty array', async () => {
-      await topology.configureBindings([])
-    })
-
-    it('can be called with a single binding', async () => {
-      await topology.configureBindings({ queue: true, source: 'some-exchange', target: 'some-queue' })
-      expect(mockChannel.bindQueue).toHaveBeenCalledWith('some-queue', 'some-exchange', '')
-    })
-
-    it('can be called with an array', async () => {
-      await topology.configureBindings([
-        { queue: true, source: 'some-exchange', target: 'some-queue' },
-        { queue: true, source: 'some-exchange', target: 'some-other-queue' }
-      ])
-      expect(mockChannel.bindQueue).toHaveBeenCalledWith('some-queue', 'some-exchange', '')
-      expect(mockChannel.bindQueue).toHaveBeenCalledWith('some-other-queue', 'some-exchange', '')
-    })
-
-    it('can be called with an object', async () => {
-      await topology.configureBindings({
-        'some-exchange->some-queue': { queue: true, source: 'some-exchange', target: 'some-queue' },
-        'some-exchange->some-other-queue': { queue: true, source: 'some-exchange', target: 'some-other-queue' }
-      }, true)
-      expect(mockChannel.bindQueue).toHaveBeenCalledWith('some-queue', 'some-exchange', '')
-      expect(mockChannel.bindQueue).toHaveBeenCalledWith('some-other-queue', 'some-exchange', '')
-    })
-
-    it('can infer that binding is to a queue when queue was previously configured', async () => {
-      await topology.createQueue({ name: 'some-queue' })
-      await topology.configureBindings({ source: 'some-exchange', target: 'some-queue' })
-      expect(mockChannel.bindQueue).toHaveBeenCalledWith('some-queue', 'some-exchange', '')
-    })
-
-    it('can infer that binding is to an exchange when no queue was previously configured', async () => {
-      await topology.configureBindings({ source: 'some-exchange', target: 'some-other-exchange' })
-      expect(mockChannel.bindExchange).toHaveBeenCalledWith('some-other-exchange', 'some-exchange', '')
+      expect(mockChannel.bindQueue).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -252,7 +193,6 @@ describe('Topology', () => {
       topology.reset()
 
       expect(mockChannel.destroy).toHaveBeenCalledWith()
-      expect(topology.channels).toEqual({})
     })
 
     it('should forget all existing definitions', async () => {
@@ -266,10 +206,9 @@ describe('Topology', () => {
       })
 
       topology.reset()
+      emitter.emit('reconnected')
 
-      expect(topology.definitions.queues).toEqual({})
-      expect(topology.definitions.exchanges).toEqual({})
-      expect(topology.definitions.bindings).toEqual({})
+      expect(mockChannel.bindQueue).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -278,12 +217,6 @@ describe('Topology', () => {
 
     beforeEach(async () => {
       topology = constructTopology()
-    })
-
-    it('should store the definition', async () => {
-      const queueOptions = { name: 'my-test-queue' }
-      await topology.createQueue(queueOptions)
-      expect(topology.definitions.queues).toEqual({ 'my-test-queue': queueOptions })
     })
 
     it('should create and store the channel', async () => {
@@ -316,9 +249,9 @@ describe('Topology', () => {
       topology = constructTopology()
     })
 
-    it('should store the definition', async () => {
+    it('should store the channel', async () => {
       await topology.connectQueue('my-connect-queue')
-      expect(topology.definitions.queues).toEqual({ 'my-connect-queue': { name: 'my-connect-queue', check: true } })
+      expect(topology.channel('queue:my-connect-queue')).toBeTruthy()
     })
   })
 
@@ -327,12 +260,6 @@ describe('Topology', () => {
 
     beforeEach(async () => {
       topology = constructTopology()
-    })
-
-    it('should store the definition', async () => {
-      const exchangeOptions = { name: 'my-test-exchange' }
-      await topology.createExchange(exchangeOptions)
-      expect(topology.definitions.exchanges).toEqual({ 'my-test-exchange': exchangeOptions })
     })
 
     it('should create and store the channel', async () => {
@@ -365,9 +292,9 @@ describe('Topology', () => {
       topology = constructTopology()
     })
 
-    it('should store the definition', async () => {
+    it('should store the channel', async () => {
       await topology.connectExchange('my-connect-exchange')
-      expect(topology.definitions.exchanges).toEqual({ 'my-connect-exchange': { name: 'my-connect-exchange', check: true } })
+      expect(topology.channel('exchange:my-connect-exchange')).toBeTruthy()
     })
   })
 
@@ -385,12 +312,12 @@ describe('Topology', () => {
 
     it('should destroy the queue channel if it was created', async () => {
       await topology.createQueue({ name: 'some-queue' })
-      let queueChannel = topology.channels['queue:some-queue']
+      let queueChannel = topology.channel('queue:some-queue')
       expect(queueChannel).toBeTruthy()
-      topology.channels['queue:some-queue'].destroy = jest.fn(() => Promise.resolve())
+      queueChannel.destroy = jest.fn(() => Promise.resolve())
       await topology.deleteQueue('some-queue')
       expect(queueChannel.destroy).toHaveBeenCalled()
-      expect(topology.channels['queue:some-queue']).toBeUndefined()
+      expect(() => topology.channel('queue:some-queue')).toThrow()
     })
   })
 
@@ -408,12 +335,12 @@ describe('Topology', () => {
 
     it('should destroy the exchange channel if it was created', async () => {
       await topology.createExchange({ name: 'some-exchange' })
-      let exchangeChannel = topology.channels['exchange:some-exchange']
+      let exchangeChannel = topology.channel('exchange:some-exchange')
       expect(exchangeChannel).toBeTruthy()
-      topology.channels['exchange:some-exchange'].destroy = jest.fn(() => Promise.resolve())
+      exchangeChannel.destroy = jest.fn(() => Promise.resolve())
       await topology.deleteExchange('some-exchange')
       expect(exchangeChannel.destroy).toHaveBeenCalled()
-      expect(topology.channels['exchange:some-exchange']).toBeUndefined()
+      expect(() => topology.channel('exchange:some-exchange')).toThrow()
     })
   })
 })
