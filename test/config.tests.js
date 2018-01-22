@@ -239,7 +239,35 @@ describe('Configurator', () => {
 
     it('should allow caller to use default topology with custom params', () => {
       let consumer = configurator.createConsumer(broker,
-        (cfg) => cfg.useDefaultTopology({ noAck: true, durable: false, autoDelete: true, exclusive: true })
+        (cfg) => cfg.useDefaultTopology({
+          noAck: true,
+          durable: false,
+          autoDelete: true,
+          exclusive: true,
+          failureQueue: false
+        })
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use listener topology with defaults', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useListenerTopology()
+      )
+
+      expect(consumer).toBeTruthy()
+    })
+
+    it('should allow caller to use listener topology with custom params', () => {
+      let consumer = configurator.createConsumer(broker,
+        (cfg) => cfg.useListenerTopology({
+          noAck: true,
+          durable: false,
+          autoDelete: true,
+          failureQueue: false,
+          failureQueueExclusive: true
+        })
       )
 
       expect(consumer).toBeTruthy()
