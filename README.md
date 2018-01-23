@@ -343,18 +343,6 @@ Run all tests with the usual command:
 $ npm test
 ```
 
-This will run all the tests, including integration tests. To run just the unit tests, run:
-
-```bash
-$ npm run-script test:unit
-```
-
-To run just the integration tests, run:
-
-```bash
-$ RABBITMQ_HOST=$YOUR_RABBIT_HOST_NAME_OR_IP npm run-script test:integration
-```
-
 ### Setting Up For Integration Tests
 
 You'll need access to a running RabbitMQ server. The easiest way to get rabbit running is with this `docker` command:
