@@ -1,9 +1,0 @@
-{
-  "source": { "include": ["lib"] },
-  "opts": {
-    "readme": "./README.md",
-    "package": "./package.json",
-    "destination": "./docs",
-    "recurse": true
-  }
-}
