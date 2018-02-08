@@ -1,6 +1,7 @@
 # magicbus
 
 [![CircleCI](https://circleci.com/gh/twindagger/magicbus.svg?style=svg)](https://circleci.com/gh/twindagger/magicbus) [![Coverage Status](https://coveralls.io/repos/github/twindagger/magicbus/badge.svg?branch=master)](https://coveralls.io/github/twindagger/magicbus?branch=master)
+[![Dependencies](https://david-dm.org/twindagger/magicbus.svg)]
 
 Helps messages [get on the bus that takes me to you](https://www.youtube.com/watch?v=bl9bvuAV-Ao).
 
