@@ -29,7 +29,7 @@ module.exports = {
     'dot-location': [ 'error', 'property' ],
     'dot-notation': 'error',
     'eol-last': 'error',
-    eqeqeq: [ 'error', 'always', { null: 'ignore' } ],
+    eqeqeq: [ 'error', 'smart' ],
     'func-call-spacing': [ 'error', 'never' ],
     'generator-star-spacing': [ 'error', { before: true, after: true } ],
     'guard-for-in': 'error',
