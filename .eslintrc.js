@@ -39,11 +39,7 @@ module.exports = {
       afterColon: true
     }],
     'keyword-spacing': [ 'error', { before: true, after: true } ],
-    'max-len': [ 'error', 120, {
-      ignoreUrls: true,
-      ignoreRegExpLiterals: true,
-      ignoreStrings: true
-    }],
+    'max-len': [ 'error', { code: 120, ignoreUrls: true, ignoreRegExpLiterals: true, ignoreStrings: true, ignoreTemplateLiterals: true }],
     'new-cap': [ 'error', { newIsCap: true, capIsNew: false } ],
     'new-parens': 'error',
     'no-array-constructor': 'error',
