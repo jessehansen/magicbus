@@ -36,7 +36,6 @@ module.exports = {
     indent: [ 'error', 2, { SwitchCase: 1 } ],
     'key-spacing': [ 'error', { beforeColon: false, afterColon: true }],
     'keyword-spacing': [ 'error', { before: true, after: true } ],
-    'max-len': [ 'error', { code: 120, ignoreUrls: true, ignoreRegExpLiterals: true, ignoreStrings: true, ignoreTemplateLiterals: true }],
     'new-cap': [ 'error', { newIsCap: true, capIsNew: false } ],
     'new-parens': 'error',
     'no-array-constructor': 'error',
@@ -151,6 +150,7 @@ module.exports = {
     'wrap-iife': [ 'error', 'any' ],
     'yield-star-spacing': [ 'error', 'both' ],
     yoda: [ 'error', 'never' ],
-    'linebreak-style': [ 'error', 'unix' ]
+    'linebreak-style': [ 'error', 'unix' ],
+    'max-len': [ 'error', { code: 120, ignoreUrls: true, ignoreRegExpLiterals: true, ignoreStrings: true, ignoreTemplateLiterals: true }]
   }
 }
