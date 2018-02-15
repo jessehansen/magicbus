@@ -150,7 +150,6 @@ module.exports = {
     'wrap-iife': [ 'error', 'any' ],
     'yield-star-spacing': [ 'error', 'both' ],
     yoda: [ 'error', 'never' ],
-    'linebreak-style': [ 'error', 'unix' ],
-    'max-len': [ 'error', { code: 120, ignoreRegExpLiterals: true, ignoreStrings: true, ignoreTemplateLiterals: true }]
+    'linebreak-style': [ 'error', 'unix' ]
   }
 }
