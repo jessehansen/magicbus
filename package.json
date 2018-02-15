@@ -27,10 +27,10 @@
   "homepage": "https://github.com/twindagger/magicbus#readme",
   "devDependencies": {
     "coveralls": "^3.0.0",
-    "eslint": "^4.15.0",
-    "eslint-plugin-jest": "^21.5.0",
+    "eslint": "^4.17.0",
+    "eslint-plugin-jest": "^21.12.1",
     "eslint-plugin-prefer-arrow": "^1.1.1",
-    "eslint-plugin-unicorn": "^3.0.1",
+    "eslint-plugin-unicorn": "^4.0.2",
     "eslint-watch": "^3.1.3",
     "jest": "^22.0.4",
     "jest-junit": "^3.4.1",
@@ -40,7 +40,7 @@
   "dependencies": {
     "amqplib": "^0.5.2",
     "machina": "^2.0.1",
-    "magicpipes": "^1.0.0",
+    "magicpipes": "^1.0.1",
     "monologue.js": "^0.3.5",
     "postal": "^2.0.5",
     "shortid": "^2.2.8"
