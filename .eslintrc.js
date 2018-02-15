@@ -111,7 +111,7 @@ module.exports = {
     'no-unsafe-negation': 'error',
     'no-unused-expressions': [ 'error', { allowTernary: true, allowShortCircuit: true }],
     'no-unused-labels': 'error',
-    'no-unused-vars': [ 'error', { vars: 'local', varsIgnorePattern: '^_', argsIgnorePattern: '^_|...props|props', args: 'after-used', ignoreRestSiblings: true }],
+    'no-unused-vars': [ 'error', { vars: 'local', varsIgnorePattern: '^_', argsIgnorePattern: '^_', args: 'after-used', ignoreRestSiblings: true }],
     'no-use-before-define': [ 'error', 'nofunc' ],
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
@@ -141,7 +141,7 @@ module.exports = {
     'space-in-parens': [ 'error', 'never' ],
     'space-infix-ops': 'error',
     'space-unary-ops': [ 'error', { words: true, nonwords: false } ],
-    'spaced-comment': [ 'error', 'always', { block: { balanced: true } }],
+    'spaced-comment': [ 'error', 'always' ],
     strict: [ 'error', 'never' ],
     'template-curly-spacing': [ 'error', 'never' ],
     'unicode-bom': [ 'error', 'never' ],
@@ -151,6 +151,6 @@ module.exports = {
     'yield-star-spacing': [ 'error', 'both' ],
     yoda: [ 'error', 'never' ],
     'linebreak-style': [ 'error', 'unix' ],
-    'max-len': [ 'error', { code: 120, ignoreUrls: true, ignoreRegExpLiterals: true, ignoreStrings: true, ignoreTemplateLiterals: true }]
+    'max-len': [ 'error', { code: 120, ignoreRegExpLiterals: true, ignoreStrings: true, ignoreTemplateLiterals: true }]
   }
 }
