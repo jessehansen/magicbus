@@ -32,7 +32,7 @@
     "eslint-plugin-prefer-arrow": "1.1.2",
     "eslint-plugin-unicorn": "5.0.0",
     "eslint-watch": "4.0.2",
-    "jest": "23.4.2",
+    "jest": "23.5.0",
     "jest-junit": "5.1.0",
     "jsdoc": "3.5.5",
     "npm-run-all": "4.1.3"
