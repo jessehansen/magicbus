@@ -30,7 +30,7 @@
     "eslint": "5.5.0",
     "eslint-plugin-jest": "21.21.0",
     "eslint-plugin-prefer-arrow": "1.1.2",
-    "eslint-plugin-unicorn": "5.0.0",
+    "eslint-plugin-unicorn": "6.0.1",
     "eslint-watch": "4.0.2",
     "jest": "23.5.0",
     "jest-junit": "5.1.0",
