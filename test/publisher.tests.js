@@ -45,7 +45,7 @@ describe('Publisher', () => {
     it('should be rejected given the broker.publish call is rejected', () => {
       mockBroker.publish = () => Promise.reject(new Error('Aw, snap!'))
 
-      return expect(publisher.publish(event)).rejects.toThrow('Aw, snap!')
+      return expect(publisher.publish(event)).rejects.toEqual(new Error('Aw, snap!'))
     })
 
     it('should call broker publish with the correct options', async () => {
@@ -70,7 +70,7 @@ describe('Publisher', () => {
         cfg.useLogger(logger)
           .overrideFilters({ input: [() => Promise.reject('Aw, snap!')], output: [] }))
 
-      await expect(publisher.publish(event)).rejects.toThrow('Aw, snap!')
+      await expect(publisher.publish(event)).rejects.toEqual('Aw, snap!')
       expect(mockBroker.publish).not.toHaveBeenCalled()
     })
 
@@ -79,7 +79,7 @@ describe('Publisher', () => {
         cfg.useLogger(logger)
           .overrideFilters({ input: [], output: [() => Promise.reject('Aw, snap!')] }))
 
-      await expect(publisher.publish(event)).rejects.toThrow('Aw, snap!')
+      await expect(publisher.publish(event)).rejects.toEqual('Aw, snap!')
       expect(mockBroker.publish).not.toHaveBeenCalled()
     })
 
@@ -133,7 +133,7 @@ describe('Publisher', () => {
     it('should be rejected given the broker.publish call is rejected', () => {
       mockBroker.publish = () => Promise.reject(new Error('Aw, snap!'))
 
-      return expect(publisher.send(message)).rejects.toThrow('Aw, snap!')
+      return expect(publisher.send(message)).rejects.toEqual(new Error('Aw, snap!'))
     })
 
     it('should call broker publish with the correct options', async () => {
@@ -156,7 +156,7 @@ describe('Publisher', () => {
         cfg.useLogger(logger)
           .overrideFilters({ input: [() => Promise.reject('Aw, snap!')], output: [] }))
 
-      await expect(publisher.send(message)).rejects.toThrow('Aw, snap!')
+      await expect(publisher.send(message)).rejects.toEqual('Aw, snap!')
       expect(mockBroker.publish).not.toHaveBeenCalled()
     })
 
@@ -165,7 +165,7 @@ describe('Publisher', () => {
         cfg.useLogger(logger)
           .overrideFilters({ input: [], output: [() => Promise.reject('Aw, snap!')] }))
 
-      await expect(publisher.send(message)).rejects.toThrow('Aw, snap!')
+      await expect(publisher.send(message)).rejects.toEqual('Aw, snap!')
       expect(mockBroker.publish).not.toHaveBeenCalled()
     })
 

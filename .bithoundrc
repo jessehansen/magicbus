@@ -1,9 +1,0 @@
-{
-  "critics": {
-    "lint": { "engine": "none" },
-    "wc": { "limit": 5000 }
-  },
-  "dependencies": {
-    "mute": ["coveralls"]
-  }
-}
