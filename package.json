@@ -39,7 +39,8 @@
   },
   "dependencies": {
     "amqplib": "^0.5.2",
-    "machina": "^2.0.0",
+    "machina": "^2.0.1",
+    "magicpipes": "^1.0.1",
     "monologue.js": "^0.3.5",
     "postal": "^2.0.5",
     "shortid": "^2.2.8"
@@ -54,7 +55,27 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/test/"
-    ]
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      },
+      "./lib/amqp/**/*.js": {
+        "branches": 50,
+        "functions": 50,
+        "lines": 50,
+        "statements": 50
+      },
+      "./lib/*-machine.js": {
+        "branches": 20,
+        "functions": 20,
+        "lines": 20,
+        "statements": 20
+      }
+    }
   },
   "jest-junit": {
     "suiteName": "magicpipes jest",

@@ -9,21 +9,27 @@ describe('Send/Receive integration', () => {
   let sender
   let receiver
 
-  beforeEach(() => {
+  beforeAll(() => {
+    // magicbus.on('log', ({ kind, namespace, message, err }) =>
+    //   err
+    //     ? console.log(namespace, kind, message, err)
+    //     : console.log(namespace, kind, message))
+    // magicbus.on('unhandled-error', ({ message, messageTypes, err }) => console.log(message, messageTypes, err))
+  })
+
+  beforeEach(async () => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
     sender = magicbus.createPublisher(broker, (cfg) => {
-      cfg.useRoutePattern(magicbus.routePatterns.publisher({ autoDelete: true, durable: false }))
+      cfg.useDefaultTopology({ autoDelete: true, durable: false })
       cfg.useRouteName('send')
     })
     receiver = magicbus.createConsumer(broker, (cfg) => {
-      cfg.useRoutePattern(magicbus.routePatterns.worker({ autoDelete: true, durable: false, exclusive: true }))
+      cfg.useDefaultTopology({ autoDelete: true, durable: false, exclusive: true })
       cfg.useRouteName('receive')
     })
 
-    return broker.bind(sender.getRoute().name, receiver.getRoute().name, { pattern: '#' })
-      .then(() => {
-        return receiver.purgeQueue()
-      })
+    await broker.bind(sender, receiver, { pattern: '#' })
+    await receiver.purgeQueue()
   })
 
   afterEach(() => {
@@ -36,9 +42,9 @@ describe('Send/Receive integration', () => {
     }
     let messageType = 'deactivateFooCommand'
 
-    let handler = function (handlerMessage, handlerMessageTypes) {
-      expect(handlerMessage).toEqual(message)
-      expect(handlerMessageTypes).toEqual([messageType])
+    let handler = function ({ message, messageTypes }) {
+      expect(message).toEqual(message)
+      expect(messageTypes).toEqual([messageType])
 
       done()
     }
@@ -55,15 +61,15 @@ describe('Send/Receive integration', () => {
     let messageType = 'deactivateFooCommand'
 
     let first = true
-    let handler = function (handlerMessage, handlerMessageTypes, _, actions) {
+    let handler = function ({ message, messageTypes, nack }) {
       if (first) {
-        actions.nack()
+        nack()
         first = false
         return
       }
       // should be processed again
-      expect(handlerMessage).toEqual(message)
-      expect(handlerMessageTypes).toEqual([messageType])
+      expect(message).toEqual(message)
+      expect(messageTypes).toEqual([messageType])
 
       done()
     }

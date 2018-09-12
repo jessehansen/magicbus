@@ -1,37 +1,34 @@
-const magicbus = require('../lib')
-const Publisher = require('../lib/publisher')
+const magicbus = require('..')
+const Pipe = require('magicpipes')
+const { EventEmitter } = require('events')
 
 const Logger = require('../lib/logger')
+
+const exchange = 'my-exchange'
+const content = 'content'
+const routingKey = 'my-key'
 
 describe('Publisher', () => {
   let mockBroker
   let logger
-  let fakePipeline
-  let fakePattern
+  let publisher
+  let mockFilter
 
   beforeEach(() => {
     mockBroker = {
-      registerRoute: jest.fn((/* name, pattern */) => {}),
-      publish: jest.fn((/* routeName, routingKey, content, options */) => Promise.resolve())
+      publish: jest.fn(() => Promise.resolve())
     }
-    logger = Logger()
-    fakePipeline = { useLogger: () => { } }
-    fakePattern = () => Promise.resolve({ exchangeName: 'my-exchange' })
-  })
-
-  describe('constructor', () => {
-    it('should register a route with the broker', () => {
-      Publisher(mockBroker, {}, {}, fakePipeline, 'route', fakePattern, logger)
-      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', fakePattern)
-    })
+    logger = Logger('tests', new EventEmitter())
+    mockFilter = jest.fn((ctx, next) =>
+      next(Object.assign(ctx, { exchange, content, routingKey })))
+    publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+      cfg.useLogger(logger)
+        .overrideFilters({ input: [mockFilter], output: [] }))
   })
 
   describe('publish', () => {
-    let publisher
-
-    beforeEach(() => {
-      publisher = magicbus.createPublisher(mockBroker)
-    })
+    const event = 'something-happened'
+    const data = { some: 'data' }
 
     it('should be rejected with an assertion error given no event name', () => {
       let fn = () => {
@@ -42,71 +39,156 @@ describe('Publisher', () => {
     })
 
     it('should be fulfilled given the broker.publish calls are fulfilled', () => {
-      mockBroker.publish = () => Promise.resolve()
-
-      return expect(publisher.publish('something-happened')).resolves.toBeUndefined()
+      return expect(publisher.publish(event)).resolves.toBeUndefined()
     })
 
     it('should be rejected given the broker.publish call is rejected', () => {
       mockBroker.publish = () => Promise.reject(new Error('Aw, snap!'))
 
-      return expect(publisher.publish('something-happened')).rejects.toThrow('Aw, snap!')
+      return expect(publisher.publish(event)).rejects.toThrow('Aw, snap!')
     })
 
-    it('should be rejected given the middleware rejects the message', () => {
-      publisher.use((message, actions) => {
-        actions.error(new Error('Aw, snap!'))
-      })
-
-      return expect(publisher.publish('something-happened')).rejects.toThrow('Aw, snap!')
+    it('should call broker publish with the correct options', async () => {
+      await publisher.publish(event)
+      expect(mockBroker.publish).toHaveBeenCalledWith({ exchange, routingKey, content, options: {} })
     })
 
-    it('should call middleware with the message', () => {
-      let middlewareCalled = false
-      publisher.use((message, actions) => {
-        middlewareCalled = true
-        actions.next()
-      })
-
-      return publisher.publish('something-happened').then(() => {
-        expect(middlewareCalled).toEqual(true)
-      })
+    it('should call middleware with the correct context', async () => {
+      await publisher.publish(event, data)
+      expect(mockFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ message: data, kind: event }), expect.any(Function))
     })
 
-    it('should set persistent to true by default', () => {
-      return publisher.publish('something-happened').then(() => {
-        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, persistent: true }))
-      })
+    it('should allow passing options', async () => {
+      await publisher.publish(event, data, { some: 'options' })
+      expect(mockFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ message: data, kind: event, publishOptions: { some: 'options' } }), expect.any(Function))
     })
 
-    it('should copy properties from the properties property of the message to the publish options', () => {
-      return publisher.publish('something-happened').then(() => {
-        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, type: 'something-happened' }))
-      })
+    it('should be rejected given the input pipe rejects the message', async () => {
+      publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+        cfg.useLogger(logger)
+          .overrideFilters({ input: [() => Promise.reject('Aw, snap!')], output: [] }))
+
+      await expect(publisher.publish(event)).rejects.toThrow('Aw, snap!')
+      expect(mockBroker.publish).not.toHaveBeenCalled()
     })
 
-    it('should copy properties from the publishOptions property of the options to the publish options', () => {
-      let options = {
-        publishOptions: {
-          correlationId: '123'
-        }
+    it('should be rejected given the output pipe rejects the message', async () => {
+      publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+        cfg.useLogger(logger)
+          .overrideFilters({ input: [], output: [() => Promise.reject('Aw, snap!')] }))
+
+      await expect(publisher.publish(event)).rejects.toThrow('Aw, snap!')
+      expect(mockBroker.publish).not.toHaveBeenCalled()
+    })
+
+    it('should call filters in the correct order', async () => {
+      let middlewareCalls = []
+      publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+        cfg.useLogger(logger)
+          .overrideFilters({
+            input: [(ctx, next) => {
+              middlewareCalls.push('input')
+              return next(ctx)
+            }],
+            output: [(ctx, next) => {
+              middlewareCalls.push('output')
+              return next(ctx)
+            }]
+          }))
+
+      await publisher.publish(event, data, { pipe: Pipe((ctx, next) => {
+        middlewareCalls.push('per-publish')
+        return next(ctx)
+      }) })
+      expect(middlewareCalls).toEqual(['input', 'per-publish', 'output'])
+    })
+  })
+
+  describe('send', () => {
+    const type = 'something-happened'
+    const message = { some: 'command' }
+
+    it('should be rejected with an assertion error given no command', () => {
+      let fn = () => {
+        publisher.send()
       }
 
-      return publisher.publish('something-happened', null, options).then(() => {
-        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, correlationId: '123' }))
-      })
+      expect(fn).toThrow('message must be provided')
     })
 
-    it('should overwrite publish options set from anywhere else with values from the publishOptions property of the options', () => {
-      let options = {
-        publishOptions: {
-          persistent: false
-        }
+    it('should be rejected with an assertion error given non string type', () => {
+      let fn = () => {
+        publisher.send(message, { some: 'data' })
       }
 
-      return publisher.publish('something-happened', null, options).then(() => {
-        expect(mockBroker.publish).toHaveBeenCalledWith('publish', expect.objectContaining({ routingKey: 'something-happened', payload: null, persistent: false }))
-      })
+      expect(fn).toThrow('messageType must be a string')
+    })
+
+    it('should be fulfilled given the broker.publish calls are fulfilled', () => {
+      return expect(publisher.send(message)).resolves.toBeUndefined()
+    })
+
+    it('should be rejected given the broker.publish call is rejected', () => {
+      mockBroker.publish = () => Promise.reject(new Error('Aw, snap!'))
+
+      return expect(publisher.send(message)).rejects.toThrow('Aw, snap!')
+    })
+
+    it('should call broker publish with the correct options', async () => {
+      await publisher.send(message)
+      expect(mockBroker.publish).toHaveBeenCalledWith({ exchange, routingKey, content, options: {} })
+    })
+
+    it('should call middleware with the correct context', async () => {
+      await publisher.send(message, type)
+      expect(mockFilter).toHaveBeenCalledWith(expect.objectContaining({ message, kind: type }), expect.any(Function))
+    })
+
+    it('should call allow passing options', async () => {
+      await publisher.send(message, type, { some: 'options' })
+      expect(mockFilter).toHaveBeenCalledWith(expect.objectContaining({ message, kind: type, publishOptions: { some: 'options' } }), expect.any(Function))
+    })
+
+    it('should be rejected given the input pipe rejects the message', async () => {
+      publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+        cfg.useLogger(logger)
+          .overrideFilters({ input: [() => Promise.reject('Aw, snap!')], output: [] }))
+
+      await expect(publisher.send(message)).rejects.toThrow('Aw, snap!')
+      expect(mockBroker.publish).not.toHaveBeenCalled()
+    })
+
+    it('should be rejected given the output pipe rejects the message', async () => {
+      publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+        cfg.useLogger(logger)
+          .overrideFilters({ input: [], output: [() => Promise.reject('Aw, snap!')] }))
+
+      await expect(publisher.send(message)).rejects.toThrow('Aw, snap!')
+      expect(mockBroker.publish).not.toHaveBeenCalled()
+    })
+
+    it('should call filters in the correct order', async () => {
+      let middlewareCalls = []
+      publisher = magicbus.createPublisher(mockBroker, (cfg) =>
+        cfg.useLogger(logger)
+          .overrideFilters({
+            input: [(ctx, next) => {
+              middlewareCalls.push('input')
+              return next(ctx)
+            }],
+            output: [(ctx, next) => {
+              middlewareCalls.push('output')
+              return next(ctx)
+            }]
+          }))
+
+      await publisher.send(message, type, { pipe: Pipe((ctx, next) => {
+        middlewareCalls.push('per-send')
+        return next(ctx)
+      }) })
+      expect(middlewareCalls).toEqual(['input', 'per-send', 'output'])
     })
   })
 })

@@ -1,68 +1,62 @@
-const jsonSerializer = require('../lib/json-serializer.js')
+const JsonSerializer = require('../lib/serialization/json-serializer.js')
 
 describe('JsonSerializer', () => {
-  let serializer
+  let serializer, context
+  const next = () => Promise.resolve()
+  const encoding = 'utf8'
+  const contentTypeSuffix = '+json'
 
   beforeEach(() => {
-    serializer = jsonSerializer()
-  })
-
-  describe('contentTypeSuffix', () => {
-    it('should return a hardcoded value in all cases', () => {
-      expect(serializer.contentTypeSuffix).toEqual('+json')
-    })
+    serializer = JsonSerializer({ encoding, contentTypeSuffix })
+    context = { message: { my: 'data' }, publishOptions: { contentType: 'application/prs.magicbus' } }
   })
 
   describe('serialize', () => {
-    it('should return a buffer containing the stringified payload', () => {
-      let payload = {
-        my: 'data'
-      }
+    it('should set content to a buffer containing the stringified payload', async () => {
+      await serializer(context, next)
 
-      let actual = serializer.serialize(payload)
-
-      expect(Buffer.isBuffer(actual)).toEqual(true)
-      expect(actual.toString()).toEqual(JSON.stringify(payload))
+      expect(Buffer.isBuffer(context.content)).toEqual(true)
+      expect(context.content.toString()).toEqual(JSON.stringify(context.message))
     })
 
-    it('should return null given no payload', () => {
-      let actual = serializer.serialize(null)
+    it('should support other encodings', async () => {
+      serializer = JsonSerializer({ encoding: 'ascii', contentTypeSuffix })
+      await serializer(context, next)
 
-      expect(actual).toEqual(null)
-    })
-  })
-
-  describe('deserialize', () => {
-    it('should return an object given a buffer containing a stringified object', () => {
-      let payload = {
-        my: 'data'
-      }
-
-      let content = Buffer.from(JSON.stringify(payload))
-
-      let result = serializer.deserialize(content)
-
-      expect(result).toEqual(payload)
+      expect(Buffer.isBuffer(context.content)).toEqual(true)
+      expect(context.content.toString('ascii')).toEqual(JSON.stringify(context.message))
     })
 
-    it('should return a string given a buffer containing a string that is not a stringified object', () => {
-      let payload = 'ok'
-
-      let content = Buffer.from(JSON.stringify(payload))
-
-      let result = serializer.deserialize(content)
-
-      expect(result).toEqual('ok')
+    it('should add content type suffix to content type', async () => {
+      await serializer(context, next)
+      expect(context.publishOptions.contentType).toEqual('application/prs.magicbus+json')
     })
 
-    it('should return an integer given a buffer containing an integer', () => {
-      let payload = 123
+    it('should support other content type suffixes', async () => {
+      serializer = JsonSerializer({ encoding, contentTypeSuffix: '-json' })
+      await serializer(context, next)
 
-      let content = Buffer.from(JSON.stringify(payload))
+      expect(context.publishOptions.contentType).toEqual('application/prs.magicbus-json')
+    })
 
-      let result = serializer.deserialize(content)
+    it('should set content to null given no payload', async () => {
+      context.message = null
+      await serializer(context, next)
 
-      expect(result).toEqual(123)
+      expect(context.content).toBeNull()
+    })
+
+    it('should not change content type if one is not set', async () => {
+      context.publishOptions = undefined
+      await serializer(context, next)
+      expect(context.publishOptions).toBeUndefined()
+      context.publishOptions = {}
+      await serializer(context, next)
+      expect(context.publishOptions.contentType).toBeUndefined()
+    })
+
+    it('should support inspect', () => {
+      expect(serializer.inspect()).toEqual({ type: 'JSON Serializer', encoding, contentTypeSuffix })
     })
   })
 })

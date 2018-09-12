@@ -1,6 +1,7 @@
 # magicbus
 
 [![CircleCI](https://circleci.com/gh/twindagger/magicbus.svg?style=svg)](https://circleci.com/gh/twindagger/magicbus) [![Coverage Status](https://coveralls.io/repos/github/twindagger/magicbus/badge.svg?branch=master)](https://coveralls.io/github/twindagger/magicbus?branch=master)
+[![Dependencies](https://david-dm.org/twindagger/magicbus.svg)]
 
 Helps messages [get on the bus that takes me to you](https://www.youtube.com/watch?v=bl9bvuAV-Ao).
 
@@ -341,18 +342,6 @@ Run all tests with the usual command:
 
 ```bash
 $ npm test
-```
-
-This will run all the tests, including integration tests. To run just the unit tests, run:
-
-```bash
-$ npm run-script test:unit
-```
-
-To run just the integration tests, run:
-
-```bash
-$ RABBITMQ_HOST=$YOUR_RABBIT_HOST_NAME_OR_IP npm run-script test:integration
 ```
 
 ### Setting Up For Integration Tests

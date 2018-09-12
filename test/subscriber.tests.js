@@ -10,7 +10,7 @@ describe('Subscriber', () => {
   let subscriber
   let logger
   let logs
-  let mockActions
+  let mockContext
 
   beforeEach(() => {
     let logEvents = new EventEmitter()
@@ -20,13 +20,13 @@ describe('Subscriber', () => {
       logs.push(data)
     })
     mockConsumer = {
-      use: function (/* middleware */) {},
       startConsuming: function (handler) {
         this._handler = handler
       }
     }
     eventDispatcher = eventDispatcherFactory()
-    mockActions = {
+    eventDispatcher.on = jest.fn(eventDispatcher.on)
+    mockContext = {
       ack: jest.fn(),
       nack: jest.fn(),
       reject: jest.fn(),
@@ -34,14 +34,18 @@ describe('Subscriber', () => {
       error: jest.fn()
     }
 
-    subscriber = Subscriber(mockConsumer, eventDispatcher, logger, logEvents)
+    subscriber = Subscriber({
+      consumer: mockConsumer,
+      eventDispatcher,
+      logger,
+      events: logEvents
+    })
   })
 
   describe('#on', () => {
     it('should pass through to the event dispatcher', () => {
       let eventName = 'myEvent',
         handler = () => {}
-      eventDispatcher.on = jest.fn()
 
       subscriber.on(eventName, handler)
 
@@ -49,27 +53,13 @@ describe('Subscriber', () => {
     })
   })
 
-  describe('#use', () => {
-    it('should pass through to the reciever', () => {
-      let middleware = () => {}
-      mockConsumer.use = jest.fn()
-
-      subscriber.use(middleware)
-
-      expect(mockConsumer.use).toHaveBeenCalledWith(middleware)
-    })
-  })
-
   describe('#startSubscription', () => {
-    let payload, messageTypes, msg
+    let messageTypes
 
     beforeEach(() => {
-      payload = 'payload'
       messageTypes = ['type1', 'type2']
-      msg = {
-        payload: payload,
-        properties: {}
-      }
+      mockContext.messageTypes = messageTypes
+      mockContext.message = 'payload'
     })
 
     it('should start the receiver', () => {
@@ -89,36 +79,35 @@ describe('Subscriber', () => {
 
       subscriber.startSubscription()
 
-      return mockConsumer._handler(payload, messageTypes, msg, mockActions).then(() => {
-        expect(handler1).toHaveBeenCalledWith(messageTypes[0], payload, msg, mockActions)
-        expect(handler2).toHaveBeenCalledWith(messageTypes[1], payload, msg, mockActions)
+      return mockConsumer._handler(mockContext).then(() => {
+        expect(handler1).toHaveBeenCalledWith(messageTypes[0], mockContext)
+        expect(handler2).toHaveBeenCalledWith(messageTypes[1], mockContext)
       })
     })
 
-    it('should allow nacking the message ' +
-      'by passing the actions from the consumer to the subscriber', () => {
-      eventDispatcher.on(messageTypes[0], (type, data, message, actions) => {
-        actions.nack()
+    it('should allow nacking the message', () => {
+      eventDispatcher.on(messageTypes[0], (type, { nack }) => {
+        nack()
       })
 
       subscriber.startSubscription()
-      return mockConsumer._handler(payload, messageTypes, msg, mockActions).then(() => {
-        expect(mockActions.nack).toHaveBeenCalled()
+      return mockConsumer._handler(mockContext).then(() => {
+        expect(mockContext.nack).toHaveBeenCalled()
       })
     })
 
     it('should fail given no handler is registered for the message type', () => {
       subscriber.startSubscription()
-      return expect(mockConsumer._handler(payload, messageTypes, msg)).rejects.toThrow('No handler registered')
+      return expect(mockConsumer._handler(mockContext)).rejects.toThrow('No handler registered')
     })
 
-    it('should fail given async handler fails', () => {
+    it('should fail given handler fails', () => {
       eventDispatcher.on(messageTypes[0], () => {
         return Promise.reject(new Error('Something happened'))
       })
 
       subscriber.startSubscription()
-      return expect(mockConsumer._handler(payload, messageTypes, msg)).rejects.toThrow('Something happened')
+      return expect(mockConsumer._handler(mockContext)).rejects.toThrow('Something happened')
         .then(() => {
           expect(logs[logs.length - 1].err).toBeTruthy()
         })

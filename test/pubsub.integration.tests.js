@@ -8,26 +8,26 @@ describe('Pub/Sub integration', () => {
   let broker
   let publisher
   let subscriber
-  let failedQueueSubscriber
+
+  beforeAll(() => {
+    // magicbus.on('log', ({ kind, namespace, message, err }) =>
+    //   err
+    //     ? console.log(namespace, kind, message, err)
+    //     : console.log(namespace, kind, message))
+    // magicbus.on('unhandled-error', ({ message, messageTypes, err }) => console.log(message, messageTypes, err))
+  })
 
   beforeEach(async () => {
     broker = magicbus.createBroker(serviceDomainName, appName, connectionInfo)
-    publisher = magicbus.createPublisher(broker, (cfg) =>
-      cfg.useRoutePattern(magicbus.routePatterns.publisher({ autoDelete: true, durable: false })))
-    subscriber = magicbus.createSubscriber(broker, (cfg) =>
-      cfg.useRoutePattern(magicbus.routePatterns.worker({ autoDelete: true, durable: false, exclusive: true })))
-    failedQueueSubscriber = magicbus.createSubscriber(broker,
-      (cfg) => {
-        // TODO: it's really confusing why this doesn't work unless you set a different route name
-        cfg.useRoutePattern(magicbus.routePatterns.existingTopology({
-          queueName: `${serviceDomainName}.${appName}.subscribe.failed`
-        }))
-        cfg.useRouteName('subscribe-failed')
-      })
+    publisher = magicbus.createPublisher(broker, (cfg) => {
+      cfg.useDefaultTopology({ autoDelete: true, durable: false })
+    })
+    subscriber = magicbus.createSubscriber(broker, (cfg) => {
+      cfg.useDefaultTopology({ autoDelete: true, durable: false, exclusive: true })
+    })
 
-    await broker.bind(publisher.getRoute().name, subscriber.getRoute().name, { pattern: '#' })
+    await broker.bind(publisher, subscriber, { pattern: '#' })
     await subscriber.purgeQueue()
-    await failedQueueSubscriber.purgeQueue()
   })
 
   afterEach(() => {
@@ -40,9 +40,9 @@ describe('Pub/Sub integration', () => {
       it: 'was awesome'
     }
 
-    let handler = function (handlerEventName, handlerData) {
+    let handler = function (handlerEventName, { message }) {
       expect(handlerEventName).toEqual(eventName)
-      expect(handlerData).toEqual(data)
+      expect(message).toEqual(data)
 
       done()
     }
@@ -63,19 +63,27 @@ describe('Pub/Sub integration', () => {
       return Promise.reject('an error')
     }
 
-    let failedQueueHandler = (handlerEventName, handlerData) => {
+    let failedQueueHandler = (handlerEventName, { message }) => {
       expect(handlerEventName).toEqual(eventName)
-      expect(handlerData).toEqual(data)
+      expect(message).toEqual(data)
       done()
     }
+    let failedQueueSubscriber
 
     subscriber.on('something-done', handler)
-    failedQueueSubscriber.on(/.*/, failedQueueHandler)
-    subscriber.startSubscription().then(() =>
-      failedQueueSubscriber.startSubscription()
-    ).then(() =>
-      publisher.publish(eventName, data)
-    )
+    subscriber.startSubscription()
+      .then(() => {
+        failedQueueSubscriber = magicbus.createSubscriber(broker,
+          (cfg) => {
+            cfg.useExistingQueue(`${serviceDomainName}.${appName}.subscribe.failed`)
+          })
+        failedQueueSubscriber.on(/.*/, failedQueueHandler)
+        return failedQueueSubscriber.startSubscription()
+      })
+      .then(() => failedQueueSubscriber.purgeQueue())
+      .then(() =>
+        publisher.publish(eventName, data)
+      )
   })
 
   xit('should handle a heavy load without rejecting because of a full write buffer', () => {

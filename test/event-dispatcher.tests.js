@@ -50,6 +50,11 @@ describe('EventDispatcher', () => {
         eventDispatcher.once(reallyBadEventName, doNothing)
       }).not.toThrow()
     })
+    it('should work with array of event names', () => {
+      expect(() => {
+        eventDispatcher.once([eventName, reallyBadEventName], doNothing)
+      }).not.toThrow()
+    })
   })
 
   describe('#dispatch', () => {
