@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "amqplib": "^0.5.2",
-    "machina": "^2.0.0",
+    "machina": "^4.0.0",
     "monologue.js": "^0.3.5",
     "postal": "^2.0.5",
     "shortid": "^2.2.8"
