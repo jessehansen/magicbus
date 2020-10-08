@@ -1,240 +1,243 @@
-const magicbus = require('..')
-const Consumer = require('../lib/consumer.js')
-const EventEmitter = require('events').EventEmitter
+const magicbus = require("..");
+const Consumer = require("../lib/consumer.js");
+const EventEmitter = require("events").EventEmitter;
 
-const Logger = require('../lib/logger')
+const Logger = require("../lib/logger");
 
-describe('Consumer', () => {
-  let mockBroker
-  let logs
-  let logEvents
-  let logger
+describe("Consumer", () => {
+  let mockBroker;
+  let logs;
+  let logEvents;
+  let logger;
 
-  let eventName
-  let fakeMessage
-  let fakePipeline
-  let fakePattern
+  let eventName;
+  let fakeMessage;
+  let fakePipeline;
+  let fakePattern;
 
   beforeEach(() => {
-    logEvents = new EventEmitter()
-    logs = []
-    logger = Logger('magicbus.tests', logEvents)
-    logEvents.on('log', (data) => {
-      logs.push(data)
-    })
+    logEvents = new EventEmitter();
+    logs = [];
+    logger = Logger("magicbus.tests", logEvents);
+    logEvents.on("log", (data) => {
+      logs.push(data);
+    });
 
     // The fake message needs to be real enough to thread the needle through the
     // envelope, serialization, and dispatch parts of the pipeline
-    eventName = 'my-event'
+    eventName = "my-event";
     fakeMessage = {
       properties: {
-        type: eventName
+        type: eventName,
       },
-      content: Buffer.from(JSON.stringify('the payload'))
-    }
+      content: Buffer.from(JSON.stringify("the payload")),
+    };
 
-    fakePipeline = { useLogger: () => {} }
-    fakePattern = () => Promise.resolve({ queueName: 'my-queue' })
+    fakePipeline = { useLogger: () => {} };
+    fakePattern = () => Promise.resolve({ queueName: "my-queue" });
 
-    let registeredConsumer
+    let registeredConsumer;
     mockBroker = {
       registerRoute: jest.fn((/* name, pattern */) => {}),
-      consume: jest.fn((routeName, callback/* , options */) => {
-        registeredConsumer = callback
+      consume: jest.fn((routeName, callback /* , options */) => {
+        registeredConsumer = callback;
       }),
       emulateConsumption: () =>
         new Promise((resolve) => {
           let ops = {
             ack: () => {
-              fakeMessage.__resolution = 'ack'
-              resolve()
+              fakeMessage.__resolution = "ack";
+              resolve();
             },
             nack: () => {
-              fakeMessage.__resolution = 'nack'
-              resolve()
+              fakeMessage.__resolution = "nack";
+              resolve();
             },
             reject: () => {
-              fakeMessage.__resolution = 'reject'
-              resolve()
-            }
-          }
+              fakeMessage.__resolution = "reject";
+              resolve();
+            },
+          };
 
           process.nextTick(() => {
-            registeredConsumer(fakeMessage, ops)
-          })
-        })
-    }
-  })
+            registeredConsumer(fakeMessage, ops);
+          });
+        }),
+    };
+  });
 
-  describe('constructor', () => {
-    it('should register a route with the broker', () => {
-      Consumer(mockBroker, {}, {}, fakePipeline, 'route', fakePattern, logger, logEvents)
-      expect(mockBroker.registerRoute).toHaveBeenCalledWith('route', fakePattern)
-    })
-  })
+  describe("constructor", () => {
+    it("should register a route with the broker", () => {
+      Consumer(
+        mockBroker,
+        {},
+        {},
+        fakePipeline,
+        "route",
+        fakePattern,
+        logger,
+        logEvents
+      );
+      expect(mockBroker.registerRoute).toHaveBeenCalledWith(
+        "route",
+        fakePattern
+      );
+    });
+  });
 
-  describe('#startConsuming', () => {
-    let consumer
+  describe("#startConsuming", () => {
+    let consumer;
 
     beforeEach(() => {
       consumer = magicbus.createConsumer(mockBroker, (cfg) => {
-        cfg.useLogger(logger)
-      })
-    })
+        cfg.useLogger(logger);
+      });
+    });
 
-    describe('acknowledging messages based on handler results', () => {
-      it('should ack the message given a synchronous handler that does not throw', () => {
+    describe("acknowledging messages based on handler results", () => {
+      it("should ack the message given a synchronous handler that does not throw", () => {
         let handler = function (/* handlerData, messageTypes, message */) {
           // Not throwing an exception here
-        }
+        };
 
-        consumer.startConsuming(handler)
-        return mockBroker.emulateConsumption()
-          .then(() => {
-            expect(fakeMessage.__resolution).toEqual('ack')
-          })
-      })
+        consumer.startConsuming(handler);
+        return mockBroker.emulateConsumption().then(() => {
+          expect(fakeMessage.__resolution).toEqual("ack");
+        });
+      });
 
-      it('should reject the message given a synchronous handler that throws', () => {
+      it("should reject the message given a synchronous handler that throws", () => {
         let handler = function (/* handlerData, messageTypes, message */) {
-          throw new Error('Aw, snap!')
-        }
+          throw new Error("Aw, snap!");
+        };
 
-        consumer.startConsuming(handler)
-        return mockBroker.emulateConsumption()
-          .then(() => {
-            expect(logs.length).toBeGreaterThan(1)
-            expect(logs.some((l) => l.err !== undefined)).toBeTruthy()
-            expect(fakeMessage.__resolution).toEqual('reject')
-          })
-      })
+        consumer.startConsuming(handler);
+        return mockBroker.emulateConsumption().then(() => {
+          expect(logs.length).toBeGreaterThan(1);
+          expect(logs.some((l) => l.err !== undefined)).toBeTruthy();
+          expect(fakeMessage.__resolution).toEqual("reject");
+        });
+      });
 
-      it('should ack the message after the handler has completed given an asynchronous handler that resolves successfully', () => {
-        let handlerCompleted = false
+      it("should ack the message after the handler has completed given an asynchronous handler that resolves successfully", () => {
+        let handlerCompleted = false;
         let handler = (/* handlerData, messageTypes, message */) =>
           new Promise((resolve) => {
             process.nextTick(() => {
-              handlerCompleted = true
-              resolve()
-            })
-          })
+              handlerCompleted = true;
+              resolve();
+            });
+          });
 
-        consumer.startConsuming(handler)
-        return mockBroker.emulateConsumption()
-          .then(() => {
-            expect(fakeMessage.__resolution).toEqual('ack')
-            expect(handlerCompleted).toEqual(true)
-          })
-      })
+        consumer.startConsuming(handler);
+        return mockBroker.emulateConsumption().then(() => {
+          expect(fakeMessage.__resolution).toEqual("ack");
+          expect(handlerCompleted).toEqual(true);
+        });
+      });
 
-      it('should reject the message after the handler has completed given an asynchronous handler that rejects/resolves with an error', () => {
-        let handlerCompleted = false
+      it("should reject the message after the handler has completed given an asynchronous handler that rejects/resolves with an error", () => {
+        let handlerCompleted = false;
         let handler = (/* handlerData, messageTypes, message */) =>
           new Promise((resolve, reject) => {
             process.nextTick(() => {
-              handlerCompleted = true
-              reject(new Error('Aw, snap!'))
-            })
-          })
+              handlerCompleted = true;
+              reject(new Error("Aw, snap!"));
+            });
+          });
 
-        consumer.startConsuming(handler)
-        return mockBroker.emulateConsumption()
-          .then(() => {
-            expect(logs.length).toBeGreaterThan(1)
-            expect(logs[logs.length - 2].err).toBeTruthy()
-            expect(fakeMessage.__resolution).toEqual('reject')
-            expect(handlerCompleted).toEqual(true)
-          })
-      })
+        consumer.startConsuming(handler);
+        return mockBroker.emulateConsumption().then(() => {
+          expect(logs.length).toBeGreaterThan(1);
+          expect(logs[logs.length - 2].err).toBeTruthy();
+          expect(fakeMessage.__resolution).toEqual("reject");
+          expect(handlerCompleted).toEqual(true);
+        });
+      });
 
-      it('should nack if the handler requests it', () => {
-        let handlerCalled = false
+      it("should nack if the handler requests it", () => {
+        let handlerCalled = false;
         let handler = (handlerData, messageTypes, message, actions) => {
-          handlerCalled = true
-          actions.nack()
-          return Promise.resolve()
-        }
+          handlerCalled = true;
+          actions.nack();
+          return Promise.resolve();
+        };
 
-        consumer.startConsuming(handler)
-        return mockBroker.emulateConsumption()
-          .then(() => {
-            expect(fakeMessage.__resolution).toEqual('nack')
-            expect(handlerCalled).toEqual(true)
-          })
-      })
+        consumer.startConsuming(handler);
+        return mockBroker.emulateConsumption().then(() => {
+          expect(fakeMessage.__resolution).toEqual("nack");
+          expect(handlerCalled).toEqual(true);
+        });
+      });
 
-      describe('using middleware', () => {
-        let handlerCompleted
-        let handlerPayload
+      describe("using middleware", () => {
+        let handlerCompleted;
+        let handlerPayload;
 
         beforeEach(() => {
-          handlerCompleted = false
-          handlerPayload = null
-        })
+          handlerCompleted = false;
+          handlerPayload = null;
+        });
 
-        function handler (handlerData /*, messageTypes, message */) {
-          handlerCompleted = true
-          handlerPayload = handlerData
+        function handler(handlerData /*, messageTypes, message */) {
+          handlerCompleted = true;
+          handlerPayload = handlerData;
         }
 
-        function ack (message, actions) {
-          actions.ack()
+        function ack(message, actions) {
+          actions.ack();
         }
 
-        function nack (message, actions) {
-          actions.nack()
+        function nack(message, actions) {
+          actions.nack();
         }
 
-        function reject (message, actions) {
-          actions.reject()
+        function reject(message, actions) {
+          actions.reject();
         }
 
-        function modify (message, actions) {
-          message.payload += ' that is new'
-          actions.next()
+        function modify(message, actions) {
+          message.payload += " that is new";
+          actions.next();
         }
 
-        it('should call middleware when provided', () => {
-          consumer.use(modify)
-          consumer.startConsuming(handler)
-          return mockBroker.emulateConsumption()
-            .then(() => {
-              expect(fakeMessage.__resolution).toEqual('ack')
-              expect(handlerPayload).toEqual('the payload that is new')
-              expect(handlerCompleted).toEqual(true)
-            })
-        })
+        it("should call middleware when provided", () => {
+          consumer.use(modify);
+          consumer.startConsuming(handler);
+          return mockBroker.emulateConsumption().then(() => {
+            expect(fakeMessage.__resolution).toEqual("ack");
+            expect(handlerPayload).toEqual("the payload that is new");
+            expect(handlerCompleted).toEqual(true);
+          });
+        });
 
-        it('should ack when middleware calls ack', () => {
-          consumer.use(ack)
-          consumer.startConsuming(handler)
-          return mockBroker.emulateConsumption()
-            .then(() => {
-              expect(fakeMessage.__resolution).toEqual('ack')
-              expect(handlerCompleted).toEqual(false)
-            })
-        })
+        it("should ack when middleware calls ack", () => {
+          consumer.use(ack);
+          consumer.startConsuming(handler);
+          return mockBroker.emulateConsumption().then(() => {
+            expect(fakeMessage.__resolution).toEqual("ack");
+            expect(handlerCompleted).toEqual(false);
+          });
+        });
 
-        it('should nack when middleware calls nack', () => {
-          consumer.use(nack)
-          consumer.startConsuming(handler)
-          return mockBroker.emulateConsumption()
-            .then(() => {
-              expect(fakeMessage.__resolution).toEqual('nack')
-              expect(handlerCompleted).toEqual(false)
-            })
-        })
+        it("should nack when middleware calls nack", () => {
+          consumer.use(nack);
+          consumer.startConsuming(handler);
+          return mockBroker.emulateConsumption().then(() => {
+            expect(fakeMessage.__resolution).toEqual("nack");
+            expect(handlerCompleted).toEqual(false);
+          });
+        });
 
-        it('should reject when middleware calls reject', () => {
-          consumer.use(reject)
-          consumer.startConsuming(handler)
-          return mockBroker.emulateConsumption()
-            .then(() => {
-              expect(fakeMessage.__resolution).toEqual('reject')
-              expect(handlerCompleted).toEqual(false)
-            })
-        })
-      })
-    })
-  })
-})
+        it("should reject when middleware calls reject", () => {
+          consumer.use(reject);
+          consumer.startConsuming(handler);
+          return mockBroker.emulateConsumption().then(() => {
+            expect(fakeMessage.__resolution).toEqual("reject");
+            expect(handlerCompleted).toEqual(false);
+          });
+        });
+      });
+    });
+  });
+});

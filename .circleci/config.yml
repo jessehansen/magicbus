@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/magicbus
     docker:
-      - image: node:8
+      - image: node:12
       - image: rabbitmq:3
     steps:
       - checkout

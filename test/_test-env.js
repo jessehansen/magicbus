@@ -1,9 +1,10 @@
-
 module.exports = {
   rabbit: {
-    server: process.env.RABBITMQ_HOST || 'localhost',
-    user: 'guest',
-    pass: 'guest'
+    server: process.env.RABBITMQ_HOST || "localhost",
+    user: "guest",
+    pass: "guest",
   },
-  rabbitString: `amqp://guest:guest@${process.env.RABBITMQ_HOST || 'localhost'}/`
-}
+  rabbitString: `amqp://guest:guest@${
+    process.env.RABBITMQ_HOST || "localhost"
+  }/`,
+};
