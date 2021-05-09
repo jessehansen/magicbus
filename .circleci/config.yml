@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/magicbus
     docker:
-      - image: node:8
+      - image: node:16
       - image: rabbitmq:3
     steps:
       - checkout
@@ -19,7 +19,7 @@ jobs:
           path: /tmp/tests
   deploy:
     docker:
-      - image: node:8
+      - image: node:16
     steps:
       - checkout
       - run:
